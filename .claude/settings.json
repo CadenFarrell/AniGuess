@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": []
+  },
+  "plugins": [
+    {
+      "name": "capstone-skills",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/crawfis/AI-Programming-Capstone.git",
+        "path": ".claude/skills"
+      }
+    }
+  ]
+}
