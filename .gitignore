@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+venv/
+.venv/
+__pycache__/
+*.pyc
+packages/
+bin/
+obj/
+
+# Build output
+dist/
+build/
+out/
+*.exe
+*.dll
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment / secrets
+.env
+.env.local
+*.key
+*.pem
+
+# Logs
+*.log
+npm-debug.log*
+
+# Claude Code - personal settings only
+.claude/settings.local.json
+/.vs

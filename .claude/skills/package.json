@@ -1,0 +1,19 @@
+{
+  "name": "capstone-skills",
+  "version": "1.1.0",
+  "description": "Claude Code skills for the Concept-First Programming Bootcamp capstone project",
+  "skills": [
+    "capstone-kickoff",
+    "capstone-stage-gen",
+    "capstone-explore-guide",
+    "capstone-learn-guide",
+    "capstone-modify-guide",
+    "capstone-reflect-guide",
+    "capstone-sprint-check",
+    "capstone-critique",
+    "capstone-critique-prd",
+    "capstone-critique-process",
+    "capstone-critique-code",
+    "capstone-critique-reflection"
+  ]
+}
