@@ -1,42 +1,24 @@
-# Dependencies
-node_modules/
-venv/
-.venv/
-__pycache__/
-*.pyc
-packages/
-bin/
-obj/
-
-# Build output
-dist/
-build/
-out/
-*.exe
-*.dll
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# Environment / secrets
-.env
-.env.local
-*.key
-*.pem
-
 # Logs
+logs
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Claude Code - personal settings only
-.claude/settings.local.json
-/.vs
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
