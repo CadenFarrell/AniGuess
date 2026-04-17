@@ -76,12 +76,23 @@ export default function GameScreen({
     onTurnComplete(logEntry);
   };
 
+  /**
+   * Check whether a guess matches the character.
+   * Accepts the canonical name OR any nickname (all case-insensitive, substring match).
+   */
+  const isCorrectGuess = (raw) => {
+    const g = raw.trim().toLowerCase();
+    if (character.name.toLowerCase().includes(g)) return true;
+    if (character.nicknames?.some((n) => n.toLowerCase().includes(g))) return true;
+    return false;
+  };
+
   const submitGuess = () => {
     if (!guess.trim()) return;
-    const isCorrect = character.name.toLowerCase().includes(guess.trim().toLowerCase());
-    const logEntry = { type: 'guess', text: guess.trim(), correct: isCorrect };
+    const correct = isCorrectGuess(guess);
+    const logEntry = { type: 'guess', text: guess.trim(), correct };
 
-    if (isCorrect) {
+    if (correct) {
       onCorrectGuess(logEntry);
     } else {
       setWrongMessage("Not quite — your turn is over!");

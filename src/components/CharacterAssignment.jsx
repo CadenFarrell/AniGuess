@@ -99,17 +99,18 @@ export default function CharacterAssignment({ guesser, onCharacterAssigned, assi
                     {anime.characters.map((char) => (
                       <div key={char.id} className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-4">
                         {char.imageUrl ? (
-                          <img src={char.imageUrl} alt={char.name} className="w-16 h-16 rounded-lg object-cover" />
+                          <img src={char.imageUrl} alt={char.name} className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
                         ) : (
-                          <div className="w-16 h-16 rounded-lg bg-white/10 flex items-center justify-center text-white/40 font-bold text-xl">?</div>
+                          <div className="w-16 h-16 rounded-lg bg-white/10 flex items-center justify-center text-white/40 font-bold text-xl flex-shrink-0">?</div>
                         )}
-                        <div className="flex-1 text-left">
-                          <p className="text-white font-bold text-lg">{char.name}</p>
-                          <p className="text-white/50 text-base">{char.gender} · {char.role} · {char.genre}</p>
+                        <div className="flex-1 text-left min-w-0">
+                          <p className="text-white font-bold text-lg truncate">{char.name}</p>
+                          <p className="text-white/50 text-base">{char.role} · {char.difficulty ?? '—'}</p>
+                          {char.genres?.length > 0 && <p className="text-white/30 text-sm">{char.genres.join(', ')}</p>}
                         </div>
                         <button
                           onClick={() => pickManual({ ...char, series: anime.title })}
-                          className="px-4 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg transition-colors text-base"
+                          className="px-4 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg transition-colors text-base flex-shrink-0"
                         >
                           Pick
                         </button>
@@ -127,13 +128,18 @@ export default function CharacterAssignment({ guesser, onCharacterAssigned, assi
             <h2 className="text-3xl font-black text-white mb-8">Confirm this character?</h2>
             <div className="bg-white/10 border-2 border-purple-500 rounded-2xl p-8 mb-8">
               {selectedCharacter.imageUrl ? (
-                <img src={selectedCharacter.imageUrl} alt={selectedCharacter.name}
-                  className="w-36 h-36 rounded-xl object-cover mx-auto mb-4" />
+                <img
+                  src={selectedCharacter.imageUrl}
+                  alt={selectedCharacter.name}
+                  className="w-36 h-36 rounded-xl object-cover mx-auto mb-4"
+                />
               ) : (
                 <div className="w-36 h-36 rounded-xl bg-white/10 flex items-center justify-center text-5xl mx-auto mb-4">?</div>
               )}
               <h3 className="text-3xl font-black text-white">{selectedCharacter.name}</h3>
               <p className="text-white/60 text-lg">from {selectedCharacter.series}</p>
+              <p className="text-white/40 text-base mt-1">{selectedCharacter.role} · {selectedCharacter.difficulty ?? '—'}</p>
+              {selectedCharacter.genres?.length > 0 && <p className="text-white/30 text-sm mt-1">{selectedCharacter.genres.join(', ')}</p>}
             </div>
             <div className="flex gap-4">
               <button
