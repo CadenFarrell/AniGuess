@@ -46,7 +46,7 @@ export default function ListManager({ profile, onProfileUpdated }) {
   const openEditCharacter = (animeId, character) => {
     setAddingCharacterTo(animeId);
     setEditingCharacter(character.id);
-    setCharacterForm({ ...character });
+    setCharacterForm({ ...emptyCharacterForm(), ...character });
   };
 
   const saveCharacter = (animeId) => {
@@ -66,16 +66,6 @@ export default function ListManager({ profile, onProfileUpdated }) {
     setAddingCharacterTo(null);
     setEditingCharacter(null);
     setCharacterForm(emptyCharacterForm());
-  };
-
-  const deleteCharacter = (animeId, characterId) => {
-    if (!window.confirm('Delete this character?')) return;
-    saveUpdatedProfile({
-      ...profile,
-      animeList: profile.animeList.map((a) =>
-        a.id === animeId ? { ...a, characters: a.characters.filter((c) => c.id !== characterId) } : a
-      ),
-    });
   };
 
   const isFormValid = () => characterForm.name.trim() && characterForm.hairColor.trim() && characterForm.ability.trim();
