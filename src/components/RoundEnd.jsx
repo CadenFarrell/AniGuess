@@ -8,8 +8,8 @@ export default function RoundEnd({ players, lockedPositions, roundNumber, totalS
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-10">
       <div className="w-full max-w-2xl">
-        <h2 className="text-5xl font-black text-center text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500 mb-3">
-          🏁 Round {roundNumber} Done!
+        <h2 className="text-5xl font-black text-center mb-3">
+          🏁 <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">Round {roundNumber} Done!</span>
         </h2>
 
         {/* This Round */}

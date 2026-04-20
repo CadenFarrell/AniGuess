@@ -37,6 +37,10 @@ export default function ListManager({ profile, onProfileUpdated }) {
     saveUpdatedProfile({ ...profile, animeList: profile.animeList.filter((a) => a.id !== animeId) });
   };
 
+  const deleteCharacter = (animeId, charId) => {
+    saveUpdatedProfile({ ...profile, animeList: profile.animeList.map((a) => a.id !== animeId ? a : { ...a, characters: a.characters.filter((c) => c.id !== charId) }) });
+  };
+
   const openAddCharacter = (animeId) => {
     setAddingCharacterTo(animeId);
     setEditingCharacter(null);

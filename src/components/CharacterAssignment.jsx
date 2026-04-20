@@ -1,19 +1,25 @@
 import { useState } from 'react';
 
-export default function CharacterAssignment({ guesser, onCharacterAssigned, assignmentNumber, totalPlayers }) {
+export default function CharacterAssignment({ guesser, allPlayers, sharedShowsOnly = true, twoStepRandom = false, onCharacterAssigned, assignmentNumber, totalPlayers }) {
   const [step, setStep] = useState('lookaway');
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   const [expandedAnime, setExpandedAnime] = useState(null);
   const [browseMode, setBrowseMode] = useState(false);
 
-  const getAllCharacters = () =>
-    guesser.animeList.flatMap((anime) =>
-      anime.characters.map((char) => ({ ...char, series: anime.title }))
-    );
+  const filteredAnimeList = sharedShowsOnly && allPlayers?.length
+    ? guesser.animeList.filter(anime => allPlayers.some(p => p.id !== guesser.id && p.animeList.some(a => a.title === anime.title)))
+    : guesser.animeList;
 
   const pickRandom = () => {
-    const all = getAllCharacters();
-    setSelectedCharacter(all[Math.floor(Math.random() * all.length)]);
+    const animeList = filteredAnimeList;
+    let pool;
+    if (twoStepRandom) {
+      const anime = animeList[Math.floor(Math.random() * animeList.length)];
+      pool = anime.characters.map(c => ({ ...c, series: anime.title }));
+    } else {
+      pool = animeList.flatMap(a => a.characters.map(c => ({ ...c, series: a.title })));
+    }
+    setSelectedCharacter(pool[Math.floor(Math.random() * pool.length)]);
     setStep('confirm');
   };
 
@@ -84,8 +90,9 @@ export default function CharacterAssignment({ guesser, onCharacterAssigned, assi
               <h2 className="text-2xl font-black text-white">
                 {guesser.name}'s Characters
               </h2>
+              {sharedShowsOnly && <span className="text-white/40 text-sm ml-auto">Shared shows only</span>}
             </div>
-            {guesser.animeList.map((anime) => (
+            {filteredAnimeList.map((anime) => (
               <div key={anime.id} className="mb-4">
                 <button
                   onClick={() => setExpandedAnime(expandedAnime === anime.id ? null : anime.id)}
