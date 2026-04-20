@@ -99,7 +99,7 @@ const trimDesc = (desc = '') => {
     .replace(/__(.*?)__/g, '$1')                 // __bold__ → plain
     .replace(/\*\*(.*?)\*\*/g, '$1')             // **bold** → plain
     .replace(/\(Source:[^)]*\)/gi, '')           // (Source: ...) attribution
-    .replace(/^[^.!?]*?\b(Height|Weight|Age|Rank|Gender|Birthday|Blood Type|Voice Actor)[^\n]*(\n|$)/gim, '') // stat lines
+    .replace(/^[^.!?\n]*?\b[A-Z][\w\s]+:[^\n]*(\n|$)/gm, '') // stat/label lines (e.g. Height:, Affiliation:)
     .replace(/\n+/g, ' ')                        // newlines → space
     .replace(/\s{2,}/g, ' ')                     // collapse extra spaces
     .trim();
@@ -148,7 +148,7 @@ const ANIME_CATALOG = {
   tokyoGhoul:         { title: 'Tokyo Ghoul',                                                               anilistId: 20605  },
   vinlandSaga:        { title: 'Vinland Saga',                                                              anilistId: 101348 },
   trinitySeven:       { title: 'Trinity Seven',                                                             anilistId: 20631  },
-  fate:               { title: 'Fate/Stay Night: Unlimited Blade Works',                                   anilistId: 20791  },
+  fate:               { title: 'Fate/Stay Night (2006)',                                                   anilistId: 356    },
   edgerunners:        { title: 'Cyberpunk: Edgerunners',                                                   anilistId: 120377 },
   dateALive:          { title: 'Date A Live',                                                               anilistId: 15583  },
   prisonSchool:       { title: 'Prison School',                                                             anilistId: 20807  },

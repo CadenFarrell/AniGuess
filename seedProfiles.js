@@ -26,7 +26,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b51343-pt1UDTRvAXfY.png",
-            "description": "Power: Youjutsu A 10th grade student. Originally about to be executed by the devils after her sister, Kuroka, kills her own master. The Satan, Lucifer, protected her, and left her under his sister's, Rias' care - becoming her servant.",
+            "description": "A 10th grade student. Originally about to be executed by the devils after her sister, Kuroka, kills her own master. The Satan, Lucifer, protected her, and left her under his sister's, Rias' care - becoming her servant.",
             "genres": [
               "Action",
               "Comedy",
@@ -42,7 +42,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b51345-FZLxaAkG6Dy5.png",
-            "description": "Sacred Gear: Sword Birth -&gt; Sword of Betrayer (Balance-Break) An 11th grade student. Self proclaimed best friend of Ise, and the school prince. He was a victim of the \"Project: Holy Sword\" where he was the only sole survivor.",
+            "description": "An 11th grade student. Self proclaimed best friend of Ise, and the school prince. He was a victim of the \"Project: Holy Sword\" where he was the only sole survivor.",
             "genres": [
               "Action",
               "Comedy",
@@ -74,7 +74,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b51347-YMb9fndAriXd.png",
-            "description": "Role: Queen Race: Reincarnated Devil (Former Half-Human/Half-Fallen Angel) Power: Elemental magic (mainly thunder), Holy Lightning (From Volume 5 onward) A third-year student and one of the \"Two Great Onee-samas\" of Kuou Academy along with Rias.",
+            "description": "A third-year student and one of the \"Two Great Onee-samas\" of Kuou Academy along with Rias. Called the ultimate \"Queen\" by other members. Born between a human mother and fallen angel father, after the death of her mother, she became Rias' servant.",
             "genres": [
               "Action",
               "Comedy",
@@ -90,7 +90,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b50389-gIhJkyk8xj1P.png",
-            "description": "Power: Power of destruction A 12th grade student and the prettiest girl in the academy. Comes from the old noble of pure devils, the house of Gremory, a top-class devil who is called a genius nicknamed \"Crimson Ruin Princess\".",
+            "description": "A 12th grade student and the prettiest girl in the academy. Comes from the old noble of pure devils, the house of Gremory, a top-class devil who is called a genius nicknamed \"Crimson Ruin Princess\". Her brother is in fact one of the Yondai-Maou, Lucifer.",
             "genres": [
               "Action",
               "Comedy",
@@ -106,7 +106,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b51335-qc4XaXfPODjw.png",
-            "description": "Devil Role: Bishop Species: Reincarnated Devil (Former human) Sacred Gear: Twilight Healing A second-year student at Kuou Academy. Originally a sister who was known as a holy maiden due to her healing powers.",
+            "description": "A second-year student at Kuou Academy. Originally a sister who was known as a holy maiden due to her healing powers. She was raised in an orphanage and was taken in by the Church after her powers were discovered.",
             "genres": [
               "Action",
               "Comedy",
@@ -319,7 +319,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n127221-Wxg4xFtW4kaJ.png",
-            "description": "",
+            "description": "A strange 2nd year student in high school, who doesn't have a cellphone in this day and age. He is currently an outcast at school due to rumors of a violent past... but doesn't seem to care.",
             "genres": [
               "Comedy",
               "Drama",
@@ -370,7 +370,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b127633-FcCwWK5sQRhK.png",
-            "description": "Talent: Explaining any strange phenomenon with science She is Sakuta's classmate, who is always cool and calm, always willing to give various advice on puberty syndrome. She is also the sole member of the Science Club, and known as an eccentric person at the school.",
+            "description": "She is Sakuta's classmate, who is always cool and calm, always willing to give various advice on puberty syndrome. She is also the sole member of the Science Club, and known as an eccentric person at the school.",
             "genres": [
               "Comedy",
               "Drama",
@@ -387,7 +387,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b127841-UY9wQq6dW9SY.png",
-            "description": "Talent: Changing clothes quickly Mai's half-sister, related through her father. A member of the idol group \"Sweet Bullet\" and designated as the most fashionable within the group. Despite her flashy looks, she attends an elite all girls' high school.",
+            "description": "Mai's half-sister, related through her father. A member of the idol group \"Sweet Bullet\" and designated as the most fashionable within the group. Despite her flashy looks, she attends an elite all girls' high school. She is confident and can be competitive.",
             "genres": [
               "Comedy",
               "Drama",
@@ -438,7 +438,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n127843-nz8GbQ9rhB8R.jpg",
-            "description": "Talent: Early to bed, early to rise A girl who has the same first and last name as Sakuta's first crush. She is a shy middle school girl, but reliable and kind. She bumps into Sakuta, while holding an umbrella over an abandoned cat in the rain.",
+            "description": "A girl who has the same first and last name as Sakuta's first crush. She is a shy middle school girl, but reliable and kind. She bumps into Sakuta, while holding an umbrella over an abandoned cat in the rain.",
             "genres": [
               "Comedy",
               "Drama",
@@ -478,7 +478,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b124380-ct1wJHIl9BY1.jpg",
-            "description": "",
+            "description": "Hiro was known as a prodigy Parasite with the codename \"016\" of Thirteenth Plantation, where he's partnered in a boy-girl pair with Zero Two to pilot a FRANXX called Strelizia.",
             "genres": [
               "Action",
               "Drama",
@@ -512,7 +512,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b124381-pkTKi6HHNuVR.png",
-            "description": "Classification: Parasite Affiliation: APE's Special Forces Unit Partner: Hiro FRANXX: Strelizia Zero Two is an elite FRANXX pilot who is a member of a race of humans with Klaxosaur blood, and the pistil of the FranXX Strelizia.",
+            "description": "Zero Two is an elite FRANXX pilot who is a member of a race of humans with Klaxosaur blood, and the pistil of the FranXX Strelizia.",
             "genres": [
               "Action",
               "Drama",
@@ -665,7 +665,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b126290-v3aLCi4pQijJ.png",
-            "description": "Classification: Klaxo Sapiens Partner: N/A (capable of piloting FRANXX without one) FRANXX: Model Saurian, 9 Model (temporarily), Strelizia (temporarily) A mysterious being that lurks deep inside Earth, accompanied by numerous Klaxosaurs.",
+            "description": "A mysterious being that lurks deep inside Earth, accompanied by numerous Klaxosaurs. She's capable of speaking telepathically and seems to have a close bond with a serpentine Klaxosaur named Nawabari (縄張).",
             "genres": [
               "Action",
               "Drama",
@@ -720,7 +720,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b191673-eD8IFBOdAFv5.jpg",
-            "description": "Relatives: Himari and Leo (Younger Cousins). Jirou Yakuin is the main protagonist, being an antisocial, pessimistic high school boy.",
+            "description": "Jirou Yakuin is the main protagonist, being an antisocial, pessimistic high school boy. He ends up forced to pair with Akari Watanabe in their school's \"Couple Practical\" course, despite harboring feelings for his childhood friend Shiori Sakurazaka.",
             "genres": [
               "Comedy",
               "Drama",
@@ -765,7 +765,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b273109-MLnliqfOwuAh.png",
-            "description": "Relatives: Keiichiro Kamo (Older Brother). Sadaharu is a close friend of Jirou Yakuin, being one of the few people Jirou is comfortable being open around. He is paired with Satsuki Kaneyama in their school's Marriage Practical.",
+            "description": "Sadaharu is a close friend of Jirou Yakuin, being one of the few people Jirou is comfortable being open around. He is paired with Satsuki Kaneyama in their school's Marriage Practical.",
             "genres": [
               "Comedy",
               "Drama",
@@ -786,7 +786,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b126635-L0y3I92JSUkN.png",
-            "description": "Occupation: Sorcerer, Student Affiliation: Jujutsu High Grade: Grade 2 Sorcerer Cursed Technique: 10 Shadows Megumi is the deuteragonist of the Jujutsu Kaisen series. He is a first-year student at Jujutsu High and also a descendant of the Zenin Family.",
+            "description": "Megumi is the deuteragonist of the Jujutsu Kaisen series. He is a first-year student at Jujutsu High and also a descendant of the Zenin Family. While outwardly stoic and calculating, Megumi wishes to help protect people he sees as good or kind.",
             "genres": [
               "Action",
               "Drama",
@@ -800,7 +800,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b127212-FVm2tD0erQ5B.png",
-            "description": "Occupation: Sorcerer, Student, Vessel Affiliation: Jujutsu High Yuuji is a fair person who cares greatly for not only his comrades but anyone he views as people with their own wills, despite how deep or shallow his connection to them is.",
+            "description": "Yuuji is a fair person who cares greatly for not only his comrades but anyone he views as people with their own wills, despite how deep or shallow his connection to them is.",
             "genres": [
               "Action",
               "Drama",
@@ -814,7 +814,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b133700-f6sOO3TcgLV6.png",
-            "description": "Occupation: Jujutsu Sorcerer, Student Affiliation: Tokyo Jujutsu High Grade: Grade 3 Sorcerer She is a first-year student and grade 3 jujutsu sorcerer at Tokyo Jujutsu High studying under Satoru Gojo alongside Yuji and Megumi.",
+            "description": "She is a first-year student and grade 3 jujutsu sorcerer at Tokyo Jujutsu High studying under Satoru Gojo alongside Yuji and Megumi. Nobara is a confident and brash young woman with an unshakable character.",
             "genres": [
               "Action",
               "Drama",
@@ -828,7 +828,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b127691-9zqh1xpIubn7.png",
-            "description": "Occupation: Jujutsu Sorcerer, Teacher Affiliation: Tokyo Metropolitan Curse Technical College, Gojou Family Grade: Special Grade Sorcerer Cursed Technique: Six Eyes, Limitless Satoru Gojou is one of the main protagonists of the Jujutsu Kaisen series.",
+            "description": "Satoru Gojou is one of the main protagonists of the Jujutsu Kaisen series. He is a special-grade jujutsu sorcerer and is widely recognized as the strongest in the world.",
             "genres": [
               "Action",
               "Drama",
@@ -842,7 +842,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b133704-8wLTGjc234q2.png",
-            "description": "Occupation: Sorcerer Affiliation: Jujutsu High Grade: Grade 1 Sorcerer Cursed Technique: Ratio He is a Grade 1 Jujutsu Sorcerer and a Tokyo Jujutsu High alumni.",
+            "description": "He is a Grade 1 Jujutsu Sorcerer and a Tokyo Jujutsu High alumni. Nanami is a very intelligent and reserved man who at first appears to be someone who is just very serious about his work.",
             "genres": [
               "Action",
               "Drama",
@@ -856,7 +856,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b172743-4Y5SXqED6A3G.jpg",
-            "description": "Species: Cursed Spirit Hanami is an antagonist intent on ridding the Earth of Humans and reviving Sukuna.",
+            "description": "Hanami is an antagonist intent on ridding the Earth of Humans and reviving Sukuna.",
             "genres": [
               "Action",
               "Drama",
@@ -884,7 +884,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157865-X9ENX9OzWevS.jpg",
-            "description": "Species: Human Occupation: Sorcerer Affiliation: Jujutsu High Grade: Grade 2 Sorcerer Takuma Ino is a grade 2 jujutsu sorcerer and a close associate of Kento Nanami who operates out of Tokyo Jujutsu High.",
+            "description": "Takuma Ino is a grade 2 jujutsu sorcerer and a close associate of Kento Nanami who operates out of Tokyo Jujutsu High. Takuma Ino is a genuine and cheerful person with a more positive outlook on things than most jujutsu sorcerers.",
             "genres": [
               "Action",
               "Drama",
@@ -912,7 +912,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b133702-Y7JRG5vAvjIL.png",
-            "description": "Grade: Special Grade Cursed Technique: Idle Transfiguration Mahito is one of the primary antagonists of the Jujutsu Kaisen series. He is a Cursed Spirit allied with Suguru Geto, Jogo, Hanami and several others.",
+            "description": "Mahito is one of the primary antagonists of the Jujutsu Kaisen series. He is a Cursed Spirit allied with Suguru Geto, Jogo, Hanami and several others. Their ultimate goal is the eradication of humanity and ultimately replacing the population with Cursed Spirits.",
             "genres": [
               "Action",
               "Drama",
@@ -926,7 +926,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b158154-UCqbiULli62P.png",
-            "description": "Ability: Reverse Healing Cursed Technique Alumnus of Tokyo Jujutsu High, having been classmates with Satoru Gojo and Suguru Geto. After graduating into a full-fledged jujutsu sorcerer, Shoko became the school's primary doctor.",
+            "description": "Alumnus of Tokyo Jujutsu High, having been classmates with Satoru Gojo and Suguru Geto. After graduating into a full-fledged jujutsu sorcerer, Shoko became the school's primary doctor.",
             "genres": [
               "Action",
               "Drama",
@@ -940,7 +940,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b156991-niYjdp9CxO4w.png",
-            "description": "Grade: Special Grade Cursed Spirit Jogou is an unregistered special grade cursed spirit aligned with Mahito, Hanami, and Dagon. He was born of humanity's fear and negative association with volcanoes and other fire-related natural disasters.",
+            "description": "Jogou is an unregistered special grade cursed spirit aligned with Mahito, Hanami, and Dagon. He was born of humanity's fear and negative association with volcanoes and other fire-related natural disasters.",
             "genres": [
               "Action",
               "Drama",
@@ -968,7 +968,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157866-UWDtYBoG71PD.png",
-            "description": "Cursed Technique: Blood Manipulation Grade: Semi-Grade 1 Sorcerer He is a third-year at Kyoto Magic Technical College.",
+            "description": "He is a third-year at Kyoto Magic Technical College.",
             "genres": [
               "Action",
               "Drama",
@@ -982,7 +982,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b133701-rCQuDpHr3UZL.png",
-            "description": "Species: Human, Reincarnated Sorcerer According to the legend, Sukuna was a demon with four arms and two faces who lived in the golden era of sorcery 1000 years ago. Sorcerers of the era gave their all to defeat him, but to no avail.",
+            "description": "According to the legend, Sukuna was a demon with four arms and two faces who lived in the golden era of sorcery 1000 years ago. Sorcerers of the era gave their all to defeat him, but to no avail.",
             "genres": [
               "Action",
               "Drama",
@@ -996,7 +996,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b133699-FCnXaISgazAi.png",
-            "description": "Occupation: Curse User Grade: Special Grade Curse User Cursed Technique: Cursed Spirit Manipulation Suguru Getou is an antagonist in both the Jujutsu Kaisen series and its prequel Jujutsu Kaisen 0: Jujutsu High.",
+            "description": "",
             "genres": [
               "Action",
               "Drama",
@@ -1038,7 +1038,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157215-I3TQJu8nkDwD.jpg",
-            "description": "Occupation: Jujutsu Sorcerer Affiliation: Jujutsu High Grade: Grade 1 Sorcerer Family: Ui Ui (Younger Brother) Abilities: Mei Mei is a grade 1 jujutsu sorcerer who works independently and only in exchange for money. She is also the older sister of Ui Ui.",
+            "description": "Mei Mei is a grade 1 jujutsu sorcerer who works independently and only in exchange for money. She is also the older sister of Ui Ui.",
             "genres": [
               "Action",
               "Drama",
@@ -1052,7 +1052,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b137974-9qnK3DPrvLKh.jpg",
-            "description": "Species: Cursed Corpse (varies among 3 personalities) Occupation: Jujutsu Sorcerer, Student Affiliation: Jujutsu High Grade: 2 He is a second-year at Tokyo Prefectural Jujutsu High. As a Metamorphosed Cursed Corpse, he is the best creation of Principal Masamichi Yaga.",
+            "description": "He is a second-year at Tokyo Prefectural Jujutsu High. As a Metamorphosed Cursed Corpse, he is the best creation of Principal Masamichi Yaga. He is sentient and has three cores inside the doll body: the youngest brother \"Panda\", the eldest brother \"Gorilla\" and a sister.",
             "genres": [
               "Action",
               "Drama",
@@ -1066,7 +1066,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b137975-6TH7PiLWJaqy.png",
-            "description": "Occupation: Sorcerer, Student Affiliation: Kyoto Jujutsu Technical High School Grade: Grade 1 Sorcerer Toudou is a third-year student at Kyoto Jujutsu Technical High School who possesses inhuman physical strength, durability, and speed.",
+            "description": "Toudou is a third-year student at Kyoto Jujutsu Technical High School who possesses inhuman physical strength, durability, and speed.",
             "genres": [
               "Action",
               "Drama",
@@ -1080,7 +1080,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157868-Ui2Wht3M6tlM.png",
-            "description": "Species: Human Occupation: Jujutsu Sorcerer Affiliation: Kyoto Magic Technical College Grade: Semi-Grade 2 Sorcerer Cursed Technique: Tool Manipulation She is a third-year at Kyoto Magic Technical College.",
+            "description": "She is a third-year at Kyoto Magic Technical College.",
             "genres": [
               "Action",
               "Drama",
@@ -1094,7 +1094,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157116-2jYQf3y8NeTZ.png",
-            "description": "Chousou bears strong attachments to his brothers and is very overprotective of them.",
+            "description": "Chousou is half human and half cursed spirit and the first of the Death Painting Wombs with a Special Grade rank. He and his two brothers, Kechizu and Eso are Cursed Womb: Death Paintings who have sided with Mahito's group.",
             "genres": [
               "Action",
               "Drama",
@@ -1122,7 +1122,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157115-kdhRYQdVhH95.png",
-            "description": "Species: Human Occupation: Sorcerer, Student Affiliation: Jujutsu High Grade: Grade 2 Sorcerer Cursed Technique: Cursed Speech He is a second-year at Tokyo Metropolitan Jujutsu Technical High School.",
+            "description": "He is a second-year at Tokyo Metropolitan Jujutsu Technical High School. Due to his curse ability, he is only willing to communicate with ingredients used to make rice balls.",
             "genres": [
               "Action",
               "Drama",
@@ -1136,7 +1136,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b156848-Rf0tuoQCNyZV.png",
-            "description": "Species: Human Occupation: Jujutsu Sorcerer, Student Affiliation: Kyoto Metropolitan Curse Technical College Grade: Grade 3 Sorcerer A second-year at Kyoto Metropolitan Curse Technical College. Kasumi is a hard-working, restrained, and considerate pacifist.",
+            "description": "A second-year at Kyoto Metropolitan Curse Technical College. Kasumi is a hard-working, restrained, and considerate pacifist. She is also a big fan of Satoru Gojo.",
             "genres": [
               "Action",
               "Drama",
@@ -1212,7 +1212,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b129928-BCEjVaP0AQSw.png",
-            "description": "",
+            "description": "Relative(s): Park Kyung-Hye (Mother), Sung Jin-Ah (Sister), Seong Jin-U is the protagonist of Solo Leveling and is known as an infamously weak E-Rank Hunter. He is a humble and benevolent individual who cares deeply for his family and has an ardent desire to become stronger.",
             "genres": [
               "Action",
               "Adventure",
@@ -1226,7 +1226,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b136077-IIMqRmMK5Fgs.png",
-            "description": "",
+            "description": "He is a S rank hunter and master of the White Tiger guild.",
             "genres": [
               "Action",
               "Adventure",
@@ -1240,7 +1240,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b136074-pLyumEnxjL7P.png",
-            "description": "",
+            "description": "She is a healer with rank B.",
             "genres": [
               "Action",
               "Adventure",
@@ -1254,7 +1254,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b138792-TXFrDA1wpbmo.png",
-            "description": "",
+            "description": "Go Gun-Hee (고건희) is a South Korean S-Rank Hunter and the Chairman of the Korean Hunters Association.",
             "genres": [
               "Action",
               "Adventure",
@@ -1310,7 +1310,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b136819-okbPuuFAefYX.png",
-            "description": "",
+            "description": "An A rank hunter that works for Hunter's association of Korea.",
             "genres": [
               "Action",
               "Adventure",
@@ -1352,7 +1352,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b138789-AhE8m0LWjE7E.png",
-            "description": "Guild: Hunters Guild Class: Sword Fighter Affiliations: Jeju Island Raid Party, Song Chi-Yul’s Dojo (Disciple) Cha Hae-In is the Vice-Guild Master of the Hunters Guild. She is an S rank hunter and the 9th ranked hunter in South Korea.",
+            "description": "Cha Hae-In is the Vice-Guild Master of the Hunters Guild. She is an S rank hunter and the 9th ranked hunter in South Korea. She possesses the unique ability of mana smell and hates the smell of hunters except for Sung Jin-Woo.",
             "genres": [
               "Action",
               "Adventure",
@@ -1366,7 +1366,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b138793-eijpaPPkcipD.png",
-            "description": "",
+            "description": "Han Song-I is an E-Rank hunter who quit school after gaining money through the Yoo Jin-Ho and Sung Jin-Woo motley group of party. She is friends with Sung Jin-Ah. She first appeared when Jin-Ah visited Jin-Woo in the hospital but she didn't know him then.",
             "genres": [
               "Action",
               "Adventure",
@@ -1380,7 +1380,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b136076-D7eiE3pA9U8g.jpg",
-            "description": "",
+            "description": "Yoo Jin-Ho is a D rank hunter and is Jin-U Seong's faithful assistant and combat partner.",
             "genres": [
               "Action",
               "Adventure",
@@ -1394,7 +1394,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b138794-dZNdO0pvZ659.png",
-            "description": "",
+            "description": "Choi Jong-In is one of the 10 S-Rank Hunters of South Korea. He is also the Guild Master of the Hunters Guild.",
             "genres": [
               "Action",
               "Adventure",
@@ -1444,7 +1444,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b36828-j5ib0adAzGMx.png",
-            "description": "Weapons of choice: Wind Fleuret (1st Floor), Lambent Light (Forged by Lisbeth) Asuna is a friend of Kirito and is a sub-leader of the guild Knights of the Blood (KoB), a medium-sized guild of about thirty players, also called the strongest guild in Aincrad.",
+            "description": "Asuna is a friend of Kirito and is a sub-leader of the guild Knights of the Blood (KoB), a medium-sized guild of about thirty players, also called the strongest guild in Aincrad.",
             "genres": [
               "Action",
               "Adventure",
@@ -1690,7 +1690,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b88950-0ER2ke5pswxq.png",
-            "description": "Ability: Affiliations: Hoshinoumi Academy student council Yuu is a first-year student at Hoshinoumi Academy. He is rude and bad at studying. He usually behaves as if he were smart, but he is actually a chronic cheater. He says things which sound clever, and he is a narcissist.",
+            "description": "Yuu is a first-year student at Hoshinoumi Academy. He is rude and bad at studying. He usually behaves as if he were smart, but he is actually a chronic cheater. He says things which sound clever, and he is a narcissist.",
             "genres": [
               "Comedy",
               "Drama",
@@ -1706,7 +1706,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/88951-bRm610RrrXp9.jpg",
-            "description": "Ability: Imperfect Invisibility Affiliations: Hoshinoumi Academy student council Nao is a first-year student and also the student council president of Hoshinoumi Academy. She has the ability to make herself invisible to any one person of her choosing at a time.",
+            "description": "Nao is a first-year student and also the student council president of Hoshinoumi Academy. She has the ability to make herself invisible to any one person of her choosing at a time. She is a huge fan of the band Zhiend. She hates people who use their power for no good.",
             "genres": [
               "Comedy",
               "Drama",
@@ -1868,7 +1868,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b162214-9x9Q3A9rxpx8.png",
-            "description": "Team: Team Z Rensuke Kunigami is very serious about his football career and training; he's always the first in the training room in the morning and the last to leave at night.",
+            "description": "Rensuke Kunigami is very serious about his football career and training; he's always the first in the training room in the morning and the last to leave at night.",
             "genres": [
               "Action",
               "Drama",
@@ -2036,7 +2036,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b191409-qU7sRhVmpgRQ.png",
-            "description": "Yukimiya is highly confident in his own abilities, declaring himself the strongest player in Japan, when it comes to one-on-one battles. He is also a likable and charismatic personality, appearing to make friends easily, like with Nagi.",
+            "description": "He is currently ranked #5 out of the original 300 forwards chosen to be apart of the Blue Lock Project Yukimiya is highly confident in his own abilities, declaring himself the strongest player in Japan, when it comes to one-on-one battles.",
             "genres": [
               "Action",
               "Drama",
@@ -2092,7 +2092,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b169402-JlISsoEunCxH.png",
-            "description": "Team: Team Z Raichi is the most hot-headed of the group and argues with just about everyone on everything, often to the point of needing to be restrained by Kunigami.",
+            "description": "Raichi is the most hot-headed of the group and argues with just about everyone on everything, often to the point of needing to be restrained by Kunigami.",
             "genres": [
               "Action",
               "Drama",
@@ -2188,7 +2188,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b88993-YNw36YYleasn.png",
-            "description": "Race: Human Section: Moon Demon Squad Demon Weapon Series: Black Demon Demon: Mahiru-no Yo He is a Lieutenant Colonel of the Japanese Imperial Demon Army and the commanding officer of the Vampire Extermination Unit, Moon Demon Company.",
+            "description": "He is a Lieutenant Colonel of the Japanese Imperial Demon Army and the commanding officer of the Vampire Extermination Unit, Moon Demon Company.",
             "genres": [
               "Action",
               "Drama",
@@ -2204,7 +2204,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b135250-fCoUY2wGYLUw.png",
-            "description": "Race: Human Affiliation: Japanese Imperial Demon Army Section: Moon Demon Squad Demon Weapon Series: Dakini Demon: Tenjiryū A member of the Japanese Imperial Demon Army and a member of Yuu's team of the Moon Demon Squad. She also the younger sister of Aoi Sanguu.",
+            "description": "A member of the Japanese Imperial Demon Army and a member of Yuu's team of the Moon Demon Squad. She also the younger sister of Aoi Sanguu. Mitsuba is shown to be a serious and by-the-book soldier, who dislikes those who break the formation and commit to individual action.",
             "genres": [
               "Action",
               "Drama",
@@ -2220,7 +2220,7 @@
             "role": "Main",
             "gender": "Unknown",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/88912-HVslXuJNgNQc.jpg",
-            "description": "Race: Human Kimizuki is a serious and diligent person. He is competitive against Yuuichirou Hyakuya. He earned the highest test scores in their class, and he is angry when Yuuichirou appears out of nowhere and may earn Cursed Gear before him.",
+            "description": "Kimizuki is a serious and diligent person. He is competitive against Yuuichirou Hyakuya. He earned the highest test scores in their class, and he is angry when Yuuichirou appears out of nowhere and may earn Cursed Gear before him.",
             "genres": [
               "Action",
               "Drama",
@@ -2236,7 +2236,7 @@
             "role": "Main",
             "gender": "Unknown",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/88988-ioriKKJJQNat.png",
-            "description": "Race: Human Affiliation: Japanese Imperial Demon Army Section: Moon Demon Squad Demon Weapon Series: Black Demon Series Demon: Gekkouin He is a member of the Japanese Imperial Demon Army and Shinoa Hīragi's squad in the Moon Demon Company.",
+            "description": "He is a member of the Japanese Imperial Demon Army and Shinoa Hīragi's squad in the Moon Demon Company. Yoichi has an equilibrium of kindness and altruism, giving him an optimistic and sweet personality.",
             "genres": [
               "Action",
               "Drama",
@@ -2252,7 +2252,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b88992-uoCcUGTnJYua.png",
-            "description": "Race: Human Affiliation: Japanese Imperial Demon Army Section: Moon Demon Squad Demon Weapon Series: Black Demon Series Demon: Byakomaru A Major General of the Japanese Imperial Demon Army.",
+            "description": "A Major General of the Japanese Imperial Demon Army. Although he has a high capacity for spellcraft since childhood, Shinya is not comfortable with being with the Hiiragi Family. Shinya is shown to be a gentle and cool man.",
             "genres": [
               "Action",
               "Drama",
@@ -2268,7 +2268,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b135257-quOjYpxuJANr.jpg",
-            "description": "Status: Alive Chess Belle is a seventeenth progenitor vampire who serves Thirteenth Progenitor Crowley Eusford. Even though she is a noble, her personality is freewheeling gets jealous easily and behavior is very careless.",
+            "description": "Chess Belle is a seventeenth progenitor vampire who serves Thirteenth Progenitor Crowley Eusford. Even though she is a noble, her personality is freewheeling gets jealous easily and behavior is very careless.",
             "genres": [
               "Action",
               "Drama",
@@ -2534,7 +2534,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b4959-DKXw1VYrvael.png",
-            "description": "Naomi is notable for having worked alongside L Lawlet in the past to solve the Los Angeles BB Serial Murder case, which was what initally helped launch Naomi's reputation within the FBI. Misora later left the FBI and became the fianc&eacute;e of Penber.",
+            "description": "Naomi is a former \"first rate\" FBI agent who is engaged to Raye Penber. She is very intelligent, however she often lets her feelings get in the way of her investigative abilities.",
             "genres": [
               "Mystery",
               "Psychological",
@@ -2846,7 +2846,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b65239-2S3t2vSyUew9.png",
-            "description": "Her teigu is called Demons Extract, which allows her to manipulate ice and mold it from nothing.",
+            "description": "Esdeath is a high-ranking general of the Empire, and leader of the Jaegers. She enjoys torturing her enemies slowly, seen when she used her Teigu to put large blocks of ice in a cauldron so that the people inside would die slower and suffer more.",
             "genres": [
               "Action",
               "Adventure",
@@ -2900,7 +2900,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b65559-FZEHEfO374x9.png",
-            "description": "Faction: Night Raid User: Najenda Susanoo is one of the new members of Night Raid that Najenda brought back with her from the Revolutionary Army HQ. He is a tall man with distinctive bull horns coming out of the sides of his head.",
+            "description": "Susanoo is one of the new members of Night Raid that Najenda brought back with her from the Revolutionary Army HQ. He is a tall man with distinctive bull horns coming out of the sides of his head.",
             "genres": [
               "Action",
               "Adventure",
@@ -2972,7 +2972,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/65235-KbSvHjKWY3z4.png",
-            "description": "Bulat's teigu is the Demon Armor: Incursio an Armor-type teigu that took on the form of a short sword with a chain link tassel in its sealed form. Once released, the user was enveloped in a full body armor.",
+            "description": "Bulat was once a high-ranking Imperial Officer known as \"100 Man-Slayer Bulat\". He later decided to betray the Empire when his superior was framed for not giving in to the Prime Minister's agenda.",
             "genres": [
               "Action",
               "Adventure",
@@ -3251,7 +3251,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b133678-IitCgjDxQGgu.png",
-            "description": "Hobbies: Hina Dolls Wakana Gojou is a fifteen-year-old high-schooler who is not very social, and doesn't fit in well with his fellow classmates, leading to him having no friends at the start of the story.",
+            "description": "Wakana Gojou is a fifteen-year-old high-schooler who is not very social, and doesn't fit in well with his fellow classmates, leading to him having no friends at the start of the story.",
             "genres": [
               "Comedy",
               "Ecchi",
@@ -3545,7 +3545,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b124110-Gfr3IYI6FwqE.jpg",
-            "description": "Otto Suwen is a merchant appearing in Re:Zero. His remarkable misfortune always takes him to dangerous situations, from which he escapes thanks to his wit. Otto has gray hair that is mentioned to be as long as a gal game protagonist.",
+            "description": "Otto has gray hair that is mentioned to be as long as a gal game protagonist. He is said to be somewhat handsome if he has a serious expression. However, he is usually either retorting, shouting, or panicking, ruining his looks.",
             "genres": [
               "Action",
               "Adventure",
@@ -3803,7 +3803,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b191242-uQJUPMyknaTb.png",
-            "description": "Sports Team: Badminton, Volleyball (one-shot) School: Eimei Junior and Senior High Year: Junior High Third-Year A third-year middle school student and a member of Elmei Junior and Senior High's boys' badminton team.",
+            "description": "A third-year middle school student and a member of Elmei Junior and Senior High's boys' badminton team. While not the most-talented player, Taiki is nonetheless extremely hardworking.",
             "genres": [
               "Romance",
               "Slice of Life",
@@ -3817,7 +3817,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b191241-FaDEXRL1CgJr.png",
-            "description": "Sports Team: Basketball School: Eimei Junior and Senior High Year: High School Second-Year / Third-Year A first-year high school student and the rising star of Elmei Junior and Senior High's girls' basketball team.",
+            "description": "A first-year high school student and the rising star of Elmei Junior and Senior High's girls' basketball team. Her personality and skills have made her incredibly popular both inside and outside of her school, to the point where she's been featured in various magazines.",
             "genres": [
               "Romance",
               "Slice of Life",
@@ -3831,7 +3831,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b218648-kXxXy8lPkeGV.png",
-            "description": "Sports Team: Rhythmic Gymnastics School: Eimei Junior and Senior High Year: Junior High Third-Year A third-year middle school student and a member of Eimei Junior and Senior High's girls' rhythmic gymnastics team.",
+            "description": "A third-year middle school student and a member of Eimei Junior and Senior High's girls' rhythmic gymnastics team.",
             "genres": [
               "Romance",
               "Slice of Life",
@@ -3873,7 +3873,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b218647-A2ngPlh7Yucn.png",
-            "description": "Sports Team: Badminton School: Eimei Junior and Senior High Year: Junior High Third-Year A third-year middle school student and a member of Elmei Junior and Senior High's boys' badminton team. He is friends with both Taiki Inomata and Hina Chono.",
+            "description": "A third-year middle school student and a member of Elmei Junior and Senior High's boys' badminton team. He is friends with both Taiki Inomata and Hina Chono. In the _Ao no Hako_ oneshot, Kyo is instead a member of his school's shogi club.",
             "genres": [
               "Romance",
               "Slice of Life",
@@ -3887,7 +3887,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b225314-LD3QqS6uAd1o.png",
-            "description": "Sports Team: Badminton School: Eimei Junior and Senior High Year: High School Second-Year A second-year high school student and a member of Elmei Junior and Senior High's boys' badminton team.",
+            "description": "A second-year high school student and a member of Elmei Junior and Senior High's boys' badminton team. He placed third in the prefectural qualifiers for badminton, barely missing the mark to qualify for nationals.",
             "genres": [
               "Romance",
               "Slice of Life",
@@ -3907,7 +3907,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b137081-TSrUR3mUJL6r.png",
-            "description": "Devil Contracts: Fox Devil, Curse Devil Relatives: Hahaoya Hayakawa (Mother), Chichioya Hayakawa (Father), Taiyou Hayakawa (Younger Brother). A Public Safety Devil Hunter working under Makima as a member of Tokyo Special Division 4.",
+            "description": "A Public Safety Devil Hunter working under Makima as a member of Tokyo Special Division 4. He is partnered with Himeno and tasked with supervising both Power and Denji. Aki Hayakawa generally appears to be a very stoic person.",
             "genres": [
               "Action",
               "Drama",
@@ -3937,7 +3937,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b137080-UHcynYNjb5ZU.png",
-            "description": "Affiliation: Public Safety Devil Hunters Makima is a Public Safety Devil Hunter, who took Denji as her human pet. She is one of the leading figures of Public Safety in Japan and has a considerable reputation among experienced Devil Hunters.",
+            "description": "Makima is a Public Safety Devil Hunter, who took Denji as her human pet. She is one of the leading figures of Public Safety in Japan and has a considerable reputation among experienced Devil Hunters.",
             "genres": [
               "Action",
               "Drama",
@@ -4042,7 +4042,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b144596-kvL6SD2litJu.png",
-            "description": "Devil Contract: Ghost Devil Relatives: Unnamed Younger Sister A Public Safety Devil Hunter, working under Makima as a member of Tokyo Special Division 4. She is partnered with Aki Hayakawa, whom she shares a close personal bond with.",
+            "description": "A Public Safety Devil Hunter, working under Makima as a member of Tokyo Special Division 4. She is partnered with Aki Hayakawa, whom she shares a close personal bond with. Himeno is shown to be a mature and experienced superior to the new recruits working under her.",
             "genres": [
               "Action",
               "Drama",
@@ -4117,7 +4117,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b144595-R8Lfn0egUR3q.png",
-            "description": "Devil Contracts: Punishment Devil A Public Safety Devil Hunter from Kyoto. She is partnered with Yuutarou Kurose.",
+            "description": "A Public Safety Devil Hunter from Kyoto. She is partnered with Yuutarou Kurose.",
             "genres": [
               "Action",
               "Drama",
@@ -4132,7 +4132,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b144592-pUY67nacCeud.png",
-            "description": "Devil Contract: Punishment Devil A Public Safety Devil Hunter from Kyoto. He is partnered with Michiko Tendou.",
+            "description": "A Public Safety Devil Hunter from Kyoto. He is partnered with Michiko Tendou.",
             "genres": [
               "Action",
               "Drama",
@@ -4153,7 +4153,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b145729-z9w8cFLyGjGG.png",
-            "description": "Occupation: Student Council President She is a perfectionist and wants to be the best at everything. She has an ability called \"The still untouched, unknowing maiden. (The eternal aisle)\".",
+            "description": "She is a perfectionist and wants to be the best at everything. She has an ability called \"The still untouched, unknowing maiden. (The eternal aisle)\". Every time she takes off a piece of underwear she can make what was done into something it wasn't.",
             "genres": [
               "Comedy",
               "Ecchi",
@@ -4481,7 +4481,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b417-gVLmIJu9phcK.png",
-            "description": "Relatives: Nunnally Lamperouge Allegiance: Order of the Black Knights Position: Order of the Black Knights Leader Knightmare Frame: Burai, Gawain, Shinkiro, Sutherland Lelouch is a student of Ashford Academy high school, where he is a member of its student council.",
+            "description": "Lelouch is a student of Ashford Academy high school, where he is a member of its student council.",
             "genres": [
               "Action",
               "Drama",
@@ -4513,7 +4513,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b559-KRvTdc6zdCuU.jpg",
-            "description": "Nationality: Japanese Known Relatives: Genbu Kururugi (father, deceased), Kaguya Sumeragi (cousin) Knightmare Frame: Lancelot and Lancelot Albion Lelouch's childhood friend and son of Japan's last prime minister.",
+            "description": "Lelouch's childhood friend and son of Japan's last prime minister. After Britannia's takeover of Japan, Suzaku joins the Britannia Army and becomes an Honorary Britannian.",
             "genres": [
               "Action",
               "Drama",
@@ -4529,7 +4529,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b1111-UhmlFtRFrnWa.png",
-            "description": "Allegiance: The Black Knights C.C. is apparently immortal, healing from any wound (implied to include beheading) with enough time. She also doesn't age. Apart from her immortality, C.C.",
+            "description": "C.C. is apparently immortal, healing from any wound (implied to include beheading) with enough time. She also doesn't age. Apart from her immortality, C.C.",
             "genres": [
               "Action",
               "Drama",
@@ -4673,7 +4673,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b1130-0yBifno91R4e.png",
-            "description": "Zodiac sign: Aquarius Lloyd Asplund is an earl of the Britannian nobility and the developer of the elite Knightmare Frame Lancelot.",
+            "description": "Lloyd Asplund is an earl of the Britannian nobility and the developer of the elite Knightmare Frame Lancelot.",
             "genres": [
               "Action",
               "Drama",
@@ -5059,7 +5059,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b171898-sOFT5nvhIsET.jpg",
-            "description": "Type: Second Generation Charon is a member of the White-Clad, that serves as the Second Pillar's guardian. He appears to be a devoted member of the White-Clad with a strong loyalty to the Evangalist.",
+            "description": "Charon is a member of the White-Clad, that serves as the Second Pillar's guardian. He appears to be a devoted member of the White-Clad with a strong loyalty to the Evangalist.",
             "genres": [
               "Action",
               "Drama",
@@ -5492,7 +5492,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b187382-NBP6I5OKXHH9.png",
-            "description": "Orsted has a curse that makes every living being feel an overwhelming fear just from being within his presence. Strangely enough, this curse does not affect Rudeus or Nanahoshi.",
+            "description": "Orsted is the current Dragon God, 2nd-ranked of the 7 World Powers, and the sworn enemy of Hitogami. Similar to other Dragon Race people such as Perugius, he has silver hair and golden sanpaku eyes with an overpowering look.",
             "genres": [
               "Adventure",
               "Drama",
@@ -5822,7 +5822,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b67071-3tO9QQA9x0hV.jpg",
-            "description": "",
+            "description": "Saika is a member of the tennis club who has a feminine appearance, but prefers others to not mistake his gender. He is called \"The Prince\" by his female classmates. On their first meeting, Saika asks help from Hachiman to join the tennis club, which was brushed off by Yukino.",
             "genres": [
               "Comedy",
               "Drama",
@@ -5843,7 +5843,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b88264-v9VFbSWtQq2C.png",
-            "description": "Stella initially appears to be feisty, hot-blooded, and quick to anger possibly due to her sheltered upbringing. However, later she is shown to be anything but bitter, and is even willing to admit her mistakes and be friendly with others.",
+            "description": "Stella Vermillion is an A-rank Apprentice Knight and princess of the Vermillion Kingdom. Stella initially appears to be feisty, hot-blooded, and quick to anger possibly due to her sheltered upbringing.",
             "genres": [
               "Action",
               "Ecchi",
@@ -5858,7 +5858,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b88265-2MlVZH85EPpR.png",
-            "description": "A noble young man with a caring personality. Ikki can be very cruel under certain circumstances.",
+            "description": "Ikki Kurogane is an F-rank Apprentice Knight who strives to become a real Mage Knight. He is a young man of average height with dark brown hair and brown eyes. A noble young man with a caring personality. Ikki can be very cruel under certain circumstances.",
             "genres": [
               "Action",
               "Ecchi",
@@ -5939,7 +5939,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b173758-AoqioODV01ki.png",
-            "description": "Occupation: First-Year High School Student Debut: Chapter 1 Rentarou is an extremely kind and thoughtful person who loves all of his many girlfriends very dearly, often to a scarily self-sacrificing degree.",
+            "description": "Rentarou is an extremely kind and thoughtful person who loves all of his many girlfriends very dearly, often to a scarily self-sacrificing degree. Before he began his days as a high school student, Rentarou had been rejected a total of 100 times.",
             "genres": [
               "Comedy",
               "Ecchi",
@@ -5953,7 +5953,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b173760-Gj3fK5VpbpT3.png",
-            "description": "Type: Tsundere Occupation: First-Year High School Student Debut: Chapter 1 Girlfriend No.",
+            "description": "Girlfriend No. 002",
             "genres": [
               "Comedy",
               "Ecchi",
@@ -5967,7 +5967,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b173759-Bu2KIzM1JELG.png",
-            "description": "Type: Deredere Occupation: First-Year High School Student Debut: Chapter 1 Girlfriend No. 001 Hakari is described as a \"clumsily calculative\" lady. She is often planning and plotting to achieve her goals which may or may not go as planned due to her clumsiness.",
+            "description": "Girlfriend No. 001 Hakari is described as a \"clumsily calculative\" lady. She is often planning and plotting to achieve her goals which may or may not go as planned due to her clumsiness.",
             "genres": [
               "Comedy",
               "Ecchi",
@@ -5981,7 +5981,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b173761-1FcQvX74KVW7.png",
-            "description": "Type: Dandere Occupation: First-Year High School Student Debut: Chapter 3 Girlfriend No. 003 Shizuka is rather timid especially given her rather quiet or mute voice which makes her rather distant from other people.",
+            "description": "Girlfriend No. 003 Shizuka is rather timid especially given her rather quiet or mute voice which makes her rather distant from other people. However, ever since she met Rentarou she has become braver, even willing to sacrifice her own safety to help Hakari out.",
             "genres": [
               "Comedy",
               "Ecchi",
@@ -5995,7 +5995,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b173762-bmdMGoIMVz2E.png",
-            "description": "Type: Kuudere Occupation: First-Year High School Student Debut: Chapter 6 Girlfriend No. 004 Nano is practical to a fault, obsessed with solving a problem in the most efficient way possible no matter what. Nano is the smartest among the girls.",
+            "description": "Girlfriend No. 004 Nano is practical to a fault, obsessed with solving a problem in the most efficient way possible no matter what. Nano is the smartest among the girls.",
             "genres": [
               "Comedy",
               "Ecchi",
@@ -6009,7 +6009,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b173763-NShnvmT00ikJ.png",
-            "description": "Type: Druggie Occupations: Third-Year High School Student, Chemistry Club President Debut: Chapter 10 Girlfriend No. 005 Kusuri is energetic and ingenuitive; she is capable of creating a drug for almost anything.",
+            "description": "Girlfriend No. 005 Kusuri is energetic and ingenuitive; she is capable of creating a drug for almost anything. She doesn't tend to be concerned about the dangers of the drugs she makes, and will often happily force them upon others or take them herself without hesitation.",
             "genres": [
               "Comedy",
               "Ecchi",
@@ -6023,7 +6023,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b173812-esAPFUOtQnKc.jpg",
-            "description": "Type: MILF Occupation: High School Chairwoman Debut: Chapter 17 Girlfriend No. 006 Hakari's mother. Hahari appears as a very mature and sophisticated woman, until she sees something cute.",
+            "description": "Girlfriend No. 006 Hakari's mother. Hahari appears as a very mature and sophisticated woman, until she sees something cute. She has an uncontrollable love for cute things, including children, as well as Rentarou and his family.",
             "genres": [
               "Comedy",
               "Ecchi",
@@ -6037,7 +6037,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b188521-rGqXf1gyqRWA.png",
-            "description": "Type: Maid Occupation: Personal Maid Debut: Chapter 30 Girlfriend No. 008 The personal maid of Hahari Hanazono. Mei is polite and proper, rarely showing strong emotions.",
+            "description": "Girlfriend No. 008 The personal maid of Hahari Hanazono. Mei is polite and proper, rarely showing strong emotions. She is loyal to Hahari above all else, and is unlikely to do anything unless given permission or ordered to by Hahari specifically.",
             "genres": [
               "Comedy",
               "Ecchi",
@@ -6057,7 +6057,7 @@
             "role": "Main",
             "gender": "Male (past life) → Agender",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b123962-eL9yGV0NLMF7.png",
-            "description": "Species: Human (past life) → Slime Kind: Reincarnated, Otherworlder Rimuru Tempest, formerly known as Satoru Mikami, is the main protagonist of Tensei Shitara Slime Datta Ken.",
+            "description": "Rimuru Tempest, formerly known as Satoru Mikami, is the main protagonist of Tensei Shitara Slime Datta Ken. They are the founder and King of the monster country Tempest, situated in the Great Jura Forest, and the partner and sworn friend of Storm Dragon, Veldora Tempest.",
             "genres": [
               "Action",
               "Adventure",
@@ -6282,7 +6282,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b128036-lW0dxNwerqw4.png",
-            "description": "Kind: Inhabitant \"Destroyer\" Milim Nava is one of the oldest and strongest Demon Lords. She is a Dragonoid. Her nickname, Destroyer, is not just for show. She is a demon lord one should never fight against.",
+            "description": "\"Destroyer\" Milim Nava is one of the oldest and strongest Demon Lords. She is a Dragonoid. Her nickname, Destroyer, is not just for show. She is a demon lord one should never fight against.",
             "genres": [
               "Action",
               "Adventure",
@@ -6378,7 +6378,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n129130-SJC0Kn1DU39E.jpg",
-            "description": "Combat Style: Beast Breathing Inosuke is usually seen wearing a grey boar mask, with a shirtless version of the Demon hunter uniform. Without the mask he has messy shoulder length black hair and large green eyes with long eyelashes.",
+            "description": "Inosuke is usually seen wearing a grey boar mask, with a shirtless version of the Demon hunter uniform. Without the mask he has messy shoulder length black hair and large green eyes with long eyelashes.",
             "genres": [
               "Action",
               "Adventure",
@@ -6394,7 +6394,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b126071-BTNEc1nRIv68.png",
-            "description": "Combat Style: Water Breathing & Tanjirou is kind by nature and has been described by others as having very gentle eyes. He has a great deal of determination and will not give up once he has a goal to achieve, an example being finding a cure for Nezuko.",
+            "description": "Tanjirou is kind by nature and has been described by others as having very gentle eyes. He has a great deal of determination and will not give up once he has a goal to achieve, an example being finding a cure for Nezuko.",
             "genres": [
               "Action",
               "Adventure",
@@ -6410,7 +6410,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b129131-FZrQ7lSlxmEr.png",
-            "description": "Combat Style: Thunder Breathing Affiliation: Demon Slayer Corps Occupation: Demon Slayer Zenitsu Agatsuma is one of the main protagonists of Demon Slayer: Kimetsu no Yaiba and along with Inosuke Hashibira, a traveling companion of Tanjiro Kamado and Nezuko Kamado.",
+            "description": "",
             "genres": [
               "Action",
               "Adventure",
@@ -6522,7 +6522,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b130050-qsLThJs5VIbz.png",
-            "description": "Combat Style: Water Breathing Water pillar in the Demon Killing Corps. Giyuu is reserved and displays little emotion, instead giving off a calm feeling most of the time. As a water breath user, Giyuu has created his own style.",
+            "description": "Water pillar in the Demon Killing Corps. Giyuu is reserved and displays little emotion, instead giving off a calm feeling most of the time. As a water breath user, Giyuu has created his own style.",
             "genres": [
               "Action",
               "Adventure",
@@ -6570,7 +6570,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b136070-MC9LLxJsHyHE.png",
-            "description": "Combat Style: Insect Breathing Shinobu is a demon slayer and the Insect Pillar of the Demon Killing Corps. She is 18 years old and one of two female pillars. Shinobu appears rather laid back, and always has a smile on her face regardless of the situation.",
+            "description": "Shinobu is a demon slayer and the Insect Pillar of the Demon Killing Corps. She is 18 years old and one of two female pillars. Shinobu appears rather laid back, and always has a smile on her face regardless of the situation.",
             "genres": [
               "Action",
               "Adventure",
@@ -6778,7 +6778,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b129133-VlTPowwt68rJ.png",
-            "description": "Combat Style: Flame Breathing He is greatly enthusiastic in regard to his duties as Flame Pillar and often cheerfully eccentric. He is amiable, kind and boasts extraordinary flame techniques and swordsmanship stemming from strict practice and discipline.",
+            "description": "He is greatly enthusiastic in regard to his duties as Flame Pillar and often cheerfully eccentric. He is amiable, kind and boasts extraordinary flame techniques and swordsmanship stemming from strict practice and discipline.",
             "genres": [
               "Action",
               "Adventure",
@@ -6810,7 +6810,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b136071-99Kexnnn2PiV.png",
-            "description": "Combat Style: Sound Breathing A Demon Slayer, and the Sound Pillar of the Demon Slayer Corps. Tengen is a very eccentric person, always wanting to complete actions as flashy as possible.",
+            "description": "A Demon Slayer, and the Sound Pillar of the Demon Slayer Corps. Tengen is a very eccentric person, always wanting to complete actions as flashy as possible.",
             "genres": [
               "Action",
               "Adventure",
@@ -6858,7 +6858,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b136072-xVwyRUKdpybi.png",
-            "description": "Combat Style: Love Breathing Demon Hunter and the Love Pillar of the Demon Killing Corps. Mitsuri is a soft and kind person. She is very emotional and passionate, constantly complimenting people in her head, which probably contributes to her nickname of \"the Hashira of Love\".",
+            "description": "Demon Hunter and the Love Pillar of the Demon Killing Corps. Mitsuri is a soft and kind person. She is very emotional and passionate, constantly complimenting people in her head, which probably contributes to her nickname of \"the Hashira of Love\".",
             "genres": [
               "Action",
               "Adventure",
@@ -6890,7 +6890,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b136069-6PLglx4tETUX.png",
-            "description": "Combat Style: Mist Breathing Muichiro is an air-headed individual who seems to constantly wander off in thought and never focus on one thing. Impassive and, at times, obtuse, he tends to think only for himself and operates on logic alone, never letting emotion guide him.",
+            "description": "Muichiro is an air-headed individual who seems to constantly wander off in thought and never focus on one thing. Impassive and, at times, obtuse, he tends to think only for himself and operates on logic alone, never letting emotion guide him.",
             "genres": [
               "Action",
               "Adventure",
@@ -7234,7 +7234,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b40881-F3gr1PkreDvj.png",
-            "description": "",
+            "description": "Mikasa is Eren Yaeger's foster sister and mutual childhood friend of Armin Arlert, living with the two of them in Shiganshina District within the southern region of Wall Maria. When she was young, her parents were killed by human traffickers, and she was kidnapped.",
             "genres": [
               "Action",
               "Drama",
@@ -7249,7 +7249,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b40882-dsj7IP943WFF.jpg",
-            "description": "Affiliation: 104th Trainees Squad, Survey Corps. Eren was born to Carla and Grisha Yeager in Shiganshina District within the southern region of Wall Maria. He grew up in the town with his parents and foster sister Mikasa, who moved in with the Yeagers as a child.",
+            "description": "Eren was born to Carla and Grisha Yeager in Shiganshina District within the southern region of Wall Maria. He grew up in the town with his parents and foster sister Mikasa, who moved in with the Yeagers as a child.",
             "genres": [
               "Action",
               "Drama",
@@ -7264,7 +7264,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b46494-g7xYYuBtYPnO.png",
-            "description": "Position: 104th Trainees Squad, Survey Corps Relatives: Grandfather Armin is a young boy who was born and raised in the Shiganshina District within the walls, being childhood friends with both Eren Yeager and Mikasa Ackerman.",
+            "description": "Armin is a young boy who was born and raised in the Shiganshina District within the walls, being childhood friends with both Eren Yeager and Mikasa Ackerman.",
             "genres": [
               "Action",
               "Drama",
@@ -7279,7 +7279,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b45887-QPtJH0KwqthW.jpg",
-            "description": "Sasha is a friendly and fun-loving girl. She speaks with a local accent from her home village, but initially hid it out of embarrassment by using overly formal and polite speech.",
+            "description": "Originally from Dauper, a remote and scarcely populated village of hunters located in a mountain forest in the southern area of Wall Rose, Sasha joined the military as a cadet of the 104th Training Corps, where she ranked 9th upon graduation.",
             "genres": [
               "Action",
               "Drama",
@@ -7294,7 +7294,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b71479-huCD908XIdqv.png",
-            "description": "Affiliations: 104th Trainees Squad, Scouting Legion Member of the Scouting Legion. She seems selfish, cynical, bossy, sly, uncooperative, exploitative, and confrontational, but she can apparently be kind, especially to Krista.",
+            "description": "Member of the Scouting Legion. She seems selfish, cynical, bossy, sly, uncooperative, exploitative, and confrontational, but she can apparently be kind, especially to Krista.",
             "genres": [
               "Action",
               "Drama",
@@ -7309,7 +7309,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n62501-CfTtAAgs64nE.jpg",
-            "description": "Affiliation: Survey Corps; Soldier, Special Operations Squad. Relatives: Father Petra Ral is a soldier of the Survey Corps hand-picked by Captain Levi to join the Special Operations Squad.",
+            "description": "Petra Ral is a soldier of the Survey Corps hand-picked by Captain Levi to join the Special Operations Squad. Petra is a very kind and caring woman, going out of her way to look after and guiding Eren Yaeger when he was first admitted to the squad.",
             "genres": [
               "Action",
               "Drama",
@@ -7324,7 +7324,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b62479-mYcTkU1RXymL.jpg",
-            "description": "Affiliations: 104th Training Corps Originally from Jinae District. Marco ranked 7th in the 104th Training Corps and is widely respected by other cadets of the 104th.",
+            "description": "Originally from Jinae District. Marco ranked 7th in the 104th Training Corps and is widely respected by other cadets of the 104th.",
             "genres": [
               "Action",
               "Drama",
@@ -7354,7 +7354,7 @@
             "role": "Supporting",
             "gender": "Unknown",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b71121-7R7CnQd3lHgt.png",
-            "description": "Affiliation: Survey Corps; Section Commander, Squad Leader. Leader of the Survey Corps' Fourth Squad, Hange is also in charge of conducting research on Titans, and pursues this knowledge so passionately that they have become obsessed with Titans as a result.",
+            "description": "Leader of the Survey Corps' Fourth Squad, Hange is also in charge of conducting research on Titans, and pursues this knowledge so passionately that they have become obsessed with Titans as a result.",
             "genres": [
               "Action",
               "Drama",
@@ -7444,7 +7444,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b46498-ritqAj9FW6jX.png",
-            "description": "Jean has a blunt personality. He holds no restraint when it comes to speaking his mind, even when he knows it would not be wise to do so or when it could spark conflict. Jean is also pragmatic: he has a strong aversion to exposing himself to dangerous situations.",
+            "description": "Jean Kirschtein is a graduate of the 104th Cadet Corps, among whom he ranked 6th for his skills with ODM gear and ability to look at things through a more tactical lense.",
             "genres": [
               "Action",
               "Drama",
@@ -7489,7 +7489,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b62481-ZZDa7vn17lMU.png",
-            "description": "",
+            "description": "Ranked tenth in the trainee class, Krista is a very shy and kind, caring person, often being described as a \"goddess\" or \"angel\" by her peers. She is good friends with Ymir.",
             "genres": [
               "Action",
               "Drama",
@@ -7504,7 +7504,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b71457-7H5bMZezo4ze.png",
-            "description": "Affiliations: Military Police, 104th Cadet Corps. Recruit of the Military Police stationed in Stohess District.",
+            "description": "Recruit of the Military Police stationed in Stohess District. While most who join the Military Police Regiment do so because they want a safe position far from the danger of the Titans, Marlo did so because he claims to want \"to uphold justice and do what's right.",
             "genres": [
               "Action",
               "Drama",
@@ -7519,7 +7519,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n127573-VSYSvQ1VK1c7.jpg",
-            "description": "Affiliation: Survey Corps; Executive Officer, Fourth Squad. A veteran member of the Survey Corps and Hange Zoe's second-in-command within the Survey Corps' Fourth Squad. He also serves as Hanji's assistant and messenger.",
+            "description": "A veteran member of the Survey Corps and Hange Zoe's second-in-command within the Survey Corps' Fourth Squad. He also serves as Hanji's assistant and messenger.",
             "genres": [
               "Action",
               "Drama",
@@ -7534,7 +7534,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b46496-Mu86MENd5wNB.png",
-            "description": "Position: 13th Commander, Survey Corps Discerning, intelligent, and widely respected, Erwin is the unshakable and calculated 13th commander of the Survey Corps.",
+            "description": "Discerning, intelligent, and widely respected, Erwin is the unshakable and calculated 13th commander of the Survey Corps.",
             "genres": [
               "Action",
               "Drama",
@@ -7549,7 +7549,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b62485-I0U5Cat3z65K.png",
-            "description": "",
+            "description": "The highest-ranked Administrator of the Southern Region. Head of the Garrison's Southern Territories, Pixis is a cunning leader with astute insights.",
             "genres": [
               "Action",
               "Drama",
@@ -7564,7 +7564,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b86017-m6vXFRKWMwUo.jpg",
-            "description": "Affiliations: 104th Cadet Corps. Recruit of the Military Police stationed in Stohess District. She was roommates with Annie Leonhart.",
+            "description": "Recruit of the Military Police stationed in Stohess District. She was roommates with Annie Leonhart.",
             "genres": [
               "Action",
               "Drama",
@@ -7579,7 +7579,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n46486-izhPjzut6WCZ.png",
-            "description": "Upbeat and naive, Connie is rather unfocused outside of combat, and enjoys goofing around and messing with his friends, but can also be a bit dense at times, as he can have some difficulty comprehending new developments as they appear.",
+            "description": "Connie Springer is a graduate of the 104th Training Corps, having ranked 8th in class. He is known to be one of the quickest soldiers while using ODM gear and is skilled at making very sharp turns.",
             "genres": [
               "Action",
               "Drama",
@@ -7609,7 +7609,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b46488-wm6HvkdkHoZu.jpg",
-            "description": "Affiliation: Survey Corps Member of the Survey Corps and former cadet of the 104th Training Corps. Bertoldt ranked 3rd in his training class upon graduation, finishing behind only Mikasa and his hometown friend Reiner.",
+            "description": "Member of the Survey Corps and former cadet of the 104th Training Corps. Bertoldt ranked 3rd in his training class upon graduation, finishing behind only Mikasa and his hometown friend Reiner.",
             "genres": [
               "Action",
               "Drama",
@@ -7624,7 +7624,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b71481-q2pfKJRFiNUE.png",
-            "description": "Affiliation: Scouting Legion Survey Corps",
+            "description": "",
             "genres": [
               "Action",
               "Drama",
@@ -7693,7 +7693,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b56701-8kwNt7u6EC0A.png",
-            "description": "Archive: Ira (wrath) Thema: ruina, paratum, victoria (temporary) Grimoire: Laguna Yggdrasil A mysterious girl who claims Arata to be her husband. She looks like Hijiri, Arata's cousin and childhood friend. Arin rarely shows emotion, and cares little what others think of her.",
+            "description": "A mysterious girl who claims Arata to be her husband. She looks like Hijiri, Arata's cousin and childhood friend. Arin rarely shows emotion, and cares little what others think of her.",
             "genres": [
               "Action",
               "Comedy",
@@ -7835,7 +7835,7 @@
       },
       {
         "id": "caden_anime_39",
-        "title": "Fate/Stay Night: Unlimited Blade Works",
+        "title": "Fate/Stay Night (2006)",
         "characters": [
           {
             "id": "anilist_497",
@@ -7847,25 +7847,25 @@
             "genres": [
               "Action",
               "Fantasy",
-              "Psychological",
+              "Romance",
               "Supernatural"
             ],
-            "series": "Fate/Stay Night: Unlimited Blade Works"
+            "series": "Fate/Stay Night (2006)"
           },
           {
-            "id": "anilist_498",
-            "name": "Rin Tohsaka",
+            "id": "anilist_2087",
+            "name": "Archer",
             "role": "Main",
-            "gender": "Female",
-            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b498-lwawtSpLyATL.png",
-            "description": "Rin is a model student and idol of Shirou's school. She barely talks to other students in her school and exhibits a desire to be left alone, as exemplified by her tendency to stay on the school's rooftop, away from the rest of the students.",
+            "gender": "Male",
+            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b2087-l5WP4W4vmfJJ.png",
+            "description": "",
             "genres": [
               "Action",
               "Fantasy",
-              "Psychological",
+              "Romance",
               "Supernatural"
             ],
-            "series": "Fate/Stay Night: Unlimited Blade Works"
+            "series": "Fate/Stay Night (2006)"
           },
           {
             "id": "anilist_496",
@@ -7877,145 +7877,25 @@
             "genres": [
               "Action",
               "Fantasy",
-              "Psychological",
+              "Romance",
               "Supernatural"
             ],
-            "series": "Fate/Stay Night: Unlimited Blade Works"
+            "series": "Fate/Stay Night (2006)"
           },
           {
-            "id": "anilist_500",
-            "name": "Sakura Matou",
+            "id": "anilist_498",
+            "name": "Rin Tohsaka",
             "role": "Main",
             "gender": "Female",
-            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b500-NQrLbnBr1sDv.png",
-            "description": "A student in her first year of high school, Sakura is the sister of Shinji Mato. After Shirou's father Kiritsugu died, Sakura often visited Shirou's home to help him with his daily chores. She is outwardly shy and timid, but possesses great inner strength.",
+            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b498-lwawtSpLyATL.png",
+            "description": "Rin is a model student and idol of Shirou's school. She barely talks to other students in her school and exhibits a desire to be left alone, as exemplified by her tendency to stay on the school's rooftop, away from the rest of the students.",
             "genres": [
               "Action",
               "Fantasy",
-              "Psychological",
+              "Romance",
               "Supernatural"
             ],
-            "series": "Fate/Stay Night: Unlimited Blade Works"
-          },
-          {
-            "id": "anilist_506",
-            "name": "Kirei Kotomine",
-            "role": "Supporting",
-            "gender": "Male",
-            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b506-qeg0TqitdCMS.png",
-            "description": "",
-            "genres": [
-              "Action",
-              "Fantasy",
-              "Psychological",
-              "Supernatural"
-            ],
-            "series": "Fate/Stay Night: Unlimited Blade Works"
-          },
-          {
-            "id": "anilist_10010",
-            "name": "Kiritsugu Emiya",
-            "role": "Supporting",
-            "gender": "Male",
-            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b10010-fNspzan5MzNk.png",
-            "description": "Sidearm: Thompson contender in conjunction with his Mystic Code Origin Bullets Shirou's foster father and his savior from the aftermath of the massive Fuyuki fire.",
-            "genres": [
-              "Action",
-              "Fantasy",
-              "Psychological",
-              "Supernatural"
-            ],
-            "series": "Fate/Stay Night: Unlimited Blade Works"
-          },
-          {
-            "id": "anilist_502",
-            "name": "Medusa",
-            "role": "Supporting",
-            "gender": "Female",
-            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b502-Nc5U3ghTR7Gy.png",
-            "description": "In Fate/stay night In Fate/stay night: Heaven's Feel In Fate/Grand Order - First Order In Fate/Grand Order: Absolute Demonic Front Babylonia",
-            "genres": [
-              "Action",
-              "Fantasy",
-              "Psychological",
-              "Supernatural"
-            ],
-            "series": "Fate/Stay Night: Unlimited Blade Works"
-          },
-          {
-            "id": "anilist_504",
-            "name": "Heracles",
-            "role": "Supporting",
-            "gender": "Male",
-            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b504-2k7LldrHYSAP.png",
-            "description": "In Fate/Stay Night",
-            "genres": [
-              "Action",
-              "Fantasy",
-              "Psychological",
-              "Supernatural"
-            ],
-            "series": "Fate/Stay Night: Unlimited Blade Works"
-          },
-          {
-            "id": "anilist_2087",
-            "name": "Archer",
-            "role": "Supporting",
-            "gender": "Male",
-            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b2087-l5WP4W4vmfJJ.png",
-            "description": "In Fate/stay night UBW: In Fate/Grand Order - First Order:",
-            "genres": [
-              "Action",
-              "Fantasy",
-              "Psychological",
-              "Supernatural"
-            ],
-            "series": "Fate/Stay Night: Unlimited Blade Works"
-          },
-          {
-            "id": "anilist_503",
-            "name": "Illyasviel von Einzbern",
-            "role": "Supporting",
-            "gender": "Female",
-            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b503-SmS87yq6l2tD.png",
-            "description": "A young Teutonic aristocrat, she traveled to Japan to participate in the Holy Grail War as a Master. Illyasviel has an angelic appearance and an unsurpassed degree of magical power.",
-            "genres": [
-              "Action",
-              "Fantasy",
-              "Psychological",
-              "Supernatural"
-            ],
-            "series": "Fate/Stay Night: Unlimited Blade Works"
-          },
-          {
-            "id": "anilist_2585",
-            "name": "Kojirou Sasaki",
-            "role": "Supporting",
-            "gender": "Male",
-            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b2585-rWFs7LihpIFZ.png",
-            "description": "He was summoned by Caster as a guardian and watchmen for the front gate of the Ryudo Temple. As an improper servant, Assassin is entirely dependent on Caster for mana and cannot move freely beyond the grounds of Ryudoji.",
-            "genres": [
-              "Action",
-              "Fantasy",
-              "Psychological",
-              "Supernatural"
-            ],
-            "series": "Fate/Stay Night: Unlimited Blade Works"
-          },
-          {
-            "id": "anilist_499",
-            "name": "Cú  Chulainn",
-            "role": "Supporting",
-            "gender": "Male",
-            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b499-gS5RAdupSKWQ.png",
-            "description": "Born as Sètanta from a mortal woman, Deichtine, and the Sun God Lugh he's a Hero from the Ulster Cycle of Irish Mythology. He took the name Cú Chulainn after he killed the guard dog of the blacksmith Culann, said to be stronger than 10 men, when he was only a child.",
-            "genres": [
-              "Action",
-              "Fantasy",
-              "Psychological",
-              "Supernatural"
-            ],
-            "series": "Fate/Stay Night: Unlimited Blade Works"
+            "series": "Fate/Stay Night (2006)"
           },
           {
             "id": "anilist_2514",
@@ -8027,10 +7907,145 @@
             "genres": [
               "Action",
               "Fantasy",
-              "Psychological",
+              "Romance",
               "Supernatural"
             ],
-            "series": "Fate/Stay Night: Unlimited Blade Works"
+            "series": "Fate/Stay Night (2006)"
+          },
+          {
+            "id": "anilist_506",
+            "name": "Kirei Kotomine",
+            "role": "Supporting",
+            "gender": "Male",
+            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b506-qeg0TqitdCMS.png",
+            "description": "",
+            "genres": [
+              "Action",
+              "Fantasy",
+              "Romance",
+              "Supernatural"
+            ],
+            "series": "Fate/Stay Night (2006)"
+          },
+          {
+            "id": "anilist_502",
+            "name": "Medusa",
+            "role": "Supporting",
+            "gender": "Female",
+            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b502-Nc5U3ghTR7Gy.png",
+            "description": "In Fate/stay night In Fate/stay night: Heaven's Feel In Fate/Grand Order - First Order",
+            "genres": [
+              "Action",
+              "Fantasy",
+              "Romance",
+              "Supernatural"
+            ],
+            "series": "Fate/Stay Night (2006)"
+          },
+          {
+            "id": "anilist_500",
+            "name": "Sakura Matou",
+            "role": "Supporting",
+            "gender": "Female",
+            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b500-NQrLbnBr1sDv.png",
+            "description": "A student in her first year of high school, Sakura is the sister of Shinji Mato. After Shirou's father Kiritsugu died, Sakura often visited Shirou's home to help him with his daily chores. She is outwardly shy and timid, but possesses great inner strength.",
+            "genres": [
+              "Action",
+              "Fantasy",
+              "Romance",
+              "Supernatural"
+            ],
+            "series": "Fate/Stay Night (2006)"
+          },
+          {
+            "id": "anilist_499",
+            "name": "Cú  Chulainn",
+            "role": "Supporting",
+            "gender": "Male",
+            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b499-gS5RAdupSKWQ.png",
+            "description": "Born as Sètanta from a mortal woman, Deichtine, and the Sun God Lugh he's a Hero from the Ulster Cycle of Irish Mythology. He took the name Cú Chulainn after he killed the guard dog of the blacksmith Culann, said to be stronger than 10 men, when he was only a child.",
+            "genres": [
+              "Action",
+              "Fantasy",
+              "Romance",
+              "Supernatural"
+            ],
+            "series": "Fate/Stay Night (2006)"
+          },
+          {
+            "id": "anilist_2585",
+            "name": "Kojirou Sasaki",
+            "role": "Supporting",
+            "gender": "Male",
+            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b2585-rWFs7LihpIFZ.png",
+            "description": "He was summoned by Caster as a guardian and watchmen for the front gate of the Ryudo Temple. As an improper servant, Assassin is entirely dependent on Caster for mana and cannot move freely beyond the grounds of Ryudoji.",
+            "genres": [
+              "Action",
+              "Fantasy",
+              "Romance",
+              "Supernatural"
+            ],
+            "series": "Fate/Stay Night (2006)"
+          },
+          {
+            "id": "anilist_3440",
+            "name": "Medea",
+            "role": "Supporting",
+            "gender": "Female",
+            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b3440-134Ip9KiQeZL.png",
+            "description": "",
+            "genres": [
+              "Action",
+              "Fantasy",
+              "Romance",
+              "Supernatural"
+            ],
+            "series": "Fate/Stay Night (2006)"
+          },
+          {
+            "id": "anilist_10010",
+            "name": "Kiritsugu Emiya",
+            "role": "Supporting",
+            "gender": "Male",
+            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b10010-fNspzan5MzNk.png",
+            "description": "Shirou's foster father and his savior from the aftermath of the massive Fuyuki fire. During his lifetime, Kiritsugu was disillusioned with becoming a Hero of Justice, a defender of humanity who could save everyone.",
+            "genres": [
+              "Action",
+              "Fantasy",
+              "Romance",
+              "Supernatural"
+            ],
+            "series": "Fate/Stay Night (2006)"
+          },
+          {
+            "id": "anilist_504",
+            "name": "Heracles",
+            "role": "Supporting",
+            "gender": "Male",
+            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b504-2k7LldrHYSAP.png",
+            "description": "In Fate/Stay Night",
+            "genres": [
+              "Action",
+              "Fantasy",
+              "Romance",
+              "Supernatural"
+            ],
+            "series": "Fate/Stay Night (2006)"
+          },
+          {
+            "id": "anilist_503",
+            "name": "Illyasviel von Einzbern",
+            "role": "Supporting",
+            "gender": "Female",
+            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b503-SmS87yq6l2tD.png",
+            "description": "Birthday in Fate/kaleid: Jul 20 A young Teutonic aristocrat, she traveled to Japan to participate in the Holy Grail War as a Master. Illyasviel has an angelic appearance and an unsurpassed degree of magical power.",
+            "genres": [
+              "Action",
+              "Fantasy",
+              "Romance",
+              "Supernatural"
+            ],
+            "series": "Fate/Stay Night (2006)"
           },
           {
             "id": "anilist_505",
@@ -8042,25 +8057,10 @@
             "genres": [
               "Action",
               "Fantasy",
-              "Psychological",
+              "Romance",
               "Supernatural"
             ],
-            "series": "Fate/Stay Night: Unlimited Blade Works"
-          },
-          {
-            "id": "anilist_3440",
-            "name": "Medea",
-            "role": "Supporting",
-            "gender": "Female",
-            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b3440-134Ip9KiQeZL.png",
-            "description": "Servant type: Caster",
-            "genres": [
-              "Action",
-              "Fantasy",
-              "Psychological",
-              "Supernatural"
-            ],
-            "series": "Fate/Stay Night: Unlimited Blade Works"
+            "series": "Fate/Stay Night (2006)"
           }
         ]
       },
@@ -8452,7 +8452,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b205434-AuBcR4M05f6s.png",
-            "description": "",
+            "description": "A girl who strived to become an idol at a young age, but due to her family situation, made sacrifices that ultimately ended with her becoming too old to become one. She is a YouTuber.",
             "genres": [
               "Drama",
               "Mystery",
@@ -8482,7 +8482,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b227579-OKrvb5rGnQrV.jpg",
-            "description": "",
+            "description": "A famous physical training YouTuber affiliated with Strawberry Productions, where he is the agency's top earner.",
             "genres": [
               "Drama",
               "Mystery",
@@ -8760,7 +8760,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b88412-sIOJUnIkyFRe.png",
-            "description": "",
+            "description": "A Rank 3 Ghoul Investigator. In the past, he went by the name Rei Suzuya. He is the partner of Yukinori Shinohara. He is a young man with androgynous appearance. He has many stitches used as both first-aid and fashion.",
             "genres": [
               "Action",
               "Drama",
@@ -8777,7 +8777,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b88421-F8yaeVfHjwYn.png",
-            "description": "Race: Human Hideyoshi is a normal human and the best friend of Ken Kaneki. Hide is incredibly observant and can figure things out about people in a almost sherlock-like manner.",
+            "description": "Hideyoshi is a normal human and the best friend of Ken Kaneki. Hide is incredibly observant and can figure things out about people in a almost sherlock-like manner. He also becomes interested in things and works hard on them until he finds something else to interest him.",
             "genres": [
               "Action",
               "Drama",
@@ -8794,7 +8794,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b125884-x9UNA2Lp31pf.jpg",
-            "description": "",
+            "description": "Takizawa is a Rank 2 Ghoul Investigator. A classmate of Akira Mado at the Academy, he is partnered with Kousuke Houji and assigned to the 20th ward to investigate the Gourmet. He greatly respects Kishou Arima and Koutarou Amon and admires their achievements.",
             "genres": [
               "Action",
               "Drama",
@@ -8998,7 +8998,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b88838-LWDgYMTqb1pd.png",
-            "description": "She is an intelligent woman and seems to be always serious about work and her daily routine in general. Like her father, she has deep insight and intuition that helps her in investigation and determining what is going on around her while on the field.",
+            "description": "Akira Mado is a Rank 2 Ghoul Investigator and Kureo's daughter. She is currently partnered with Koutarou Amon. She is an intelligent woman and seems to be always serious about work and her daily routine in general.",
             "genres": [
               "Action",
               "Drama",
@@ -9032,7 +9032,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b88946-YbTQAGJAdpoH.jpg",
-            "description": "Quinque: IXA (Koukaku), Narukami (Ukaku), Yukimura 1/3 (Koukaku) Kishou Arima is a famed Special Class Ghoul Investigator known as the CCG's Reaper. He is undefeated as a Ghoul Investigator and at some point was formerly partnered with Take Hirako.",
+            "description": "Kishou Arima is a famed Special Class Ghoul Investigator known as the CCG's Reaper. He is undefeated as a Ghoul Investigator and at some point was formerly partnered with Take Hirako.",
             "genres": [
               "Action",
               "Drama",
@@ -9492,7 +9492,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/89158-GsNSGPGLXyOA.jpg",
-            "description": "Mio normally displays a calm demeanor, preferring to remain quiet when around others; however, she is prone to outbursts when faced with inappropriate situations such as finding erotic magazines underneath Basara's bed or being left at the mercy of Maria's succubus curse.",
+            "description": "Mio is a beautiful young girl of average height, with long waist-length red hair and violet eyes. She is noted for having a distinctly voluptuous body for someone her age.",
             "genres": [
               "Action",
               "Ecchi",
@@ -9537,7 +9537,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/89161-X100Xt7Uovd5.jpg",
-            "description": "A Hero and the sister of Yuki Nonaka. She is also an Element Master.",
+            "description": "A Hero and the sister of Yuki Nonaka. She is also an Element Master. Kurumi is a petite, young girl who is surprisingly developed for her age. She has blue violet hair held up in a ponytail by a white scrunchy and yellow eyes like her sister.",
             "genres": [
               "Action",
               "Ecchi",
@@ -9605,7 +9605,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b17-phjcWCkRuIhu.png",
-            "description": "Family: Born in Konohagakure, a ninja village hidden in the leaves, Naruto Uzumaki was destined for greatness. When born, a powerful nine-tailed demon fox attacked his village. With a wave of its tail, the demon fox could raise tsunamis and shatter mountains.",
+            "description": "Born in Konohagakure, a ninja village hidden in the leaves, Naruto Uzumaki was destined for greatness. When born, a powerful nine-tailed demon fox attacked his village. With a wave of its tail, the demon fox could raise tsunamis and shatter mountains.",
             "genres": [
               "Action",
               "Adventure",
@@ -9707,7 +9707,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n3889-gCUewPsRY2kD.png",
-            "description": "Konohamaru named after the village he lives in: Konoha, is the grandson of the Third Hokage and by extension the nephew of Asuma Sarutobi. Konohamaru usually hangs out with his two friends, Udon and Moegi.",
+            "description": "In Part II they are teamed together under the leadership of Ebisu, Konohamaru's former tutor. At the start of the series, Konohamaru feels unacknowledged due to his status as the Hokage's grandson.",
             "genres": [
               "Action",
               "Adventure",
@@ -9758,7 +9758,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b1555-Q41GLTV3FvYF.png",
-            "description": "Hyuuga Hinata is the eldest daughter of the Hyuuga clan's main branch. Hinata was trained by her father, Hiashi Hyuuga, to become the clan's heiress, though in time he came to deem her a lost cause.",
+            "description": "Ninja Registration Nº: 012612 Hyuuga Hinata is the eldest daughter of the Hyuuga clan's main branch. Hinata was trained by her father, Hiashi Hyuuga, to become the clan's heiress, though in time he came to deem her a lost cause.",
             "genres": [
               "Action",
               "Adventure",
@@ -9809,7 +9809,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/2672-oxbHx8n3N7WY.jpg",
-            "description": "Affiliation: Akatsuki Kisame Hoshigaki is a missing-nin from Kirigakure and is partnered with Itachi Uchiha.",
+            "description": "Kisame Hoshigaki is a missing-nin from Kirigakure and is partnered with Itachi Uchiha. He gets along considerably better with Itachi than most Akatsuki members do with their own partners, immediately doing as Itachi asks of him and always looking out for Itachi's well-being.",
             "genres": [
               "Action",
               "Adventure",
@@ -9860,7 +9860,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b1902-JsEFRFwjmtZJ.png",
-            "description": "Occupation: Akatsuki member Deidara is a missing-nin from Iwagakure. Before joining the Akatsuki, Deidara was a terrorist bomber for hire. His work caught the eye of Pain, who sent other Akatsuki members to recruit him.",
+            "description": "Deidara is a missing-nin from Iwagakure. Before joining the Akatsuki, Deidara was a terrorist bomber for hire. His work caught the eye of Pain, who sent other Akatsuki members to recruit him.",
             "genres": [
               "Action",
               "Adventure",
@@ -9877,7 +9877,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n4694-2brvNKpdqARU.png",
-            "description": "Likes: Hamburger stakes, collecting puppets Dislikes: spinach, children Kankuro is initially characterized by his apparent dislike for children, as seen when he is noticeably irritated while in the presence of someone younger than him.",
+            "description": "Kankuro is initially characterized by his apparent dislike for children, as seen when he is noticeably irritated while in the presence of someone younger than him. Though, this seems to have gone away as time passed by.",
             "genres": [
               "Action",
               "Adventure",
@@ -9911,7 +9911,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b2009-H7n38Ns1fr0Y.jpg",
-            "description": "Family: Inoichi Yamanaka (Father) Team: Ino Yamanaka is a childhood friend of Sakura Haruno who was bullied due to her large forehead, ending when Ino befriended her. She acted like a mentor, being tougher and more confident.",
+            "description": "Ino Yamanaka is a childhood friend of Sakura Haruno who was bullied due to her large forehead, ending when Ino befriended her. She acted like a mentor, being tougher and more confident. Under her influence, Sakura began to develop her own identity.",
             "genres": [
               "Action",
               "Adventure",
@@ -10030,7 +10030,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/2672-oxbHx8n3N7WY.jpg",
-            "description": "Affiliation: Akatsuki Kisame Hoshigaki is a missing-nin from Kirigakure and is partnered with Itachi Uchiha.",
+            "description": "Kisame Hoshigaki is a missing-nin from Kirigakure and is partnered with Itachi Uchiha. He gets along considerably better with Itachi than most Akatsuki members do with their own partners, immediately doing as Itachi asks of him and always looking out for Itachi's well-being.",
             "genres": [
               "Action",
               "Adventure",
@@ -10268,7 +10268,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b1902-JsEFRFwjmtZJ.png",
-            "description": "Occupation: Akatsuki member Deidara is a missing-nin from Iwagakure. Before joining the Akatsuki, Deidara was a terrorist bomber for hire. His work caught the eye of Pain, who sent other Akatsuki members to recruit him.",
+            "description": "Deidara is a missing-nin from Iwagakure. Before joining the Akatsuki, Deidara was a terrorist bomber for hire. His work caught the eye of Pain, who sent other Akatsuki members to recruit him.",
             "genres": [
               "Action",
               "Adventure",
@@ -10302,7 +10302,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n4694-2brvNKpdqARU.png",
-            "description": "Likes: Hamburger stakes, collecting puppets Dislikes: spinach, children Kankuro is initially characterized by his apparent dislike for children, as seen when he is noticeably irritated while in the presence of someone younger than him.",
+            "description": "Kankuro is initially characterized by his apparent dislike for children, as seen when he is noticeably irritated while in the presence of someone younger than him. Though, this seems to have gone away as time passed by.",
             "genres": [
               "Action",
               "Adventure",
@@ -10673,7 +10673,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b17-phjcWCkRuIhu.png",
-            "description": "Family: Born in Konohagakure, a ninja village hidden in the leaves, Naruto Uzumaki was destined for greatness. When born, a powerful nine-tailed demon fox attacked his village. With a wave of its tail, the demon fox could raise tsunamis and shatter mountains.",
+            "description": "Born in Konohagakure, a ninja village hidden in the leaves, Naruto Uzumaki was destined for greatness. When born, a powerful nine-tailed demon fox attacked his village. With a wave of its tail, the demon fox could raise tsunamis and shatter mountains.",
             "genres": [
               "Action",
               "Adventure",
@@ -10775,7 +10775,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n3889-gCUewPsRY2kD.png",
-            "description": "Konohamaru named after the village he lives in: Konoha, is the grandson of the Third Hokage and by extension the nephew of Asuma Sarutobi. Konohamaru usually hangs out with his two friends, Udon and Moegi.",
+            "description": "In Part II they are teamed together under the leadership of Ebisu, Konohamaru's former tutor. At the start of the series, Konohamaru feels unacknowledged due to his status as the Hokage's grandson.",
             "genres": [
               "Action",
               "Adventure",
@@ -10826,7 +10826,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b1555-Q41GLTV3FvYF.png",
-            "description": "Hyuuga Hinata is the eldest daughter of the Hyuuga clan's main branch. Hinata was trained by her father, Hiashi Hyuuga, to become the clan's heiress, though in time he came to deem her a lost cause.",
+            "description": "Ninja Registration Nº: 012612 Hyuuga Hinata is the eldest daughter of the Hyuuga clan's main branch. Hinata was trained by her father, Hiashi Hyuuga, to become the clan's heiress, though in time he came to deem her a lost cause.",
             "genres": [
               "Action",
               "Adventure",
@@ -10877,7 +10877,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/2672-oxbHx8n3N7WY.jpg",
-            "description": "Affiliation: Akatsuki Kisame Hoshigaki is a missing-nin from Kirigakure and is partnered with Itachi Uchiha.",
+            "description": "Kisame Hoshigaki is a missing-nin from Kirigakure and is partnered with Itachi Uchiha. He gets along considerably better with Itachi than most Akatsuki members do with their own partners, immediately doing as Itachi asks of him and always looking out for Itachi's well-being.",
             "genres": [
               "Action",
               "Adventure",
@@ -10928,7 +10928,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b1902-JsEFRFwjmtZJ.png",
-            "description": "Occupation: Akatsuki member Deidara is a missing-nin from Iwagakure. Before joining the Akatsuki, Deidara was a terrorist bomber for hire. His work caught the eye of Pain, who sent other Akatsuki members to recruit him.",
+            "description": "Deidara is a missing-nin from Iwagakure. Before joining the Akatsuki, Deidara was a terrorist bomber for hire. His work caught the eye of Pain, who sent other Akatsuki members to recruit him.",
             "genres": [
               "Action",
               "Adventure",
@@ -10945,7 +10945,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n4694-2brvNKpdqARU.png",
-            "description": "Likes: Hamburger stakes, collecting puppets Dislikes: spinach, children Kankuro is initially characterized by his apparent dislike for children, as seen when he is noticeably irritated while in the presence of someone younger than him.",
+            "description": "Kankuro is initially characterized by his apparent dislike for children, as seen when he is noticeably irritated while in the presence of someone younger than him. Though, this seems to have gone away as time passed by.",
             "genres": [
               "Action",
               "Adventure",
@@ -10979,7 +10979,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b2009-H7n38Ns1fr0Y.jpg",
-            "description": "Family: Inoichi Yamanaka (Father) Team: Ino Yamanaka is a childhood friend of Sakura Haruno who was bullied due to her large forehead, ending when Ino befriended her. She acted like a mentor, being tougher and more confident.",
+            "description": "Ino Yamanaka is a childhood friend of Sakura Haruno who was bullied due to her large forehead, ending when Ino befriended her. She acted like a mentor, being tougher and more confident. Under her influence, Sakura began to develop her own identity.",
             "genres": [
               "Action",
               "Adventure",
@@ -11098,7 +11098,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/2672-oxbHx8n3N7WY.jpg",
-            "description": "Affiliation: Akatsuki Kisame Hoshigaki is a missing-nin from Kirigakure and is partnered with Itachi Uchiha.",
+            "description": "Kisame Hoshigaki is a missing-nin from Kirigakure and is partnered with Itachi Uchiha. He gets along considerably better with Itachi than most Akatsuki members do with their own partners, immediately doing as Itachi asks of him and always looking out for Itachi's well-being.",
             "genres": [
               "Action",
               "Adventure",
@@ -11336,7 +11336,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b1902-JsEFRFwjmtZJ.png",
-            "description": "Occupation: Akatsuki member Deidara is a missing-nin from Iwagakure. Before joining the Akatsuki, Deidara was a terrorist bomber for hire. His work caught the eye of Pain, who sent other Akatsuki members to recruit him.",
+            "description": "Deidara is a missing-nin from Iwagakure. Before joining the Akatsuki, Deidara was a terrorist bomber for hire. His work caught the eye of Pain, who sent other Akatsuki members to recruit him.",
             "genres": [
               "Action",
               "Adventure",
@@ -11370,7 +11370,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n4694-2brvNKpdqARU.png",
-            "description": "Likes: Hamburger stakes, collecting puppets Dislikes: spinach, children Kankuro is initially characterized by his apparent dislike for children, as seen when he is noticeably irritated while in the presence of someone younger than him.",
+            "description": "Kankuro is initially characterized by his apparent dislike for children, as seen when he is noticeably irritated while in the presence of someone younger than him. Though, this seems to have gone away as time passed by.",
             "genres": [
               "Action",
               "Adventure",
@@ -11586,7 +11586,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b51343-pt1UDTRvAXfY.png",
-            "description": "Power: Youjutsu A 10th grade student. Originally about to be executed by the devils after her sister, Kuroka, kills her own master. The Satan, Lucifer, protected her, and left her under his sister's, Rias' care - becoming her servant.",
+            "description": "A 10th grade student. Originally about to be executed by the devils after her sister, Kuroka, kills her own master. The Satan, Lucifer, protected her, and left her under his sister's, Rias' care - becoming her servant.",
             "genres": [
               "Action",
               "Comedy",
@@ -11602,7 +11602,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b51345-FZLxaAkG6Dy5.png",
-            "description": "Sacred Gear: Sword Birth -&gt; Sword of Betrayer (Balance-Break) An 11th grade student. Self proclaimed best friend of Ise, and the school prince. He was a victim of the \"Project: Holy Sword\" where he was the only sole survivor.",
+            "description": "An 11th grade student. Self proclaimed best friend of Ise, and the school prince. He was a victim of the \"Project: Holy Sword\" where he was the only sole survivor.",
             "genres": [
               "Action",
               "Comedy",
@@ -11634,7 +11634,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b51347-YMb9fndAriXd.png",
-            "description": "Role: Queen Race: Reincarnated Devil (Former Half-Human/Half-Fallen Angel) Power: Elemental magic (mainly thunder), Holy Lightning (From Volume 5 onward) A third-year student and one of the \"Two Great Onee-samas\" of Kuou Academy along with Rias.",
+            "description": "A third-year student and one of the \"Two Great Onee-samas\" of Kuou Academy along with Rias. Called the ultimate \"Queen\" by other members. Born between a human mother and fallen angel father, after the death of her mother, she became Rias' servant.",
             "genres": [
               "Action",
               "Comedy",
@@ -11650,7 +11650,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b50389-gIhJkyk8xj1P.png",
-            "description": "Power: Power of destruction A 12th grade student and the prettiest girl in the academy. Comes from the old noble of pure devils, the house of Gremory, a top-class devil who is called a genius nicknamed \"Crimson Ruin Princess\".",
+            "description": "A 12th grade student and the prettiest girl in the academy. Comes from the old noble of pure devils, the house of Gremory, a top-class devil who is called a genius nicknamed \"Crimson Ruin Princess\". Her brother is in fact one of the Yondai-Maou, Lucifer.",
             "genres": [
               "Action",
               "Comedy",
@@ -11666,7 +11666,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b51335-qc4XaXfPODjw.png",
-            "description": "Devil Role: Bishop Species: Reincarnated Devil (Former human) Sacred Gear: Twilight Healing A second-year student at Kuou Academy. Originally a sister who was known as a holy maiden due to her healing powers.",
+            "description": "A second-year student at Kuou Academy. Originally a sister who was known as a holy maiden due to her healing powers. She was raised in an orphanage and was taken in by the Church after her powers were discovered.",
             "genres": [
               "Action",
               "Comedy",
@@ -11768,7 +11768,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b137081-TSrUR3mUJL6r.png",
-            "description": "Devil Contracts: Fox Devil, Curse Devil Relatives: Hahaoya Hayakawa (Mother), Chichioya Hayakawa (Father), Taiyou Hayakawa (Younger Brother). A Public Safety Devil Hunter working under Makima as a member of Tokyo Special Division 4.",
+            "description": "A Public Safety Devil Hunter working under Makima as a member of Tokyo Special Division 4. He is partnered with Himeno and tasked with supervising both Power and Denji. Aki Hayakawa generally appears to be a very stoic person.",
             "genres": [
               "Action",
               "Drama",
@@ -11798,7 +11798,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b137080-UHcynYNjb5ZU.png",
-            "description": "Affiliation: Public Safety Devil Hunters Makima is a Public Safety Devil Hunter, who took Denji as her human pet. She is one of the leading figures of Public Safety in Japan and has a considerable reputation among experienced Devil Hunters.",
+            "description": "Makima is a Public Safety Devil Hunter, who took Denji as her human pet. She is one of the leading figures of Public Safety in Japan and has a considerable reputation among experienced Devil Hunters.",
             "genres": [
               "Action",
               "Drama",
@@ -11903,7 +11903,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b144596-kvL6SD2litJu.png",
-            "description": "Devil Contract: Ghost Devil Relatives: Unnamed Younger Sister A Public Safety Devil Hunter, working under Makima as a member of Tokyo Special Division 4. She is partnered with Aki Hayakawa, whom she shares a close personal bond with.",
+            "description": "A Public Safety Devil Hunter, working under Makima as a member of Tokyo Special Division 4. She is partnered with Aki Hayakawa, whom she shares a close personal bond with. Himeno is shown to be a mature and experienced superior to the new recruits working under her.",
             "genres": [
               "Action",
               "Drama",
@@ -11978,7 +11978,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b144595-R8Lfn0egUR3q.png",
-            "description": "Devil Contracts: Punishment Devil A Public Safety Devil Hunter from Kyoto. She is partnered with Yuutarou Kurose.",
+            "description": "A Public Safety Devil Hunter from Kyoto. She is partnered with Yuutarou Kurose.",
             "genres": [
               "Action",
               "Drama",
@@ -11993,7 +11993,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b144592-pUY67nacCeud.png",
-            "description": "Devil Contract: Punishment Devil A Public Safety Devil Hunter from Kyoto. He is partnered with Michiko Tendou.",
+            "description": "A Public Safety Devil Hunter from Kyoto. He is partnered with Michiko Tendou.",
             "genres": [
               "Action",
               "Drama",
@@ -12125,7 +12125,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b126635-L0y3I92JSUkN.png",
-            "description": "Occupation: Sorcerer, Student Affiliation: Jujutsu High Grade: Grade 2 Sorcerer Cursed Technique: 10 Shadows Megumi is the deuteragonist of the Jujutsu Kaisen series. He is a first-year student at Jujutsu High and also a descendant of the Zenin Family.",
+            "description": "Megumi is the deuteragonist of the Jujutsu Kaisen series. He is a first-year student at Jujutsu High and also a descendant of the Zenin Family. While outwardly stoic and calculating, Megumi wishes to help protect people he sees as good or kind.",
             "genres": [
               "Action",
               "Drama",
@@ -12139,7 +12139,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b127212-FVm2tD0erQ5B.png",
-            "description": "Occupation: Sorcerer, Student, Vessel Affiliation: Jujutsu High Yuuji is a fair person who cares greatly for not only his comrades but anyone he views as people with their own wills, despite how deep or shallow his connection to them is.",
+            "description": "Yuuji is a fair person who cares greatly for not only his comrades but anyone he views as people with their own wills, despite how deep or shallow his connection to them is.",
             "genres": [
               "Action",
               "Drama",
@@ -12153,7 +12153,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b133700-f6sOO3TcgLV6.png",
-            "description": "Occupation: Jujutsu Sorcerer, Student Affiliation: Tokyo Jujutsu High Grade: Grade 3 Sorcerer She is a first-year student and grade 3 jujutsu sorcerer at Tokyo Jujutsu High studying under Satoru Gojo alongside Yuji and Megumi.",
+            "description": "She is a first-year student and grade 3 jujutsu sorcerer at Tokyo Jujutsu High studying under Satoru Gojo alongside Yuji and Megumi. Nobara is a confident and brash young woman with an unshakable character.",
             "genres": [
               "Action",
               "Drama",
@@ -12167,7 +12167,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b127691-9zqh1xpIubn7.png",
-            "description": "Occupation: Jujutsu Sorcerer, Teacher Affiliation: Tokyo Metropolitan Curse Technical College, Gojou Family Grade: Special Grade Sorcerer Cursed Technique: Six Eyes, Limitless Satoru Gojou is one of the main protagonists of the Jujutsu Kaisen series.",
+            "description": "Satoru Gojou is one of the main protagonists of the Jujutsu Kaisen series. He is a special-grade jujutsu sorcerer and is widely recognized as the strongest in the world.",
             "genres": [
               "Action",
               "Drama",
@@ -12181,7 +12181,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b133704-8wLTGjc234q2.png",
-            "description": "Occupation: Sorcerer Affiliation: Jujutsu High Grade: Grade 1 Sorcerer Cursed Technique: Ratio He is a Grade 1 Jujutsu Sorcerer and a Tokyo Jujutsu High alumni.",
+            "description": "He is a Grade 1 Jujutsu Sorcerer and a Tokyo Jujutsu High alumni. Nanami is a very intelligent and reserved man who at first appears to be someone who is just very serious about his work.",
             "genres": [
               "Action",
               "Drama",
@@ -12195,7 +12195,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b172743-4Y5SXqED6A3G.jpg",
-            "description": "Species: Cursed Spirit Hanami is an antagonist intent on ridding the Earth of Humans and reviving Sukuna.",
+            "description": "Hanami is an antagonist intent on ridding the Earth of Humans and reviving Sukuna.",
             "genres": [
               "Action",
               "Drama",
@@ -12223,7 +12223,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157865-X9ENX9OzWevS.jpg",
-            "description": "Species: Human Occupation: Sorcerer Affiliation: Jujutsu High Grade: Grade 2 Sorcerer Takuma Ino is a grade 2 jujutsu sorcerer and a close associate of Kento Nanami who operates out of Tokyo Jujutsu High.",
+            "description": "Takuma Ino is a grade 2 jujutsu sorcerer and a close associate of Kento Nanami who operates out of Tokyo Jujutsu High. Takuma Ino is a genuine and cheerful person with a more positive outlook on things than most jujutsu sorcerers.",
             "genres": [
               "Action",
               "Drama",
@@ -12251,7 +12251,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b133702-Y7JRG5vAvjIL.png",
-            "description": "Grade: Special Grade Cursed Technique: Idle Transfiguration Mahito is one of the primary antagonists of the Jujutsu Kaisen series. He is a Cursed Spirit allied with Suguru Geto, Jogo, Hanami and several others.",
+            "description": "Mahito is one of the primary antagonists of the Jujutsu Kaisen series. He is a Cursed Spirit allied with Suguru Geto, Jogo, Hanami and several others. Their ultimate goal is the eradication of humanity and ultimately replacing the population with Cursed Spirits.",
             "genres": [
               "Action",
               "Drama",
@@ -12265,7 +12265,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b158154-UCqbiULli62P.png",
-            "description": "Ability: Reverse Healing Cursed Technique Alumnus of Tokyo Jujutsu High, having been classmates with Satoru Gojo and Suguru Geto. After graduating into a full-fledged jujutsu sorcerer, Shoko became the school's primary doctor.",
+            "description": "Alumnus of Tokyo Jujutsu High, having been classmates with Satoru Gojo and Suguru Geto. After graduating into a full-fledged jujutsu sorcerer, Shoko became the school's primary doctor.",
             "genres": [
               "Action",
               "Drama",
@@ -12279,7 +12279,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b156991-niYjdp9CxO4w.png",
-            "description": "Grade: Special Grade Cursed Spirit Jogou is an unregistered special grade cursed spirit aligned with Mahito, Hanami, and Dagon. He was born of humanity's fear and negative association with volcanoes and other fire-related natural disasters.",
+            "description": "Jogou is an unregistered special grade cursed spirit aligned with Mahito, Hanami, and Dagon. He was born of humanity's fear and negative association with volcanoes and other fire-related natural disasters.",
             "genres": [
               "Action",
               "Drama",
@@ -12307,7 +12307,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157866-UWDtYBoG71PD.png",
-            "description": "Cursed Technique: Blood Manipulation Grade: Semi-Grade 1 Sorcerer He is a third-year at Kyoto Magic Technical College.",
+            "description": "He is a third-year at Kyoto Magic Technical College.",
             "genres": [
               "Action",
               "Drama",
@@ -12321,7 +12321,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b133701-rCQuDpHr3UZL.png",
-            "description": "Species: Human, Reincarnated Sorcerer According to the legend, Sukuna was a demon with four arms and two faces who lived in the golden era of sorcery 1000 years ago. Sorcerers of the era gave their all to defeat him, but to no avail.",
+            "description": "According to the legend, Sukuna was a demon with four arms and two faces who lived in the golden era of sorcery 1000 years ago. Sorcerers of the era gave their all to defeat him, but to no avail.",
             "genres": [
               "Action",
               "Drama",
@@ -12335,7 +12335,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b133699-FCnXaISgazAi.png",
-            "description": "Occupation: Curse User Grade: Special Grade Curse User Cursed Technique: Cursed Spirit Manipulation Suguru Getou is an antagonist in both the Jujutsu Kaisen series and its prequel Jujutsu Kaisen 0: Jujutsu High.",
+            "description": "",
             "genres": [
               "Action",
               "Drama",
@@ -12377,7 +12377,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157215-I3TQJu8nkDwD.jpg",
-            "description": "Occupation: Jujutsu Sorcerer Affiliation: Jujutsu High Grade: Grade 1 Sorcerer Family: Ui Ui (Younger Brother) Abilities: Mei Mei is a grade 1 jujutsu sorcerer who works independently and only in exchange for money. She is also the older sister of Ui Ui.",
+            "description": "Mei Mei is a grade 1 jujutsu sorcerer who works independently and only in exchange for money. She is also the older sister of Ui Ui.",
             "genres": [
               "Action",
               "Drama",
@@ -12391,7 +12391,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b137974-9qnK3DPrvLKh.jpg",
-            "description": "Species: Cursed Corpse (varies among 3 personalities) Occupation: Jujutsu Sorcerer, Student Affiliation: Jujutsu High Grade: 2 He is a second-year at Tokyo Prefectural Jujutsu High. As a Metamorphosed Cursed Corpse, he is the best creation of Principal Masamichi Yaga.",
+            "description": "He is a second-year at Tokyo Prefectural Jujutsu High. As a Metamorphosed Cursed Corpse, he is the best creation of Principal Masamichi Yaga. He is sentient and has three cores inside the doll body: the youngest brother \"Panda\", the eldest brother \"Gorilla\" and a sister.",
             "genres": [
               "Action",
               "Drama",
@@ -12405,7 +12405,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b137975-6TH7PiLWJaqy.png",
-            "description": "Occupation: Sorcerer, Student Affiliation: Kyoto Jujutsu Technical High School Grade: Grade 1 Sorcerer Toudou is a third-year student at Kyoto Jujutsu Technical High School who possesses inhuman physical strength, durability, and speed.",
+            "description": "Toudou is a third-year student at Kyoto Jujutsu Technical High School who possesses inhuman physical strength, durability, and speed.",
             "genres": [
               "Action",
               "Drama",
@@ -12419,7 +12419,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157868-Ui2Wht3M6tlM.png",
-            "description": "Species: Human Occupation: Jujutsu Sorcerer Affiliation: Kyoto Magic Technical College Grade: Semi-Grade 2 Sorcerer Cursed Technique: Tool Manipulation She is a third-year at Kyoto Magic Technical College.",
+            "description": "She is a third-year at Kyoto Magic Technical College.",
             "genres": [
               "Action",
               "Drama",
@@ -12433,7 +12433,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157116-2jYQf3y8NeTZ.png",
-            "description": "Chousou bears strong attachments to his brothers and is very overprotective of them.",
+            "description": "Chousou is half human and half cursed spirit and the first of the Death Painting Wombs with a Special Grade rank. He and his two brothers, Kechizu and Eso are Cursed Womb: Death Paintings who have sided with Mahito's group.",
             "genres": [
               "Action",
               "Drama",
@@ -12461,7 +12461,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157115-kdhRYQdVhH95.png",
-            "description": "Species: Human Occupation: Sorcerer, Student Affiliation: Jujutsu High Grade: Grade 2 Sorcerer Cursed Technique: Cursed Speech He is a second-year at Tokyo Metropolitan Jujutsu Technical High School.",
+            "description": "He is a second-year at Tokyo Metropolitan Jujutsu Technical High School. Due to his curse ability, he is only willing to communicate with ingredients used to make rice balls.",
             "genres": [
               "Action",
               "Drama",
@@ -12475,7 +12475,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b156848-Rf0tuoQCNyZV.png",
-            "description": "Species: Human Occupation: Jujutsu Sorcerer, Student Affiliation: Kyoto Metropolitan Curse Technical College Grade: Grade 3 Sorcerer A second-year at Kyoto Metropolitan Curse Technical College. Kasumi is a hard-working, restrained, and considerate pacifist.",
+            "description": "A second-year at Kyoto Metropolitan Curse Technical College. Kasumi is a hard-working, restrained, and considerate pacifist. She is also a big fan of Satoru Gojo.",
             "genres": [
               "Action",
               "Drama",
@@ -12581,7 +12581,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b36828-j5ib0adAzGMx.png",
-            "description": "Weapons of choice: Wind Fleuret (1st Floor), Lambent Light (Forged by Lisbeth) Asuna is a friend of Kirito and is a sub-leader of the guild Knights of the Blood (KoB), a medium-sized guild of about thirty players, also called the strongest guild in Aincrad.",
+            "description": "Asuna is a friend of Kirito and is a sub-leader of the guild Knights of the Blood (KoB), a medium-sized guild of about thirty players, also called the strongest guild in Aincrad.",
             "genres": [
               "Action",
               "Adventure",
@@ -12765,7 +12765,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b162214-9x9Q3A9rxpx8.png",
-            "description": "Team: Team Z Rensuke Kunigami is very serious about his football career and training; he's always the first in the training room in the morning and the last to leave at night.",
+            "description": "Rensuke Kunigami is very serious about his football career and training; he's always the first in the training room in the morning and the last to leave at night.",
             "genres": [
               "Action",
               "Drama",
@@ -12933,7 +12933,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b191409-qU7sRhVmpgRQ.png",
-            "description": "Yukimiya is highly confident in his own abilities, declaring himself the strongest player in Japan, when it comes to one-on-one battles. He is also a likable and charismatic personality, appearing to make friends easily, like with Nagi.",
+            "description": "He is currently ranked #5 out of the original 300 forwards chosen to be apart of the Blue Lock Project Yukimiya is highly confident in his own abilities, declaring himself the strongest player in Japan, when it comes to one-on-one battles.",
             "genres": [
               "Action",
               "Drama",
@@ -12989,7 +12989,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b169402-JlISsoEunCxH.png",
-            "description": "Team: Team Z Raichi is the most hot-headed of the group and argues with just about everyone on everything, often to the point of needing to be restrained by Kunigami.",
+            "description": "Raichi is the most hot-headed of the group and argues with just about everyone on everything, often to the point of needing to be restrained by Kunigami.",
             "genres": [
               "Action",
               "Drama",
@@ -13037,7 +13037,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b191242-uQJUPMyknaTb.png",
-            "description": "Sports Team: Badminton, Volleyball (one-shot) School: Eimei Junior and Senior High Year: Junior High Third-Year A third-year middle school student and a member of Elmei Junior and Senior High's boys' badminton team.",
+            "description": "A third-year middle school student and a member of Elmei Junior and Senior High's boys' badminton team. While not the most-talented player, Taiki is nonetheless extremely hardworking.",
             "genres": [
               "Romance",
               "Slice of Life",
@@ -13051,7 +13051,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b191241-FaDEXRL1CgJr.png",
-            "description": "Sports Team: Basketball School: Eimei Junior and Senior High Year: High School Second-Year / Third-Year A first-year high school student and the rising star of Elmei Junior and Senior High's girls' basketball team.",
+            "description": "A first-year high school student and the rising star of Elmei Junior and Senior High's girls' basketball team. Her personality and skills have made her incredibly popular both inside and outside of her school, to the point where she's been featured in various magazines.",
             "genres": [
               "Romance",
               "Slice of Life",
@@ -13065,7 +13065,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b218648-kXxXy8lPkeGV.png",
-            "description": "Sports Team: Rhythmic Gymnastics School: Eimei Junior and Senior High Year: Junior High Third-Year A third-year middle school student and a member of Eimei Junior and Senior High's girls' rhythmic gymnastics team.",
+            "description": "A third-year middle school student and a member of Eimei Junior and Senior High's girls' rhythmic gymnastics team.",
             "genres": [
               "Romance",
               "Slice of Life",
@@ -13107,7 +13107,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b218647-A2ngPlh7Yucn.png",
-            "description": "Sports Team: Badminton School: Eimei Junior and Senior High Year: Junior High Third-Year A third-year middle school student and a member of Elmei Junior and Senior High's boys' badminton team. He is friends with both Taiki Inomata and Hina Chono.",
+            "description": "A third-year middle school student and a member of Elmei Junior and Senior High's boys' badminton team. He is friends with both Taiki Inomata and Hina Chono. In the _Ao no Hako_ oneshot, Kyo is instead a member of his school's shogi club.",
             "genres": [
               "Romance",
               "Slice of Life",
@@ -13121,7 +13121,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b225314-LD3QqS6uAd1o.png",
-            "description": "Sports Team: Badminton School: Eimei Junior and Senior High Year: High School Second-Year A second-year high school student and a member of Elmei Junior and Senior High's boys' badminton team.",
+            "description": "A second-year high school student and a member of Elmei Junior and Senior High's boys' badminton team. He placed third in the prefectural qualifiers for badminton, barely missing the mark to qualify for nationals.",
             "genres": [
               "Romance",
               "Slice of Life",
@@ -13253,7 +13253,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b191673-eD8IFBOdAFv5.jpg",
-            "description": "Relatives: Himari and Leo (Younger Cousins). Jirou Yakuin is the main protagonist, being an antisocial, pessimistic high school boy.",
+            "description": "Jirou Yakuin is the main protagonist, being an antisocial, pessimistic high school boy. He ends up forced to pair with Akari Watanabe in their school's \"Couple Practical\" course, despite harboring feelings for his childhood friend Shiori Sakurazaka.",
             "genres": [
               "Comedy",
               "Drama",
@@ -13298,7 +13298,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b273109-MLnliqfOwuAh.png",
-            "description": "Relatives: Keiichiro Kamo (Older Brother). Sadaharu is a close friend of Jirou Yakuin, being one of the few people Jirou is comfortable being open around. He is paired with Satsuki Kaneyama in their school's Marriage Practical.",
+            "description": "Sadaharu is a close friend of Jirou Yakuin, being one of the few people Jirou is comfortable being open around. He is paired with Satsuki Kaneyama in their school's Marriage Practical.",
             "genres": [
               "Comedy",
               "Drama",
@@ -13319,7 +13319,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b173758-AoqioODV01ki.png",
-            "description": "Occupation: First-Year High School Student Debut: Chapter 1 Rentarou is an extremely kind and thoughtful person who loves all of his many girlfriends very dearly, often to a scarily self-sacrificing degree.",
+            "description": "Rentarou is an extremely kind and thoughtful person who loves all of his many girlfriends very dearly, often to a scarily self-sacrificing degree. Before he began his days as a high school student, Rentarou had been rejected a total of 100 times.",
             "genres": [
               "Comedy",
               "Ecchi",
@@ -13333,7 +13333,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b173760-Gj3fK5VpbpT3.png",
-            "description": "Type: Tsundere Occupation: First-Year High School Student Debut: Chapter 1 Girlfriend No.",
+            "description": "Girlfriend No. 002",
             "genres": [
               "Comedy",
               "Ecchi",
@@ -13347,7 +13347,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b173759-Bu2KIzM1JELG.png",
-            "description": "Type: Deredere Occupation: First-Year High School Student Debut: Chapter 1 Girlfriend No. 001 Hakari is described as a \"clumsily calculative\" lady. She is often planning and plotting to achieve her goals which may or may not go as planned due to her clumsiness.",
+            "description": "Girlfriend No. 001 Hakari is described as a \"clumsily calculative\" lady. She is often planning and plotting to achieve her goals which may or may not go as planned due to her clumsiness.",
             "genres": [
               "Comedy",
               "Ecchi",
@@ -13361,7 +13361,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b173761-1FcQvX74KVW7.png",
-            "description": "Type: Dandere Occupation: First-Year High School Student Debut: Chapter 3 Girlfriend No. 003 Shizuka is rather timid especially given her rather quiet or mute voice which makes her rather distant from other people.",
+            "description": "Girlfriend No. 003 Shizuka is rather timid especially given her rather quiet or mute voice which makes her rather distant from other people. However, ever since she met Rentarou she has become braver, even willing to sacrifice her own safety to help Hakari out.",
             "genres": [
               "Comedy",
               "Ecchi",
@@ -13375,7 +13375,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b173762-bmdMGoIMVz2E.png",
-            "description": "Type: Kuudere Occupation: First-Year High School Student Debut: Chapter 6 Girlfriend No. 004 Nano is practical to a fault, obsessed with solving a problem in the most efficient way possible no matter what. Nano is the smartest among the girls.",
+            "description": "Girlfriend No. 004 Nano is practical to a fault, obsessed with solving a problem in the most efficient way possible no matter what. Nano is the smartest among the girls.",
             "genres": [
               "Comedy",
               "Ecchi",
@@ -13389,7 +13389,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b173763-NShnvmT00ikJ.png",
-            "description": "Type: Druggie Occupations: Third-Year High School Student, Chemistry Club President Debut: Chapter 10 Girlfriend No. 005 Kusuri is energetic and ingenuitive; she is capable of creating a drug for almost anything.",
+            "description": "Girlfriend No. 005 Kusuri is energetic and ingenuitive; she is capable of creating a drug for almost anything. She doesn't tend to be concerned about the dangers of the drugs she makes, and will often happily force them upon others or take them herself without hesitation.",
             "genres": [
               "Comedy",
               "Ecchi",
@@ -13403,7 +13403,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b173812-esAPFUOtQnKc.jpg",
-            "description": "Type: MILF Occupation: High School Chairwoman Debut: Chapter 17 Girlfriend No. 006 Hakari's mother. Hahari appears as a very mature and sophisticated woman, until she sees something cute.",
+            "description": "Girlfriend No. 006 Hakari's mother. Hahari appears as a very mature and sophisticated woman, until she sees something cute. She has an uncontrollable love for cute things, including children, as well as Rentarou and his family.",
             "genres": [
               "Comedy",
               "Ecchi",
@@ -13417,7 +13417,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b188521-rGqXf1gyqRWA.png",
-            "description": "Type: Maid Occupation: Personal Maid Debut: Chapter 30 Girlfriend No. 008 The personal maid of Hahari Hanazono. Mei is polite and proper, rarely showing strong emotions.",
+            "description": "Girlfriend No. 008 The personal maid of Hahari Hanazono. Mei is polite and proper, rarely showing strong emotions. She is loyal to Hahari above all else, and is unlikely to do anything unless given permission or ordered to by Hahari specifically.",
             "genres": [
               "Comedy",
               "Ecchi",
@@ -13527,7 +13527,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b88950-0ER2ke5pswxq.png",
-            "description": "Ability: Affiliations: Hoshinoumi Academy student council Yuu is a first-year student at Hoshinoumi Academy. He is rude and bad at studying. He usually behaves as if he were smart, but he is actually a chronic cheater. He says things which sound clever, and he is a narcissist.",
+            "description": "Yuu is a first-year student at Hoshinoumi Academy. He is rude and bad at studying. He usually behaves as if he were smart, but he is actually a chronic cheater. He says things which sound clever, and he is a narcissist.",
             "genres": [
               "Comedy",
               "Drama",
@@ -13543,7 +13543,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/88951-bRm610RrrXp9.jpg",
-            "description": "Ability: Imperfect Invisibility Affiliations: Hoshinoumi Academy student council Nao is a first-year student and also the student council president of Hoshinoumi Academy. She has the ability to make herself invisible to any one person of her choosing at a time.",
+            "description": "Nao is a first-year student and also the student council president of Hoshinoumi Academy. She has the ability to make herself invisible to any one person of her choosing at a time. She is a huge fan of the band Zhiend. She hates people who use their power for no good.",
             "genres": [
               "Comedy",
               "Drama",
@@ -13677,7 +13677,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n127221-Wxg4xFtW4kaJ.png",
-            "description": "",
+            "description": "A strange 2nd year student in high school, who doesn't have a cellphone in this day and age. He is currently an outcast at school due to rumors of a violent past... but doesn't seem to care.",
             "genres": [
               "Comedy",
               "Drama",
@@ -13728,7 +13728,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b127633-FcCwWK5sQRhK.png",
-            "description": "Talent: Explaining any strange phenomenon with science She is Sakuta's classmate, who is always cool and calm, always willing to give various advice on puberty syndrome. She is also the sole member of the Science Club, and known as an eccentric person at the school.",
+            "description": "She is Sakuta's classmate, who is always cool and calm, always willing to give various advice on puberty syndrome. She is also the sole member of the Science Club, and known as an eccentric person at the school.",
             "genres": [
               "Comedy",
               "Drama",
@@ -13745,7 +13745,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b127841-UY9wQq6dW9SY.png",
-            "description": "Talent: Changing clothes quickly Mai's half-sister, related through her father. A member of the idol group \"Sweet Bullet\" and designated as the most fashionable within the group. Despite her flashy looks, she attends an elite all girls' high school.",
+            "description": "Mai's half-sister, related through her father. A member of the idol group \"Sweet Bullet\" and designated as the most fashionable within the group. Despite her flashy looks, she attends an elite all girls' high school. She is confident and can be competitive.",
             "genres": [
               "Comedy",
               "Drama",
@@ -13796,7 +13796,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n127843-nz8GbQ9rhB8R.jpg",
-            "description": "Talent: Early to bed, early to rise A girl who has the same first and last name as Sakuta's first crush. She is a shy middle school girl, but reliable and kind. She bumps into Sakuta, while holding an umbrella over an abandoned cat in the rain.",
+            "description": "A girl who has the same first and last name as Sakuta's first crush. She is a shy middle school girl, but reliable and kind. She bumps into Sakuta, while holding an umbrella over an abandoned cat in the rain.",
             "genres": [
               "Comedy",
               "Drama",
@@ -13836,7 +13836,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b88264-v9VFbSWtQq2C.png",
-            "description": "Stella initially appears to be feisty, hot-blooded, and quick to anger possibly due to her sheltered upbringing. However, later she is shown to be anything but bitter, and is even willing to admit her mistakes and be friendly with others.",
+            "description": "Stella Vermillion is an A-rank Apprentice Knight and princess of the Vermillion Kingdom. Stella initially appears to be feisty, hot-blooded, and quick to anger possibly due to her sheltered upbringing.",
             "genres": [
               "Action",
               "Ecchi",
@@ -13851,7 +13851,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b88265-2MlVZH85EPpR.png",
-            "description": "A noble young man with a caring personality. Ikki can be very cruel under certain circumstances.",
+            "description": "Ikki Kurogane is an F-rank Apprentice Knight who strives to become a real Mage Knight. He is a young man of average height with dark brown hair and brown eyes. A noble young man with a caring personality. Ikki can be very cruel under certain circumstances.",
             "genres": [
               "Action",
               "Ecchi",
@@ -14022,7 +14022,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b65239-2S3t2vSyUew9.png",
-            "description": "Her teigu is called Demons Extract, which allows her to manipulate ice and mold it from nothing.",
+            "description": "Esdeath is a high-ranking general of the Empire, and leader of the Jaegers. She enjoys torturing her enemies slowly, seen when she used her Teigu to put large blocks of ice in a cauldron so that the people inside would die slower and suffer more.",
             "genres": [
               "Action",
               "Adventure",
@@ -14076,7 +14076,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b65559-FZEHEfO374x9.png",
-            "description": "Faction: Night Raid User: Najenda Susanoo is one of the new members of Night Raid that Najenda brought back with her from the Revolutionary Army HQ. He is a tall man with distinctive bull horns coming out of the sides of his head.",
+            "description": "Susanoo is one of the new members of Night Raid that Najenda brought back with her from the Revolutionary Army HQ. He is a tall man with distinctive bull horns coming out of the sides of his head.",
             "genres": [
               "Action",
               "Adventure",
@@ -14148,7 +14148,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/65235-KbSvHjKWY3z4.png",
-            "description": "Bulat's teigu is the Demon Armor: Incursio an Armor-type teigu that took on the form of a short sword with a chain link tassel in its sealed form. Once released, the user was enveloped in a full body armor.",
+            "description": "Bulat was once a high-ranking Imperial Officer known as \"100 Man-Slayer Bulat\". He later decided to betray the Empire when his superior was framed for not giving in to the Prime Minister's agenda.",
             "genres": [
               "Action",
               "Adventure",
@@ -14451,7 +14451,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b187382-NBP6I5OKXHH9.png",
-            "description": "Orsted has a curse that makes every living being feel an overwhelming fear just from being within his presence. Strangely enough, this curse does not affect Rudeus or Nanahoshi.",
+            "description": "Orsted is the current Dragon God, 2nd-ranked of the 7 World Powers, and the sworn enemy of Hitogami. Similar to other Dragon Race people such as Perugius, he has silver hair and golden sanpaku eyes with an overpowering look.",
             "genres": [
               "Adventure",
               "Drama",
@@ -14643,7 +14643,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n129130-SJC0Kn1DU39E.jpg",
-            "description": "Combat Style: Beast Breathing Inosuke is usually seen wearing a grey boar mask, with a shirtless version of the Demon hunter uniform. Without the mask he has messy shoulder length black hair and large green eyes with long eyelashes.",
+            "description": "Inosuke is usually seen wearing a grey boar mask, with a shirtless version of the Demon hunter uniform. Without the mask he has messy shoulder length black hair and large green eyes with long eyelashes.",
             "genres": [
               "Action",
               "Adventure",
@@ -14659,7 +14659,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b126071-BTNEc1nRIv68.png",
-            "description": "Combat Style: Water Breathing & Tanjirou is kind by nature and has been described by others as having very gentle eyes. He has a great deal of determination and will not give up once he has a goal to achieve, an example being finding a cure for Nezuko.",
+            "description": "Tanjirou is kind by nature and has been described by others as having very gentle eyes. He has a great deal of determination and will not give up once he has a goal to achieve, an example being finding a cure for Nezuko.",
             "genres": [
               "Action",
               "Adventure",
@@ -14675,7 +14675,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b129131-FZrQ7lSlxmEr.png",
-            "description": "Combat Style: Thunder Breathing Affiliation: Demon Slayer Corps Occupation: Demon Slayer Zenitsu Agatsuma is one of the main protagonists of Demon Slayer: Kimetsu no Yaiba and along with Inosuke Hashibira, a traveling companion of Tanjiro Kamado and Nezuko Kamado.",
+            "description": "",
             "genres": [
               "Action",
               "Adventure",
@@ -14787,7 +14787,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b130050-qsLThJs5VIbz.png",
-            "description": "Combat Style: Water Breathing Water pillar in the Demon Killing Corps. Giyuu is reserved and displays little emotion, instead giving off a calm feeling most of the time. As a water breath user, Giyuu has created his own style.",
+            "description": "Water pillar in the Demon Killing Corps. Giyuu is reserved and displays little emotion, instead giving off a calm feeling most of the time. As a water breath user, Giyuu has created his own style.",
             "genres": [
               "Action",
               "Adventure",
@@ -14835,7 +14835,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b136070-MC9LLxJsHyHE.png",
-            "description": "Combat Style: Insect Breathing Shinobu is a demon slayer and the Insect Pillar of the Demon Killing Corps. She is 18 years old and one of two female pillars. Shinobu appears rather laid back, and always has a smile on her face regardless of the situation.",
+            "description": "Shinobu is a demon slayer and the Insect Pillar of the Demon Killing Corps. She is 18 years old and one of two female pillars. Shinobu appears rather laid back, and always has a smile on her face regardless of the situation.",
             "genres": [
               "Action",
               "Adventure",
@@ -15043,7 +15043,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b129133-VlTPowwt68rJ.png",
-            "description": "Combat Style: Flame Breathing He is greatly enthusiastic in regard to his duties as Flame Pillar and often cheerfully eccentric. He is amiable, kind and boasts extraordinary flame techniques and swordsmanship stemming from strict practice and discipline.",
+            "description": "He is greatly enthusiastic in regard to his duties as Flame Pillar and often cheerfully eccentric. He is amiable, kind and boasts extraordinary flame techniques and swordsmanship stemming from strict practice and discipline.",
             "genres": [
               "Action",
               "Adventure",
@@ -15075,7 +15075,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b136071-99Kexnnn2PiV.png",
-            "description": "Combat Style: Sound Breathing A Demon Slayer, and the Sound Pillar of the Demon Slayer Corps. Tengen is a very eccentric person, always wanting to complete actions as flashy as possible.",
+            "description": "A Demon Slayer, and the Sound Pillar of the Demon Slayer Corps. Tengen is a very eccentric person, always wanting to complete actions as flashy as possible.",
             "genres": [
               "Action",
               "Adventure",
@@ -15123,7 +15123,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b136072-xVwyRUKdpybi.png",
-            "description": "Combat Style: Love Breathing Demon Hunter and the Love Pillar of the Demon Killing Corps. Mitsuri is a soft and kind person. She is very emotional and passionate, constantly complimenting people in her head, which probably contributes to her nickname of \"the Hashira of Love\".",
+            "description": "Demon Hunter and the Love Pillar of the Demon Killing Corps. Mitsuri is a soft and kind person. She is very emotional and passionate, constantly complimenting people in her head, which probably contributes to her nickname of \"the Hashira of Love\".",
             "genres": [
               "Action",
               "Adventure",
@@ -15155,7 +15155,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b136069-6PLglx4tETUX.png",
-            "description": "Combat Style: Mist Breathing Muichiro is an air-headed individual who seems to constantly wander off in thought and never focus on one thing. Impassive and, at times, obtuse, he tends to think only for himself and operates on logic alone, never letting emotion guide him.",
+            "description": "Muichiro is an air-headed individual who seems to constantly wander off in thought and never focus on one thing. Impassive and, at times, obtuse, he tends to think only for himself and operates on logic alone, never letting emotion guide him.",
             "genres": [
               "Action",
               "Adventure",
@@ -15193,7 +15193,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b121956-5FbIbcd6gAZW.png",
-            "description": "Position: Goddess Relatives: Shousuke Komi (younger brother), Shuuko Komi (mother), Masayoshi Komi (father), Yuiko Komi (grandmother), Akira Komi (cousin), Sadayoshi Komi (uncle) Shouko Komi is the main character of the series.",
+            "description": "Shouko Komi is the main character of the series. Though she's regarded as the *Madonna* of their school, she's incapable of socializing with others to such a level where it can be called a communication disorder.",
             "genres": [
               "Comedy",
               "Romance",
@@ -15207,7 +15207,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b78093-QnJ9wDICvhSR.png",
-            "description": "Position: President Relatives: Hitomi Tadano (younger sister) Hitohito Tadano is a person average in almost every way. His name means, *just some guy*. He is the first to befriend Shouko Komi. Tadano suffered from chuunibyou in his second year of middle school.",
+            "description": "Hitohito Tadano is a person average in almost every way. His name means, *just some guy*. He is the first to befriend Shouko Komi. Tadano is often described as an ordinary student with normal looks and average height and weight.",
             "genres": [
               "Comedy",
               "Romance",
@@ -15221,7 +15221,7 @@
             "role": "Main",
             "gender": "Unknown",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b126825-J4GTiz4OHDa5.png",
-            "description": "Growing up, Najimi was constantly transferring from one school to another, allowing them to make millions of friends.",
+            "description": "Najimi is a mysterious student whose gender is unknown. They are talented enough at communicating to easily befriend someone within minutes of meeting them. Growing up, Najimi was constantly transferring from one school to another, allowing them to make millions of friends.",
             "genres": [
               "Comedy",
               "Romance",
@@ -15291,7 +15291,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b130870-9fSkcaHdQXFq.png",
-            "description": "Relatives: Yuiko Komi (grandmother), Masayoshi Komi (father), Shuuko Komi (mother), Sadayoshi Komi (uncle), Ryouko Komi (aunt), Shouko Komi (older sister), Akira Komi (cousin) Shousuke Komi is Shouko's younger brother. He's quiet most of the time but can converse well.",
+            "description": "Shousuke Komi is Shouko's younger brother. He's quiet most of the time but can converse well. Shousuke has short trimmed hair and his eyes are usually hidden with his bangs. Still, his very appearance is similar to his mother and sister and can be referred to as a handsome man.",
             "genres": [
               "Comedy",
               "Romance",
@@ -15319,7 +15319,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b130878-E6iil2Bh2JIX.png",
-            "description": "Relatives: Hitohito Tadano (older brother) Hitomi Tadano is the younger sister of Hitohito Tadano. She bears resemblance to her brother in terms of understanding people's minds. She is active, unlike her brother who is timid and more passive in doing things.",
+            "description": "Hitomi Tadano is the younger sister of Hitohito Tadano. She bears resemblance to her brother in terms of understanding people's minds. She is active, unlike her brother who is timid and more passive in doing things.",
             "genres": [
               "Comedy",
               "Romance",
@@ -15333,7 +15333,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b130867-cdy2mWlQhiX9.png",
-            "description": "Relatives: Yuiko Komi (mother-in-law), Masayoshi Komi (husband), Sadayoshi Komi (brother-in-law), Shouko Komi (daughter), Shousuke Komi (son), Akira Komi (niece) Shuuko Komi, formerly known as Shuuko Nimi, is Shouko and Shousuke's mother.",
+            "description": "Shuuko Komi, formerly known as Shuuko Nimi, is Shouko and Shousuke's mother. She looks like her daughter, but her personality is that of a teenager, claiming to be forever 17 years old.",
             "genres": [
               "Comedy",
               "Romance",
@@ -15361,7 +15361,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b130865-Ztgp75hdKhQ2.png",
-            "description": "Relatives: Yuiko Komi (mother), Sadayoshi Komi (brother), Shuuko Komi (wife), Shouko Komi (daughter), Shousuke Komi (son), Akira Komi (niece) Masayoshi Komi is Shouko's and Shousuke's father. He is seen as a dandy middle-aged man.",
+            "description": "Masayoshi Komi is Shouko's and Shousuke's father. He is seen as a dandy middle-aged man. Masayoshi rarely speaks and sometimes struggles to express himself verbally and can, at times, be easily flustered.",
             "genres": [
               "Comedy",
               "Romance",
@@ -15618,7 +15618,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b205434-AuBcR4M05f6s.png",
-            "description": "",
+            "description": "A girl who strived to become an idol at a young age, but due to her family situation, made sacrifices that ultimately ended with her becoming too old to become one. She is a YouTuber.",
             "genres": [
               "Drama",
               "Mystery",
@@ -15648,7 +15648,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b227579-OKrvb5rGnQrV.jpg",
-            "description": "",
+            "description": "A famous physical training YouTuber affiliated with Strawberry Productions, where he is the agency's top earner.",
             "genres": [
               "Drama",
               "Mystery",
@@ -15714,7 +15714,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b141061-jqIhB9jmClQ3.png",
-            "description": "",
+            "description": "Vladilena Milizé, more commonly known as Lena by her friends and as Handler One to her subordinates, is an elite Republic commissioned officer who rose to the rank of Major at the young age of 16.",
             "genres": [
               "Action",
               "Drama",
@@ -15861,7 +15861,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b191673-eD8IFBOdAFv5.jpg",
-            "description": "Relatives: Himari and Leo (Younger Cousins). Jirou Yakuin is the main protagonist, being an antisocial, pessimistic high school boy.",
+            "description": "Jirou Yakuin is the main protagonist, being an antisocial, pessimistic high school boy. He ends up forced to pair with Akari Watanabe in their school's \"Couple Practical\" course, despite harboring feelings for his childhood friend Shiori Sakurazaka.",
             "genres": [
               "Comedy",
               "Drama",
@@ -15906,7 +15906,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b273109-MLnliqfOwuAh.png",
-            "description": "Relatives: Keiichiro Kamo (Older Brother). Sadaharu is a close friend of Jirou Yakuin, being one of the few people Jirou is comfortable being open around. He is paired with Satsuki Kaneyama in their school's Marriage Practical.",
+            "description": "Sadaharu is a close friend of Jirou Yakuin, being one of the few people Jirou is comfortable being open around. He is paired with Satsuki Kaneyama in their school's Marriage Practical.",
             "genres": [
               "Comedy",
               "Drama",
@@ -15927,7 +15927,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b133678-IitCgjDxQGgu.png",
-            "description": "Hobbies: Hina Dolls Wakana Gojou is a fifteen-year-old high-schooler who is not very social, and doesn't fit in well with his fellow classmates, leading to him having no friends at the start of the story.",
+            "description": "Wakana Gojou is a fifteen-year-old high-schooler who is not very social, and doesn't fit in well with his fellow classmates, leading to him having no friends at the start of the story.",
             "genres": [
               "Comedy",
               "Ecchi",
@@ -16190,7 +16190,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b66975-1ENOxQZ7SJPm.png",
-            "description": "Occupation: English Teacher Affiliation: Student Council (Manager), Katagiri Senior High School He is one of the supporting characters for Horimiya. Yasuda loves high school girls and makes no attempt to hide this either.",
+            "description": "He is one of the supporting characters for Horimiya. Yasuda loves high school girls and makes no attempt to hide this either. However, he never actually touches any of the girls, just acts overly friendly towards them and overly cold towards the guys.",
             "genres": [
               "Comedy",
               "Romance",
@@ -16461,7 +16461,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n127221-Wxg4xFtW4kaJ.png",
-            "description": "",
+            "description": "A strange 2nd year student in high school, who doesn't have a cellphone in this day and age. He is currently an outcast at school due to rumors of a violent past... but doesn't seem to care.",
             "genres": [
               "Comedy",
               "Drama",
@@ -16512,7 +16512,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b127633-FcCwWK5sQRhK.png",
-            "description": "Talent: Explaining any strange phenomenon with science She is Sakuta's classmate, who is always cool and calm, always willing to give various advice on puberty syndrome. She is also the sole member of the Science Club, and known as an eccentric person at the school.",
+            "description": "She is Sakuta's classmate, who is always cool and calm, always willing to give various advice on puberty syndrome. She is also the sole member of the Science Club, and known as an eccentric person at the school.",
             "genres": [
               "Comedy",
               "Drama",
@@ -16529,7 +16529,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b127841-UY9wQq6dW9SY.png",
-            "description": "Talent: Changing clothes quickly Mai's half-sister, related through her father. A member of the idol group \"Sweet Bullet\" and designated as the most fashionable within the group. Despite her flashy looks, she attends an elite all girls' high school.",
+            "description": "Mai's half-sister, related through her father. A member of the idol group \"Sweet Bullet\" and designated as the most fashionable within the group. Despite her flashy looks, she attends an elite all girls' high school. She is confident and can be competitive.",
             "genres": [
               "Comedy",
               "Drama",
@@ -16580,7 +16580,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n127843-nz8GbQ9rhB8R.jpg",
-            "description": "Talent: Early to bed, early to rise A girl who has the same first and last name as Sakuta's first crush. She is a shy middle school girl, but reliable and kind. She bumps into Sakuta, while holding an umbrella over an abandoned cat in the rain.",
+            "description": "A girl who has the same first and last name as Sakuta's first crush. She is a shy middle school girl, but reliable and kind. She bumps into Sakuta, while holding an umbrella over an abandoned cat in the rain.",
             "genres": [
               "Comedy",
               "Drama",
@@ -16755,7 +16755,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b126635-L0y3I92JSUkN.png",
-            "description": "Occupation: Sorcerer, Student Affiliation: Jujutsu High Grade: Grade 2 Sorcerer Cursed Technique: 10 Shadows Megumi is the deuteragonist of the Jujutsu Kaisen series. He is a first-year student at Jujutsu High and also a descendant of the Zenin Family.",
+            "description": "Megumi is the deuteragonist of the Jujutsu Kaisen series. He is a first-year student at Jujutsu High and also a descendant of the Zenin Family. While outwardly stoic and calculating, Megumi wishes to help protect people he sees as good or kind.",
             "genres": [
               "Action",
               "Drama",
@@ -16769,7 +16769,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b127212-FVm2tD0erQ5B.png",
-            "description": "Occupation: Sorcerer, Student, Vessel Affiliation: Jujutsu High Yuuji is a fair person who cares greatly for not only his comrades but anyone he views as people with their own wills, despite how deep or shallow his connection to them is.",
+            "description": "Yuuji is a fair person who cares greatly for not only his comrades but anyone he views as people with their own wills, despite how deep or shallow his connection to them is.",
             "genres": [
               "Action",
               "Drama",
@@ -16783,7 +16783,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b133700-f6sOO3TcgLV6.png",
-            "description": "Occupation: Jujutsu Sorcerer, Student Affiliation: Tokyo Jujutsu High Grade: Grade 3 Sorcerer She is a first-year student and grade 3 jujutsu sorcerer at Tokyo Jujutsu High studying under Satoru Gojo alongside Yuji and Megumi.",
+            "description": "She is a first-year student and grade 3 jujutsu sorcerer at Tokyo Jujutsu High studying under Satoru Gojo alongside Yuji and Megumi. Nobara is a confident and brash young woman with an unshakable character.",
             "genres": [
               "Action",
               "Drama",
@@ -16797,7 +16797,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b127691-9zqh1xpIubn7.png",
-            "description": "Occupation: Jujutsu Sorcerer, Teacher Affiliation: Tokyo Metropolitan Curse Technical College, Gojou Family Grade: Special Grade Sorcerer Cursed Technique: Six Eyes, Limitless Satoru Gojou is one of the main protagonists of the Jujutsu Kaisen series.",
+            "description": "Satoru Gojou is one of the main protagonists of the Jujutsu Kaisen series. He is a special-grade jujutsu sorcerer and is widely recognized as the strongest in the world.",
             "genres": [
               "Action",
               "Drama",
@@ -16811,7 +16811,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b133704-8wLTGjc234q2.png",
-            "description": "Occupation: Sorcerer Affiliation: Jujutsu High Grade: Grade 1 Sorcerer Cursed Technique: Ratio He is a Grade 1 Jujutsu Sorcerer and a Tokyo Jujutsu High alumni.",
+            "description": "He is a Grade 1 Jujutsu Sorcerer and a Tokyo Jujutsu High alumni. Nanami is a very intelligent and reserved man who at first appears to be someone who is just very serious about his work.",
             "genres": [
               "Action",
               "Drama",
@@ -16825,7 +16825,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b172743-4Y5SXqED6A3G.jpg",
-            "description": "Species: Cursed Spirit Hanami is an antagonist intent on ridding the Earth of Humans and reviving Sukuna.",
+            "description": "Hanami is an antagonist intent on ridding the Earth of Humans and reviving Sukuna.",
             "genres": [
               "Action",
               "Drama",
@@ -16853,7 +16853,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157865-X9ENX9OzWevS.jpg",
-            "description": "Species: Human Occupation: Sorcerer Affiliation: Jujutsu High Grade: Grade 2 Sorcerer Takuma Ino is a grade 2 jujutsu sorcerer and a close associate of Kento Nanami who operates out of Tokyo Jujutsu High.",
+            "description": "Takuma Ino is a grade 2 jujutsu sorcerer and a close associate of Kento Nanami who operates out of Tokyo Jujutsu High. Takuma Ino is a genuine and cheerful person with a more positive outlook on things than most jujutsu sorcerers.",
             "genres": [
               "Action",
               "Drama",
@@ -16881,7 +16881,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b133702-Y7JRG5vAvjIL.png",
-            "description": "Grade: Special Grade Cursed Technique: Idle Transfiguration Mahito is one of the primary antagonists of the Jujutsu Kaisen series. He is a Cursed Spirit allied with Suguru Geto, Jogo, Hanami and several others.",
+            "description": "Mahito is one of the primary antagonists of the Jujutsu Kaisen series. He is a Cursed Spirit allied with Suguru Geto, Jogo, Hanami and several others. Their ultimate goal is the eradication of humanity and ultimately replacing the population with Cursed Spirits.",
             "genres": [
               "Action",
               "Drama",
@@ -16895,7 +16895,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b158154-UCqbiULli62P.png",
-            "description": "Ability: Reverse Healing Cursed Technique Alumnus of Tokyo Jujutsu High, having been classmates with Satoru Gojo and Suguru Geto. After graduating into a full-fledged jujutsu sorcerer, Shoko became the school's primary doctor.",
+            "description": "Alumnus of Tokyo Jujutsu High, having been classmates with Satoru Gojo and Suguru Geto. After graduating into a full-fledged jujutsu sorcerer, Shoko became the school's primary doctor.",
             "genres": [
               "Action",
               "Drama",
@@ -16909,7 +16909,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b156991-niYjdp9CxO4w.png",
-            "description": "Grade: Special Grade Cursed Spirit Jogou is an unregistered special grade cursed spirit aligned with Mahito, Hanami, and Dagon. He was born of humanity's fear and negative association with volcanoes and other fire-related natural disasters.",
+            "description": "Jogou is an unregistered special grade cursed spirit aligned with Mahito, Hanami, and Dagon. He was born of humanity's fear and negative association with volcanoes and other fire-related natural disasters.",
             "genres": [
               "Action",
               "Drama",
@@ -16937,7 +16937,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157866-UWDtYBoG71PD.png",
-            "description": "Cursed Technique: Blood Manipulation Grade: Semi-Grade 1 Sorcerer He is a third-year at Kyoto Magic Technical College.",
+            "description": "He is a third-year at Kyoto Magic Technical College.",
             "genres": [
               "Action",
               "Drama",
@@ -16951,7 +16951,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b133701-rCQuDpHr3UZL.png",
-            "description": "Species: Human, Reincarnated Sorcerer According to the legend, Sukuna was a demon with four arms and two faces who lived in the golden era of sorcery 1000 years ago. Sorcerers of the era gave their all to defeat him, but to no avail.",
+            "description": "According to the legend, Sukuna was a demon with four arms and two faces who lived in the golden era of sorcery 1000 years ago. Sorcerers of the era gave their all to defeat him, but to no avail.",
             "genres": [
               "Action",
               "Drama",
@@ -16965,7 +16965,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b133699-FCnXaISgazAi.png",
-            "description": "Occupation: Curse User Grade: Special Grade Curse User Cursed Technique: Cursed Spirit Manipulation Suguru Getou is an antagonist in both the Jujutsu Kaisen series and its prequel Jujutsu Kaisen 0: Jujutsu High.",
+            "description": "",
             "genres": [
               "Action",
               "Drama",
@@ -17007,7 +17007,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157215-I3TQJu8nkDwD.jpg",
-            "description": "Occupation: Jujutsu Sorcerer Affiliation: Jujutsu High Grade: Grade 1 Sorcerer Family: Ui Ui (Younger Brother) Abilities: Mei Mei is a grade 1 jujutsu sorcerer who works independently and only in exchange for money. She is also the older sister of Ui Ui.",
+            "description": "Mei Mei is a grade 1 jujutsu sorcerer who works independently and only in exchange for money. She is also the older sister of Ui Ui.",
             "genres": [
               "Action",
               "Drama",
@@ -17021,7 +17021,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b137974-9qnK3DPrvLKh.jpg",
-            "description": "Species: Cursed Corpse (varies among 3 personalities) Occupation: Jujutsu Sorcerer, Student Affiliation: Jujutsu High Grade: 2 He is a second-year at Tokyo Prefectural Jujutsu High. As a Metamorphosed Cursed Corpse, he is the best creation of Principal Masamichi Yaga.",
+            "description": "He is a second-year at Tokyo Prefectural Jujutsu High. As a Metamorphosed Cursed Corpse, he is the best creation of Principal Masamichi Yaga. He is sentient and has three cores inside the doll body: the youngest brother \"Panda\", the eldest brother \"Gorilla\" and a sister.",
             "genres": [
               "Action",
               "Drama",
@@ -17035,7 +17035,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b137975-6TH7PiLWJaqy.png",
-            "description": "Occupation: Sorcerer, Student Affiliation: Kyoto Jujutsu Technical High School Grade: Grade 1 Sorcerer Toudou is a third-year student at Kyoto Jujutsu Technical High School who possesses inhuman physical strength, durability, and speed.",
+            "description": "Toudou is a third-year student at Kyoto Jujutsu Technical High School who possesses inhuman physical strength, durability, and speed.",
             "genres": [
               "Action",
               "Drama",
@@ -17049,7 +17049,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157868-Ui2Wht3M6tlM.png",
-            "description": "Species: Human Occupation: Jujutsu Sorcerer Affiliation: Kyoto Magic Technical College Grade: Semi-Grade 2 Sorcerer Cursed Technique: Tool Manipulation She is a third-year at Kyoto Magic Technical College.",
+            "description": "She is a third-year at Kyoto Magic Technical College.",
             "genres": [
               "Action",
               "Drama",
@@ -17063,7 +17063,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157116-2jYQf3y8NeTZ.png",
-            "description": "Chousou bears strong attachments to his brothers and is very overprotective of them.",
+            "description": "Chousou is half human and half cursed spirit and the first of the Death Painting Wombs with a Special Grade rank. He and his two brothers, Kechizu and Eso are Cursed Womb: Death Paintings who have sided with Mahito's group.",
             "genres": [
               "Action",
               "Drama",
@@ -17091,7 +17091,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157115-kdhRYQdVhH95.png",
-            "description": "Species: Human Occupation: Sorcerer, Student Affiliation: Jujutsu High Grade: Grade 2 Sorcerer Cursed Technique: Cursed Speech He is a second-year at Tokyo Metropolitan Jujutsu Technical High School.",
+            "description": "He is a second-year at Tokyo Metropolitan Jujutsu Technical High School. Due to his curse ability, he is only willing to communicate with ingredients used to make rice balls.",
             "genres": [
               "Action",
               "Drama",
@@ -17105,7 +17105,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b156848-Rf0tuoQCNyZV.png",
-            "description": "Species: Human Occupation: Jujutsu Sorcerer, Student Affiliation: Kyoto Metropolitan Curse Technical College Grade: Grade 3 Sorcerer A second-year at Kyoto Metropolitan Curse Technical College. Kasumi is a hard-working, restrained, and considerate pacifist.",
+            "description": "A second-year at Kyoto Metropolitan Curse Technical College. Kasumi is a hard-working, restrained, and considerate pacifist. She is also a big fan of Satoru Gojo.",
             "genres": [
               "Action",
               "Drama",
@@ -17418,7 +17418,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/85839-lYYIkvS9I7wS.png",
-            "description": "",
+            "description": "Takeshi is a pianist of the same year as Kousei, who aimed to surpass him since watching him play at a young age. For that, Takeshi would even abandon a competition in Europe in order to compete with Kousei.",
             "genres": [
               "Drama",
               "Music",
@@ -17433,7 +17433,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b85841-728eVWAvzifr.png",
-            "description": "",
+            "description": "Emi is a pianist of the same year as Kousei, who decided to become a pianist after listening to Kousei play at the age of 5. Emi is very emotional and her piano performance often depends on her mood on that day.",
             "genres": [
               "Drama",
               "Music",
@@ -17559,7 +17559,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b205434-AuBcR4M05f6s.png",
-            "description": "",
+            "description": "A girl who strived to become an idol at a young age, but due to her family situation, made sacrifices that ultimately ended with her becoming too old to become one. She is a YouTuber.",
             "genres": [
               "Drama",
               "Mystery",
@@ -17589,7 +17589,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b227579-OKrvb5rGnQrV.jpg",
-            "description": "",
+            "description": "A famous physical training YouTuber affiliated with Strawberry Productions, where he is the agency's top earner.",
             "genres": [
               "Drama",
               "Mystery",
@@ -17806,7 +17806,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b137081-TSrUR3mUJL6r.png",
-            "description": "Devil Contracts: Fox Devil, Curse Devil Relatives: Hahaoya Hayakawa (Mother), Chichioya Hayakawa (Father), Taiyou Hayakawa (Younger Brother). A Public Safety Devil Hunter working under Makima as a member of Tokyo Special Division 4.",
+            "description": "A Public Safety Devil Hunter working under Makima as a member of Tokyo Special Division 4. He is partnered with Himeno and tasked with supervising both Power and Denji. Aki Hayakawa generally appears to be a very stoic person.",
             "genres": [
               "Action",
               "Drama",
@@ -17836,7 +17836,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b137080-UHcynYNjb5ZU.png",
-            "description": "Affiliation: Public Safety Devil Hunters Makima is a Public Safety Devil Hunter, who took Denji as her human pet. She is one of the leading figures of Public Safety in Japan and has a considerable reputation among experienced Devil Hunters.",
+            "description": "Makima is a Public Safety Devil Hunter, who took Denji as her human pet. She is one of the leading figures of Public Safety in Japan and has a considerable reputation among experienced Devil Hunters.",
             "genres": [
               "Action",
               "Drama",
@@ -17941,7 +17941,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b144596-kvL6SD2litJu.png",
-            "description": "Devil Contract: Ghost Devil Relatives: Unnamed Younger Sister A Public Safety Devil Hunter, working under Makima as a member of Tokyo Special Division 4. She is partnered with Aki Hayakawa, whom she shares a close personal bond with.",
+            "description": "A Public Safety Devil Hunter, working under Makima as a member of Tokyo Special Division 4. She is partnered with Aki Hayakawa, whom she shares a close personal bond with. Himeno is shown to be a mature and experienced superior to the new recruits working under her.",
             "genres": [
               "Action",
               "Drama",
@@ -18016,7 +18016,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b144595-R8Lfn0egUR3q.png",
-            "description": "Devil Contracts: Punishment Devil A Public Safety Devil Hunter from Kyoto. She is partnered with Yuutarou Kurose.",
+            "description": "A Public Safety Devil Hunter from Kyoto. She is partnered with Yuutarou Kurose.",
             "genres": [
               "Action",
               "Drama",
@@ -18031,7 +18031,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b144592-pUY67nacCeud.png",
-            "description": "Devil Contract: Punishment Devil A Public Safety Devil Hunter from Kyoto. He is partnered with Michiko Tendou.",
+            "description": "A Public Safety Devil Hunter from Kyoto. He is partnered with Michiko Tendou.",
             "genres": [
               "Action",
               "Drama",
@@ -18142,7 +18142,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b65239-2S3t2vSyUew9.png",
-            "description": "Her teigu is called Demons Extract, which allows her to manipulate ice and mold it from nothing.",
+            "description": "Esdeath is a high-ranking general of the Empire, and leader of the Jaegers. She enjoys torturing her enemies slowly, seen when she used her Teigu to put large blocks of ice in a cauldron so that the people inside would die slower and suffer more.",
             "genres": [
               "Action",
               "Adventure",
@@ -18196,7 +18196,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b65559-FZEHEfO374x9.png",
-            "description": "Faction: Night Raid User: Najenda Susanoo is one of the new members of Night Raid that Najenda brought back with her from the Revolutionary Army HQ. He is a tall man with distinctive bull horns coming out of the sides of his head.",
+            "description": "Susanoo is one of the new members of Night Raid that Najenda brought back with her from the Revolutionary Army HQ. He is a tall man with distinctive bull horns coming out of the sides of his head.",
             "genres": [
               "Action",
               "Adventure",
@@ -18268,7 +18268,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/65235-KbSvHjKWY3z4.png",
-            "description": "Bulat's teigu is the Demon Armor: Incursio an Armor-type teigu that took on the form of a short sword with a chain link tassel in its sealed form. Once released, the user was enveloped in a full body armor.",
+            "description": "Bulat was once a high-ranking Imperial Officer known as \"100 Man-Slayer Bulat\". He later decided to betray the Empire when his superior was framed for not giving in to the Prime Minister's agenda.",
             "genres": [
               "Action",
               "Adventure",
@@ -18346,7 +18346,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b40881-F3gr1PkreDvj.png",
-            "description": "",
+            "description": "Mikasa is Eren Yaeger's foster sister and mutual childhood friend of Armin Arlert, living with the two of them in Shiganshina District within the southern region of Wall Maria. When she was young, her parents were killed by human traffickers, and she was kidnapped.",
             "genres": [
               "Action",
               "Drama",
@@ -18361,7 +18361,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b40882-dsj7IP943WFF.jpg",
-            "description": "Affiliation: 104th Trainees Squad, Survey Corps. Eren was born to Carla and Grisha Yeager in Shiganshina District within the southern region of Wall Maria. He grew up in the town with his parents and foster sister Mikasa, who moved in with the Yeagers as a child.",
+            "description": "Eren was born to Carla and Grisha Yeager in Shiganshina District within the southern region of Wall Maria. He grew up in the town with his parents and foster sister Mikasa, who moved in with the Yeagers as a child.",
             "genres": [
               "Action",
               "Drama",
@@ -18376,7 +18376,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b46494-g7xYYuBtYPnO.png",
-            "description": "Position: 104th Trainees Squad, Survey Corps Relatives: Grandfather Armin is a young boy who was born and raised in the Shiganshina District within the walls, being childhood friends with both Eren Yeager and Mikasa Ackerman.",
+            "description": "Armin is a young boy who was born and raised in the Shiganshina District within the walls, being childhood friends with both Eren Yeager and Mikasa Ackerman.",
             "genres": [
               "Action",
               "Drama",
@@ -18391,7 +18391,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b45887-QPtJH0KwqthW.jpg",
-            "description": "Sasha is a friendly and fun-loving girl. She speaks with a local accent from her home village, but initially hid it out of embarrassment by using overly formal and polite speech.",
+            "description": "Originally from Dauper, a remote and scarcely populated village of hunters located in a mountain forest in the southern area of Wall Rose, Sasha joined the military as a cadet of the 104th Training Corps, where she ranked 9th upon graduation.",
             "genres": [
               "Action",
               "Drama",
@@ -18406,7 +18406,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b71479-huCD908XIdqv.png",
-            "description": "Affiliations: 104th Trainees Squad, Scouting Legion Member of the Scouting Legion. She seems selfish, cynical, bossy, sly, uncooperative, exploitative, and confrontational, but she can apparently be kind, especially to Krista.",
+            "description": "Member of the Scouting Legion. She seems selfish, cynical, bossy, sly, uncooperative, exploitative, and confrontational, but she can apparently be kind, especially to Krista.",
             "genres": [
               "Action",
               "Drama",
@@ -18421,7 +18421,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n62501-CfTtAAgs64nE.jpg",
-            "description": "Affiliation: Survey Corps; Soldier, Special Operations Squad. Relatives: Father Petra Ral is a soldier of the Survey Corps hand-picked by Captain Levi to join the Special Operations Squad.",
+            "description": "Petra Ral is a soldier of the Survey Corps hand-picked by Captain Levi to join the Special Operations Squad. Petra is a very kind and caring woman, going out of her way to look after and guiding Eren Yaeger when he was first admitted to the squad.",
             "genres": [
               "Action",
               "Drama",
@@ -18436,7 +18436,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b62479-mYcTkU1RXymL.jpg",
-            "description": "Affiliations: 104th Training Corps Originally from Jinae District. Marco ranked 7th in the 104th Training Corps and is widely respected by other cadets of the 104th.",
+            "description": "Originally from Jinae District. Marco ranked 7th in the 104th Training Corps and is widely respected by other cadets of the 104th.",
             "genres": [
               "Action",
               "Drama",
@@ -18466,7 +18466,7 @@
             "role": "Supporting",
             "gender": "Unknown",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b71121-7R7CnQd3lHgt.png",
-            "description": "Affiliation: Survey Corps; Section Commander, Squad Leader. Leader of the Survey Corps' Fourth Squad, Hange is also in charge of conducting research on Titans, and pursues this knowledge so passionately that they have become obsessed with Titans as a result.",
+            "description": "Leader of the Survey Corps' Fourth Squad, Hange is also in charge of conducting research on Titans, and pursues this knowledge so passionately that they have become obsessed with Titans as a result.",
             "genres": [
               "Action",
               "Drama",
@@ -18556,7 +18556,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b46498-ritqAj9FW6jX.png",
-            "description": "Jean has a blunt personality. He holds no restraint when it comes to speaking his mind, even when he knows it would not be wise to do so or when it could spark conflict. Jean is also pragmatic: he has a strong aversion to exposing himself to dangerous situations.",
+            "description": "Jean Kirschtein is a graduate of the 104th Cadet Corps, among whom he ranked 6th for his skills with ODM gear and ability to look at things through a more tactical lense.",
             "genres": [
               "Action",
               "Drama",
@@ -18601,7 +18601,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b62481-ZZDa7vn17lMU.png",
-            "description": "",
+            "description": "Ranked tenth in the trainee class, Krista is a very shy and kind, caring person, often being described as a \"goddess\" or \"angel\" by her peers. She is good friends with Ymir.",
             "genres": [
               "Action",
               "Drama",
@@ -18616,7 +18616,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b71457-7H5bMZezo4ze.png",
-            "description": "Affiliations: Military Police, 104th Cadet Corps. Recruit of the Military Police stationed in Stohess District.",
+            "description": "Recruit of the Military Police stationed in Stohess District. While most who join the Military Police Regiment do so because they want a safe position far from the danger of the Titans, Marlo did so because he claims to want \"to uphold justice and do what's right.",
             "genres": [
               "Action",
               "Drama",
@@ -18631,7 +18631,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n127573-VSYSvQ1VK1c7.jpg",
-            "description": "Affiliation: Survey Corps; Executive Officer, Fourth Squad. A veteran member of the Survey Corps and Hange Zoe's second-in-command within the Survey Corps' Fourth Squad. He also serves as Hanji's assistant and messenger.",
+            "description": "A veteran member of the Survey Corps and Hange Zoe's second-in-command within the Survey Corps' Fourth Squad. He also serves as Hanji's assistant and messenger.",
             "genres": [
               "Action",
               "Drama",
@@ -18646,7 +18646,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b46496-Mu86MENd5wNB.png",
-            "description": "Position: 13th Commander, Survey Corps Discerning, intelligent, and widely respected, Erwin is the unshakable and calculated 13th commander of the Survey Corps.",
+            "description": "Discerning, intelligent, and widely respected, Erwin is the unshakable and calculated 13th commander of the Survey Corps.",
             "genres": [
               "Action",
               "Drama",
@@ -18661,7 +18661,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b62485-I0U5Cat3z65K.png",
-            "description": "",
+            "description": "The highest-ranked Administrator of the Southern Region. Head of the Garrison's Southern Territories, Pixis is a cunning leader with astute insights.",
             "genres": [
               "Action",
               "Drama",
@@ -18676,7 +18676,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b86017-m6vXFRKWMwUo.jpg",
-            "description": "Affiliations: 104th Cadet Corps. Recruit of the Military Police stationed in Stohess District. She was roommates with Annie Leonhart.",
+            "description": "Recruit of the Military Police stationed in Stohess District. She was roommates with Annie Leonhart.",
             "genres": [
               "Action",
               "Drama",
@@ -18691,7 +18691,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n46486-izhPjzut6WCZ.png",
-            "description": "Upbeat and naive, Connie is rather unfocused outside of combat, and enjoys goofing around and messing with his friends, but can also be a bit dense at times, as he can have some difficulty comprehending new developments as they appear.",
+            "description": "Connie Springer is a graduate of the 104th Training Corps, having ranked 8th in class. He is known to be one of the quickest soldiers while using ODM gear and is skilled at making very sharp turns.",
             "genres": [
               "Action",
               "Drama",
@@ -18721,7 +18721,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b46488-wm6HvkdkHoZu.jpg",
-            "description": "Affiliation: Survey Corps Member of the Survey Corps and former cadet of the 104th Training Corps. Bertoldt ranked 3rd in his training class upon graduation, finishing behind only Mikasa and his hometown friend Reiner.",
+            "description": "Member of the Survey Corps and former cadet of the 104th Training Corps. Bertoldt ranked 3rd in his training class upon graduation, finishing behind only Mikasa and his hometown friend Reiner.",
             "genres": [
               "Action",
               "Drama",
@@ -18736,7 +18736,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b71481-q2pfKJRFiNUE.png",
-            "description": "Affiliation: Scouting Legion Survey Corps",
+            "description": "",
             "genres": [
               "Action",
               "Drama",
@@ -18955,7 +18955,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b124110-Gfr3IYI6FwqE.jpg",
-            "description": "Otto Suwen is a merchant appearing in Re:Zero. His remarkable misfortune always takes him to dangerous situations, from which he escapes thanks to his wit. Otto has gray hair that is mentioned to be as long as a gal game protagonist.",
+            "description": "Otto has gray hair that is mentioned to be as long as a gal game protagonist. He is said to be somewhat handsome if he has a serious expression. However, he is usually either retorting, shouting, or panicking, ruining his looks.",
             "genres": [
               "Action",
               "Adventure",
@@ -19496,7 +19496,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b187382-NBP6I5OKXHH9.png",
-            "description": "Orsted has a curse that makes every living being feel an overwhelming fear just from being within his presence. Strangely enough, this curse does not affect Rudeus or Nanahoshi.",
+            "description": "Orsted is the current Dragon God, 2nd-ranked of the 7 World Powers, and the sworn enemy of Hitogami. Similar to other Dragon Race people such as Perugius, he has silver hair and golden sanpaku eyes with an overpowering look.",
             "genres": [
               "Adventure",
               "Drama",
@@ -19517,7 +19517,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b124380-ct1wJHIl9BY1.jpg",
-            "description": "",
+            "description": "Hiro was known as a prodigy Parasite with the codename \"016\" of Thirteenth Plantation, where he's partnered in a boy-girl pair with Zero Two to pilot a FRANXX called Strelizia.",
             "genres": [
               "Action",
               "Drama",
@@ -19551,7 +19551,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b124381-pkTKi6HHNuVR.png",
-            "description": "Classification: Parasite Affiliation: APE's Special Forces Unit Partner: Hiro FRANXX: Strelizia Zero Two is an elite FRANXX pilot who is a member of a race of humans with Klaxosaur blood, and the pistil of the FranXX Strelizia.",
+            "description": "Zero Two is an elite FRANXX pilot who is a member of a race of humans with Klaxosaur blood, and the pistil of the FranXX Strelizia.",
             "genres": [
               "Action",
               "Drama",
@@ -19704,7 +19704,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b126290-v3aLCi4pQijJ.png",
-            "description": "Classification: Klaxo Sapiens Partner: N/A (capable of piloting FRANXX without one) FRANXX: Model Saurian, 9 Model (temporarily), Strelizia (temporarily) A mysterious being that lurks deep inside Earth, accompanied by numerous Klaxosaurs.",
+            "description": "A mysterious being that lurks deep inside Earth, accompanied by numerous Klaxosaurs. She's capable of speaking telepathically and seems to have a close bond with a serpentine Klaxosaur named Nawabari (縄張).",
             "genres": [
               "Action",
               "Drama",
@@ -19744,7 +19744,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b129928-BCEjVaP0AQSw.png",
-            "description": "",
+            "description": "Relative(s): Park Kyung-Hye (Mother), Sung Jin-Ah (Sister), Seong Jin-U is the protagonist of Solo Leveling and is known as an infamously weak E-Rank Hunter. He is a humble and benevolent individual who cares deeply for his family and has an ardent desire to become stronger.",
             "genres": [
               "Action",
               "Adventure",
@@ -19758,7 +19758,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b136077-IIMqRmMK5Fgs.png",
-            "description": "",
+            "description": "He is a S rank hunter and master of the White Tiger guild.",
             "genres": [
               "Action",
               "Adventure",
@@ -19772,7 +19772,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b136074-pLyumEnxjL7P.png",
-            "description": "",
+            "description": "She is a healer with rank B.",
             "genres": [
               "Action",
               "Adventure",
@@ -19786,7 +19786,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b138792-TXFrDA1wpbmo.png",
-            "description": "",
+            "description": "Go Gun-Hee (고건희) is a South Korean S-Rank Hunter and the Chairman of the Korean Hunters Association.",
             "genres": [
               "Action",
               "Adventure",
@@ -19842,7 +19842,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b136819-okbPuuFAefYX.png",
-            "description": "",
+            "description": "An A rank hunter that works for Hunter's association of Korea.",
             "genres": [
               "Action",
               "Adventure",
@@ -19884,7 +19884,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b138789-AhE8m0LWjE7E.png",
-            "description": "Guild: Hunters Guild Class: Sword Fighter Affiliations: Jeju Island Raid Party, Song Chi-Yul’s Dojo (Disciple) Cha Hae-In is the Vice-Guild Master of the Hunters Guild. She is an S rank hunter and the 9th ranked hunter in South Korea.",
+            "description": "Cha Hae-In is the Vice-Guild Master of the Hunters Guild. She is an S rank hunter and the 9th ranked hunter in South Korea. She possesses the unique ability of mana smell and hates the smell of hunters except for Sung Jin-Woo.",
             "genres": [
               "Action",
               "Adventure",
@@ -19898,7 +19898,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b138793-eijpaPPkcipD.png",
-            "description": "",
+            "description": "Han Song-I is an E-Rank hunter who quit school after gaining money through the Yoo Jin-Ho and Sung Jin-Woo motley group of party. She is friends with Sung Jin-Ah. She first appeared when Jin-Ah visited Jin-Woo in the hospital but she didn't know him then.",
             "genres": [
               "Action",
               "Adventure",
@@ -19912,7 +19912,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b136076-D7eiE3pA9U8g.jpg",
-            "description": "",
+            "description": "Yoo Jin-Ho is a D rank hunter and is Jin-U Seong's faithful assistant and combat partner.",
             "genres": [
               "Action",
               "Adventure",
@@ -19926,7 +19926,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b138794-dZNdO0pvZ659.png",
-            "description": "",
+            "description": "Choi Jong-In is one of the 10 S-Rank Hunters of South Korea. He is also the Guild Master of the Hunters Guild.",
             "genres": [
               "Action",
               "Adventure",
@@ -19974,7 +19974,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b162214-9x9Q3A9rxpx8.png",
-            "description": "Team: Team Z Rensuke Kunigami is very serious about his football career and training; he's always the first in the training room in the morning and the last to leave at night.",
+            "description": "Rensuke Kunigami is very serious about his football career and training; he's always the first in the training room in the morning and the last to leave at night.",
             "genres": [
               "Action",
               "Drama",
@@ -20142,7 +20142,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b191409-qU7sRhVmpgRQ.png",
-            "description": "Yukimiya is highly confident in his own abilities, declaring himself the strongest player in Japan, when it comes to one-on-one battles. He is also a likable and charismatic personality, appearing to make friends easily, like with Nagi.",
+            "description": "He is currently ranked #5 out of the original 300 forwards chosen to be apart of the Blue Lock Project Yukimiya is highly confident in his own abilities, declaring himself the strongest player in Japan, when it comes to one-on-one battles.",
             "genres": [
               "Action",
               "Drama",
@@ -20198,7 +20198,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b169402-JlISsoEunCxH.png",
-            "description": "Team: Team Z Raichi is the most hot-headed of the group and argues with just about everyone on everything, often to the point of needing to be restrained by Kunigami.",
+            "description": "Raichi is the most hot-headed of the group and argues with just about everyone on everything, often to the point of needing to be restrained by Kunigami.",
             "genres": [
               "Action",
               "Drama",
@@ -20267,7 +20267,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b191673-eD8IFBOdAFv5.jpg",
-            "description": "Relatives: Himari and Leo (Younger Cousins). Jirou Yakuin is the main protagonist, being an antisocial, pessimistic high school boy.",
+            "description": "Jirou Yakuin is the main protagonist, being an antisocial, pessimistic high school boy. He ends up forced to pair with Akari Watanabe in their school's \"Couple Practical\" course, despite harboring feelings for his childhood friend Shiori Sakurazaka.",
             "genres": [
               "Comedy",
               "Drama",
@@ -20312,7 +20312,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b273109-MLnliqfOwuAh.png",
-            "description": "Relatives: Keiichiro Kamo (Older Brother). Sadaharu is a close friend of Jirou Yakuin, being one of the few people Jirou is comfortable being open around. He is paired with Satsuki Kaneyama in their school's Marriage Practical.",
+            "description": "Sadaharu is a close friend of Jirou Yakuin, being one of the few people Jirou is comfortable being open around. He is paired with Satsuki Kaneyama in their school's Marriage Practical.",
             "genres": [
               "Comedy",
               "Drama",
@@ -20333,7 +20333,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b137081-TSrUR3mUJL6r.png",
-            "description": "Devil Contracts: Fox Devil, Curse Devil Relatives: Hahaoya Hayakawa (Mother), Chichioya Hayakawa (Father), Taiyou Hayakawa (Younger Brother). A Public Safety Devil Hunter working under Makima as a member of Tokyo Special Division 4.",
+            "description": "A Public Safety Devil Hunter working under Makima as a member of Tokyo Special Division 4. He is partnered with Himeno and tasked with supervising both Power and Denji. Aki Hayakawa generally appears to be a very stoic person.",
             "genres": [
               "Action",
               "Drama",
@@ -20363,7 +20363,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b137080-UHcynYNjb5ZU.png",
-            "description": "Affiliation: Public Safety Devil Hunters Makima is a Public Safety Devil Hunter, who took Denji as her human pet. She is one of the leading figures of Public Safety in Japan and has a considerable reputation among experienced Devil Hunters.",
+            "description": "Makima is a Public Safety Devil Hunter, who took Denji as her human pet. She is one of the leading figures of Public Safety in Japan and has a considerable reputation among experienced Devil Hunters.",
             "genres": [
               "Action",
               "Drama",
@@ -20468,7 +20468,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b144596-kvL6SD2litJu.png",
-            "description": "Devil Contract: Ghost Devil Relatives: Unnamed Younger Sister A Public Safety Devil Hunter, working under Makima as a member of Tokyo Special Division 4. She is partnered with Aki Hayakawa, whom she shares a close personal bond with.",
+            "description": "A Public Safety Devil Hunter, working under Makima as a member of Tokyo Special Division 4. She is partnered with Aki Hayakawa, whom she shares a close personal bond with. Himeno is shown to be a mature and experienced superior to the new recruits working under her.",
             "genres": [
               "Action",
               "Drama",
@@ -20543,7 +20543,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b144595-R8Lfn0egUR3q.png",
-            "description": "Devil Contracts: Punishment Devil A Public Safety Devil Hunter from Kyoto. She is partnered with Yuutarou Kurose.",
+            "description": "A Public Safety Devil Hunter from Kyoto. She is partnered with Yuutarou Kurose.",
             "genres": [
               "Action",
               "Drama",
@@ -20558,7 +20558,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b144592-pUY67nacCeud.png",
-            "description": "Devil Contract: Punishment Devil A Public Safety Devil Hunter from Kyoto. He is partnered with Michiko Tendou.",
+            "description": "A Public Safety Devil Hunter from Kyoto. He is partnered with Michiko Tendou.",
             "genres": [
               "Action",
               "Drama",
@@ -20579,7 +20579,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b88264-v9VFbSWtQq2C.png",
-            "description": "Stella initially appears to be feisty, hot-blooded, and quick to anger possibly due to her sheltered upbringing. However, later she is shown to be anything but bitter, and is even willing to admit her mistakes and be friendly with others.",
+            "description": "Stella Vermillion is an A-rank Apprentice Knight and princess of the Vermillion Kingdom. Stella initially appears to be feisty, hot-blooded, and quick to anger possibly due to her sheltered upbringing.",
             "genres": [
               "Action",
               "Ecchi",
@@ -20594,7 +20594,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b88265-2MlVZH85EPpR.png",
-            "description": "A noble young man with a caring personality. Ikki can be very cruel under certain circumstances.",
+            "description": "Ikki Kurogane is an F-rank Apprentice Knight who strives to become a real Mage Knight. He is a young man of average height with dark brown hair and brown eyes. A noble young man with a caring personality. Ikki can be very cruel under certain circumstances.",
             "genres": [
               "Action",
               "Ecchi",
@@ -20814,7 +20814,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b162214-9x9Q3A9rxpx8.png",
-            "description": "Team: Team Z Rensuke Kunigami is very serious about his football career and training; he's always the first in the training room in the morning and the last to leave at night.",
+            "description": "Rensuke Kunigami is very serious about his football career and training; he's always the first in the training room in the morning and the last to leave at night.",
             "genres": [
               "Action",
               "Drama",
@@ -20982,7 +20982,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b191409-qU7sRhVmpgRQ.png",
-            "description": "Yukimiya is highly confident in his own abilities, declaring himself the strongest player in Japan, when it comes to one-on-one battles. He is also a likable and charismatic personality, appearing to make friends easily, like with Nagi.",
+            "description": "He is currently ranked #5 out of the original 300 forwards chosen to be apart of the Blue Lock Project Yukimiya is highly confident in his own abilities, declaring himself the strongest player in Japan, when it comes to one-on-one battles.",
             "genres": [
               "Action",
               "Drama",
@@ -21038,7 +21038,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b169402-JlISsoEunCxH.png",
-            "description": "Team: Team Z Raichi is the most hot-headed of the group and argues with just about everyone on everything, often to the point of needing to be restrained by Kunigami.",
+            "description": "Raichi is the most hot-headed of the group and argues with just about everyone on everything, often to the point of needing to be restrained by Kunigami.",
             "genres": [
               "Action",
               "Drama",
@@ -21086,7 +21086,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b126635-L0y3I92JSUkN.png",
-            "description": "Occupation: Sorcerer, Student Affiliation: Jujutsu High Grade: Grade 2 Sorcerer Cursed Technique: 10 Shadows Megumi is the deuteragonist of the Jujutsu Kaisen series. He is a first-year student at Jujutsu High and also a descendant of the Zenin Family.",
+            "description": "Megumi is the deuteragonist of the Jujutsu Kaisen series. He is a first-year student at Jujutsu High and also a descendant of the Zenin Family. While outwardly stoic and calculating, Megumi wishes to help protect people he sees as good or kind.",
             "genres": [
               "Action",
               "Drama",
@@ -21100,7 +21100,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b127212-FVm2tD0erQ5B.png",
-            "description": "Occupation: Sorcerer, Student, Vessel Affiliation: Jujutsu High Yuuji is a fair person who cares greatly for not only his comrades but anyone he views as people with their own wills, despite how deep or shallow his connection to them is.",
+            "description": "Yuuji is a fair person who cares greatly for not only his comrades but anyone he views as people with their own wills, despite how deep or shallow his connection to them is.",
             "genres": [
               "Action",
               "Drama",
@@ -21114,7 +21114,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b133700-f6sOO3TcgLV6.png",
-            "description": "Occupation: Jujutsu Sorcerer, Student Affiliation: Tokyo Jujutsu High Grade: Grade 3 Sorcerer She is a first-year student and grade 3 jujutsu sorcerer at Tokyo Jujutsu High studying under Satoru Gojo alongside Yuji and Megumi.",
+            "description": "She is a first-year student and grade 3 jujutsu sorcerer at Tokyo Jujutsu High studying under Satoru Gojo alongside Yuji and Megumi. Nobara is a confident and brash young woman with an unshakable character.",
             "genres": [
               "Action",
               "Drama",
@@ -21128,7 +21128,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b127691-9zqh1xpIubn7.png",
-            "description": "Occupation: Jujutsu Sorcerer, Teacher Affiliation: Tokyo Metropolitan Curse Technical College, Gojou Family Grade: Special Grade Sorcerer Cursed Technique: Six Eyes, Limitless Satoru Gojou is one of the main protagonists of the Jujutsu Kaisen series.",
+            "description": "Satoru Gojou is one of the main protagonists of the Jujutsu Kaisen series. He is a special-grade jujutsu sorcerer and is widely recognized as the strongest in the world.",
             "genres": [
               "Action",
               "Drama",
@@ -21142,7 +21142,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b133704-8wLTGjc234q2.png",
-            "description": "Occupation: Sorcerer Affiliation: Jujutsu High Grade: Grade 1 Sorcerer Cursed Technique: Ratio He is a Grade 1 Jujutsu Sorcerer and a Tokyo Jujutsu High alumni.",
+            "description": "He is a Grade 1 Jujutsu Sorcerer and a Tokyo Jujutsu High alumni. Nanami is a very intelligent and reserved man who at first appears to be someone who is just very serious about his work.",
             "genres": [
               "Action",
               "Drama",
@@ -21156,7 +21156,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b172743-4Y5SXqED6A3G.jpg",
-            "description": "Species: Cursed Spirit Hanami is an antagonist intent on ridding the Earth of Humans and reviving Sukuna.",
+            "description": "Hanami is an antagonist intent on ridding the Earth of Humans and reviving Sukuna.",
             "genres": [
               "Action",
               "Drama",
@@ -21184,7 +21184,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157865-X9ENX9OzWevS.jpg",
-            "description": "Species: Human Occupation: Sorcerer Affiliation: Jujutsu High Grade: Grade 2 Sorcerer Takuma Ino is a grade 2 jujutsu sorcerer and a close associate of Kento Nanami who operates out of Tokyo Jujutsu High.",
+            "description": "Takuma Ino is a grade 2 jujutsu sorcerer and a close associate of Kento Nanami who operates out of Tokyo Jujutsu High. Takuma Ino is a genuine and cheerful person with a more positive outlook on things than most jujutsu sorcerers.",
             "genres": [
               "Action",
               "Drama",
@@ -21212,7 +21212,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b133702-Y7JRG5vAvjIL.png",
-            "description": "Grade: Special Grade Cursed Technique: Idle Transfiguration Mahito is one of the primary antagonists of the Jujutsu Kaisen series. He is a Cursed Spirit allied with Suguru Geto, Jogo, Hanami and several others.",
+            "description": "Mahito is one of the primary antagonists of the Jujutsu Kaisen series. He is a Cursed Spirit allied with Suguru Geto, Jogo, Hanami and several others. Their ultimate goal is the eradication of humanity and ultimately replacing the population with Cursed Spirits.",
             "genres": [
               "Action",
               "Drama",
@@ -21226,7 +21226,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b158154-UCqbiULli62P.png",
-            "description": "Ability: Reverse Healing Cursed Technique Alumnus of Tokyo Jujutsu High, having been classmates with Satoru Gojo and Suguru Geto. After graduating into a full-fledged jujutsu sorcerer, Shoko became the school's primary doctor.",
+            "description": "Alumnus of Tokyo Jujutsu High, having been classmates with Satoru Gojo and Suguru Geto. After graduating into a full-fledged jujutsu sorcerer, Shoko became the school's primary doctor.",
             "genres": [
               "Action",
               "Drama",
@@ -21240,7 +21240,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b156991-niYjdp9CxO4w.png",
-            "description": "Grade: Special Grade Cursed Spirit Jogou is an unregistered special grade cursed spirit aligned with Mahito, Hanami, and Dagon. He was born of humanity's fear and negative association with volcanoes and other fire-related natural disasters.",
+            "description": "Jogou is an unregistered special grade cursed spirit aligned with Mahito, Hanami, and Dagon. He was born of humanity's fear and negative association with volcanoes and other fire-related natural disasters.",
             "genres": [
               "Action",
               "Drama",
@@ -21268,7 +21268,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157866-UWDtYBoG71PD.png",
-            "description": "Cursed Technique: Blood Manipulation Grade: Semi-Grade 1 Sorcerer He is a third-year at Kyoto Magic Technical College.",
+            "description": "He is a third-year at Kyoto Magic Technical College.",
             "genres": [
               "Action",
               "Drama",
@@ -21282,7 +21282,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b133701-rCQuDpHr3UZL.png",
-            "description": "Species: Human, Reincarnated Sorcerer According to the legend, Sukuna was a demon with four arms and two faces who lived in the golden era of sorcery 1000 years ago. Sorcerers of the era gave their all to defeat him, but to no avail.",
+            "description": "According to the legend, Sukuna was a demon with four arms and two faces who lived in the golden era of sorcery 1000 years ago. Sorcerers of the era gave their all to defeat him, but to no avail.",
             "genres": [
               "Action",
               "Drama",
@@ -21296,7 +21296,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b133699-FCnXaISgazAi.png",
-            "description": "Occupation: Curse User Grade: Special Grade Curse User Cursed Technique: Cursed Spirit Manipulation Suguru Getou is an antagonist in both the Jujutsu Kaisen series and its prequel Jujutsu Kaisen 0: Jujutsu High.",
+            "description": "",
             "genres": [
               "Action",
               "Drama",
@@ -21338,7 +21338,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157215-I3TQJu8nkDwD.jpg",
-            "description": "Occupation: Jujutsu Sorcerer Affiliation: Jujutsu High Grade: Grade 1 Sorcerer Family: Ui Ui (Younger Brother) Abilities: Mei Mei is a grade 1 jujutsu sorcerer who works independently and only in exchange for money. She is also the older sister of Ui Ui.",
+            "description": "Mei Mei is a grade 1 jujutsu sorcerer who works independently and only in exchange for money. She is also the older sister of Ui Ui.",
             "genres": [
               "Action",
               "Drama",
@@ -21352,7 +21352,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b137974-9qnK3DPrvLKh.jpg",
-            "description": "Species: Cursed Corpse (varies among 3 personalities) Occupation: Jujutsu Sorcerer, Student Affiliation: Jujutsu High Grade: 2 He is a second-year at Tokyo Prefectural Jujutsu High. As a Metamorphosed Cursed Corpse, he is the best creation of Principal Masamichi Yaga.",
+            "description": "He is a second-year at Tokyo Prefectural Jujutsu High. As a Metamorphosed Cursed Corpse, he is the best creation of Principal Masamichi Yaga. He is sentient and has three cores inside the doll body: the youngest brother \"Panda\", the eldest brother \"Gorilla\" and a sister.",
             "genres": [
               "Action",
               "Drama",
@@ -21366,7 +21366,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b137975-6TH7PiLWJaqy.png",
-            "description": "Occupation: Sorcerer, Student Affiliation: Kyoto Jujutsu Technical High School Grade: Grade 1 Sorcerer Toudou is a third-year student at Kyoto Jujutsu Technical High School who possesses inhuman physical strength, durability, and speed.",
+            "description": "Toudou is a third-year student at Kyoto Jujutsu Technical High School who possesses inhuman physical strength, durability, and speed.",
             "genres": [
               "Action",
               "Drama",
@@ -21380,7 +21380,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157868-Ui2Wht3M6tlM.png",
-            "description": "Species: Human Occupation: Jujutsu Sorcerer Affiliation: Kyoto Magic Technical College Grade: Semi-Grade 2 Sorcerer Cursed Technique: Tool Manipulation She is a third-year at Kyoto Magic Technical College.",
+            "description": "She is a third-year at Kyoto Magic Technical College.",
             "genres": [
               "Action",
               "Drama",
@@ -21394,7 +21394,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157116-2jYQf3y8NeTZ.png",
-            "description": "Chousou bears strong attachments to his brothers and is very overprotective of them.",
+            "description": "Chousou is half human and half cursed spirit and the first of the Death Painting Wombs with a Special Grade rank. He and his two brothers, Kechizu and Eso are Cursed Womb: Death Paintings who have sided with Mahito's group.",
             "genres": [
               "Action",
               "Drama",
@@ -21422,7 +21422,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157115-kdhRYQdVhH95.png",
-            "description": "Species: Human Occupation: Sorcerer, Student Affiliation: Jujutsu High Grade: Grade 2 Sorcerer Cursed Technique: Cursed Speech He is a second-year at Tokyo Metropolitan Jujutsu Technical High School.",
+            "description": "He is a second-year at Tokyo Metropolitan Jujutsu Technical High School. Due to his curse ability, he is only willing to communicate with ingredients used to make rice balls.",
             "genres": [
               "Action",
               "Drama",
@@ -21436,7 +21436,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b156848-Rf0tuoQCNyZV.png",
-            "description": "Species: Human Occupation: Jujutsu Sorcerer, Student Affiliation: Kyoto Metropolitan Curse Technical College Grade: Grade 3 Sorcerer A second-year at Kyoto Metropolitan Curse Technical College. Kasumi is a hard-working, restrained, and considerate pacifist.",
+            "description": "A second-year at Kyoto Metropolitan Curse Technical College. Kasumi is a hard-working, restrained, and considerate pacifist. She is also a big fan of Satoru Gojo.",
             "genres": [
               "Action",
               "Drama",

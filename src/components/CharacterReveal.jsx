@@ -10,8 +10,8 @@ export default function CharacterReveal({ character, guesserName, onStartQuestio
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-10">
       <div className="w-full max-w-2xl text-center">
-        <h2 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500 mb-8">
-          🎭 Character Reveal
+        <h2 className="text-4xl font-black mb-8">
+          🎭 <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">Character Reveal</span>
         </h2>
 
         <div className="flex justify-center mb-4">

@@ -1,4 +1,6 @@
 export default function Leaderboard({ players, totalScores, roundNumber, onPlayAgain, onEditLists }) {
+  const allWins = JSON.parse(localStorage.getItem('aniGuessWins') || '{}');
+  const winsEntries = Object.entries(allWins).sort((a, b) => b[1] - a[1]);
   const ranked = [...players]
     .map((p) => ({ ...p, total: totalScores[p.id] || 0 }))
     .sort((a, b) => b.total - a.total || a.name.localeCompare(b.name));
@@ -46,8 +48,8 @@ export default function Leaderboard({ players, totalScores, roundNumber, onPlayA
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-10">
       <div className="w-full max-w-2xl text-center">
-        <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 mb-2">
-          🏆 Final Results
+        <h2 className="text-5xl font-black mb-2">
+          🏆 <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500">Final Results</span>
         </h2>
         <p className="text-white/50 text-lg mb-10">{roundNumber} round{roundNumber !== 1 ? 's' : ''} played</p>
 
@@ -89,6 +91,19 @@ export default function Leaderboard({ players, totalScores, roundNumber, onPlayA
             </div>
           ))}
         </div>
+
+        {/* Cumulative Wins */}
+        {winsEntries.length > 0 && (
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8 text-left">
+            <h3 className="text-white font-bold text-xl mb-4">🏅 All-Time Wins</h3>
+            {winsEntries.map(([name, count], i) => (
+              <div key={name} className="flex justify-between items-center py-3 border-b border-white/10 last:border-0">
+                <span className="text-white text-lg">{i === 0 ? '👑 ' : ''}{name}</span>
+                <span className="text-yellow-400 font-black text-xl">{count} W</span>
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="flex flex-col gap-4">
           <button

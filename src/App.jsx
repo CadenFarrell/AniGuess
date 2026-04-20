@@ -258,6 +258,14 @@ function App() {
 
   const handleEndSession = () => {
     clearSession();
+    const maxScore = Math.max(...Object.values(totalScores));
+    if (maxScore > 0) {
+      const wins = JSON.parse(localStorage.getItem('aniGuessWins') || '{}');
+      gameSession.players.forEach((p) => {
+        if ((totalScores[p.id] || 0) === maxScore) wins[p.name] = (wins[p.name] || 0) + 1;
+      });
+      localStorage.setItem('aniGuessWins', JSON.stringify(wins));
+    }
     setView('leaderboard');
   };
 
@@ -340,6 +348,9 @@ function App() {
       {view === 'assignment' && gameSession && (
         <CharacterAssignment
           guesser={assignmentPlayer}
+          allPlayers={gameSession.players}
+          sharedShowsOnly={gameSession.settings.sharedShowsOnly}
+          twoStepRandom={gameSession.settings.twoStepRandom}
           onCharacterAssigned={handleCharacterAssigned}
           assignmentNumber={assignmentIndex + 1}
           totalPlayers={gameSession.players.length}
@@ -372,6 +383,7 @@ function App() {
               onWrongGuess={handleWrongGuess}
               timerEnabled={gameSession.settings.timerEnabled}
               timerSeconds={gameSession.settings.timerSeconds}
+              sharedShowsOnly={gameSession.settings.sharedShowsOnly ?? true}
             />
           </div>
         </div>
@@ -382,11 +394,16 @@ function App() {
           <div className="w-full max-w-2xl mx-auto">
             <div className="text-9xl mb-6">🎉</div>
             <h2 className="text-5xl font-black text-white mb-3">{lastLocked.name} got it!</h2>
-            <p className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-pink-500 mb-3">
-              {lastLocked.position === 1 ? '🥇 1st' :
-               lastLocked.position === 2 ? '🥈 2nd' :
-               lastLocked.position === 3 ? '🥉 3rd' :
-               `#${lastLocked.position}`}
+            <p className="text-7xl font-black mb-3">
+              {lastLocked.position === 1 ? '🥇' :
+               lastLocked.position === 2 ? '🥈' :
+               lastLocked.position === 3 ? '🥉' : ''}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-pink-500">
+                {lastLocked.position === 1 ? ' 1st' :
+                 lastLocked.position === 2 ? ' 2nd' :
+                 lastLocked.position === 3 ? ' 3rd' :
+                 `#${lastLocked.position}`}
+              </span>
             </p>
             <p className="text-2xl text-white/60 mb-3">in {lastLocked.turnsUsed} turns</p>
             {lockedPositions.filter(lp => lp.turnsUsed === lastLocked.turnsUsed && lp.playerId !== lastLocked.playerId).length > 0 && (

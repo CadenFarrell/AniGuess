@@ -50,7 +50,9 @@ function SortablePlayer({ player, onRemove, onGoToList }) {
 export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayersChange }) {
   const { loadOrCreateProfile } = useProfile();
   const [nameInput, setNameInput] = useState('');
+  const [twoStepRandom, setTwoStepRandom] = useState(false);
   const [timerEnabled, setTimerEnabled] = useState(false);
+  const [sharedShowsOnly, setSharedShowsOnly] = useState(true);
   const [timerSeconds, setTimerSeconds] = useState(60);
   const [pointsPerPosition, setPointsPerPosition] = useState([3, 2, 1, 0]);
 
@@ -138,13 +140,23 @@ export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayer
           <h3 className="text-white font-bold text-xl mb-4">⚙️ Settings</h3>
 
           <label className="flex items-center gap-3 text-white/80 text-lg mb-4 cursor-pointer">
+            <input type="checkbox" checked={twoStepRandom} onChange={(e) => setTwoStepRandom(e.target.checked)} className="w-5 h-5" />
+            Anime-first randomizer
+          </label>
+
+          <label className="flex items-center gap-3 text-white/80 text-lg mb-4 cursor-pointer">
+            <input type="checkbox" checked={timerEnabled} onChange={(e) => setTimerEnabled(e.target.checked)} className="w-5 h-5" />
+            Enable Timer
+          </label>
+
+          <label className="flex items-center gap-3 text-white/80 text-lg mb-4 cursor-pointer">
             <input
               type="checkbox"
-              checked={timerEnabled}
-              onChange={(e) => setTimerEnabled(e.target.checked)}
+              checked={sharedShowsOnly}
+              onChange={(e) => setSharedShowsOnly(e.target.checked)}
               className="w-5 h-5"
             />
-            Enable Timer
+            Shared shows only
           </label>
 
           {timerEnabled && (
@@ -181,7 +193,7 @@ export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayer
 
         {/* Start Button */}
         <button
-          onClick={() => onStartGame({ players, settings: { timerEnabled, timerSeconds, pointsPerPosition } })}
+          onClick={() => onStartGame({ players, settings: { timerEnabled, timerSeconds, pointsPerPosition, sharedShowsOnly, twoStepRandom } })}
           disabled={!canStart}
           className="w-full py-5 rounded-xl font-black text-2xl transition-all duration-200 
             disabled:bg-white/10 disabled:text-white/30 disabled:cursor-not-allowed

@@ -15,9 +15,13 @@ export default function GameScreen({
   onWrongGuess,
   timerEnabled,
   timerSeconds,
+  sharedShowsOnly = true,
 }) {
   const [question, setQuestion] = useState('');
   const [guess, setGuess] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [activeIdx, setActiveIdx] = useState(-1);
+  const allChars = guesser.animeList.flatMap(a => a.characters.map(c => ({ name: c.name, series: a.title, imageUrl: c.imageUrl })));
   const [mode, setMode] = useState('choose'); // choose | question | guess
   const [waitingForAnswer, setWaitingForAnswer] = useState(false);
   const [pendingQuestion, setPendingQuestion] = useState('');
@@ -26,6 +30,10 @@ export default function GameScreen({
   const [timeLeft, setTimeLeft] = useState(timerSeconds);
   const [timerActive, setTimerActive] = useState(timerEnabled);
   const timerRef = useRef(null);
+
+  const peekList = sharedShowsOnly
+    ? guesser.animeList.filter(anime => players.some(p => p.id !== guesser.id && p.animeList.some(a => a.title === anime.title)))
+    : guesser.animeList;
 
   // Reset state when guesser changes (setState during render — React recommended pattern)
   const [prevGuesserID, setPrevGuesserID] = useState(guesser.id);
@@ -87,7 +95,22 @@ export default function GameScreen({
     return false;
   };
 
+  const updateGuess = (val) => {
+    setGuess(val);
+    setActiveIdx(-1);
+    if (val.trim().length < 1) { setSuggestions([]); return; }
+    const q = val.toLowerCase();
+    setSuggestions(allChars.filter(c => c.name.toLowerCase().includes(q)).slice(0, 5));
+  };
+
+  const pickSuggestion = (name) => {
+    setGuess(name);
+    setSuggestions([]);
+    setActiveIdx(-1);
+  };
+
   const submitGuess = () => {
+    setSuggestions([]);
     if (!guess.trim()) return;
     const correct = isCorrectGuess(guess);
     const logEntry = { type: 'guess', text: guess.trim(), correct };
@@ -192,18 +215,39 @@ export default function GameScreen({
 
       {mode === 'guess' && (
         <div className="mb-5">
+          <div className="relative">
           <input
             type="text"
             value={guess}
-            onChange={(e) => setGuess(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && guess.trim() && submitGuess()}
+            onChange={(e) => updateGuess(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'ArrowDown') { e.preventDefault(); setActiveIdx(i => Math.min(i + 1, suggestions.length - 1)); }
+              else if (e.key === 'ArrowUp') { e.preventDefault(); setActiveIdx(i => Math.max(i - 1, -1)); }
+              else if (e.key === 'Enter') { if (activeIdx >= 0) pickSuggestion(suggestions[activeIdx].name); else if (guess.trim()) submitGuess(); }
+              else if (e.key === 'Escape') setSuggestions([]);
+            }}
             placeholder="Type your guess..."
             autoFocus
             className="w-full bg-white/10 border border-white/20 rounded-xl px-5 py-4 text-white text-lg placeholder-white/40 outline-none focus:border-pink-500 mb-3"
           />
+          {suggestions.length > 0 && (
+            <div className="absolute z-10 w-full bg-gray-900 border border-white/20 rounded-xl overflow-hidden mb-3">
+              {suggestions.map((s, i) => (
+                <div key={i} onMouseDown={() => pickSuggestion(s.name)}
+                  className={`flex items-center gap-3 px-4 py-2 cursor-pointer ${ i === activeIdx ? 'bg-pink-600/30' : 'hover:bg-white/10' }`}>
+                  {s.imageUrl && <img src={s.imageUrl} className="w-9 h-9 rounded-lg object-cover flex-shrink-0" />}
+                  <div>
+                    <p className="text-white text-sm font-semibold">{s.name}</p>
+                    <p className="text-white/40 text-xs">{s.series}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          </div>
           <div className="flex gap-3">
             <button
-              onClick={() => { setMode('choose'); setGuess(''); }}
+              onClick={() => { setMode('choose'); setGuess(''); setSuggestions([]); }}
               className="px-5 py-4 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors text-base"
             >
               ← Back
@@ -285,11 +329,11 @@ export default function GameScreen({
           <div className="bg-gray-900 border border-white/20 rounded-2xl p-8 max-w-lg w-full max-h-[32rem] overflow-y-auto">
             <h3 className="text-white font-black text-2xl mb-1">📋 Your Anime List</h3>
             <p className="text-white/50 text-base mb-5">Titles only — no characters!</p>
-            {guesser.animeList.length === 0 ? (
-              <p className="text-white/50 text-lg">No anime in your list yet.</p>
+            {peekList.length === 0 ? (
+              <p className="text-white/50 text-lg">No shared anime found.</p>
             ) : (
               <ul className="space-y-2">
-                {guesser.animeList.map((anime) => (
+                {peekList.map((anime) => (
                   <li key={anime.id} className="text-white/80 text-lg py-2 border-b border-white/10">
                     {anime.title}
                   </li>
