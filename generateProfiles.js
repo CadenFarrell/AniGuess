@@ -89,8 +89,24 @@ async function anilist(id) {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const trimDesc = (desc = '') => {
-  const t = (desc || '').replace(/~!.*?!~/gs, '').replace(/\n+/g, ' ').trim();
-  return t.length > 280 ? t.slice(0, 277) + '…' : t;
+  const t = (desc || '')
+    .replace(/~!.*?!~/gs, '')                    // strip spoiler tags
+    .replace(/\[([^\]]+)\]\(https?:\/\/[^)]+\)/g, '$1') // [text](url) → text
+    .replace(/<br\s*\/?>/gi, ' ')                // <br> tags
+    .replace(/&quot;/g, '"')                     // HTML entities
+    .replace(/&#039;/g, "'")                     // HTML entities
+    .replace(/&amp;/g, '&')                      // HTML entities
+    .replace(/__(.*?)__/g, '$1')                 // __bold__ → plain
+    .replace(/\*\*(.*?)\*\*/g, '$1')             // **bold** → plain
+    .replace(/\(Source:[^)]*\)/gi, '')           // (Source: ...) attribution
+    .replace(/^[^.!?]*?\b(Height|Weight|Age|Rank|Gender|Birthday|Blood Type|Voice Actor)[^\n]*(\n|$)/gim, '') // stat lines
+    .replace(/\n+/g, ' ')                        // newlines → space
+    .replace(/\s{2,}/g, ' ')                     // collapse extra spaces
+    .trim();
+  if (t.length <= 280) return t;
+  const cut = t.slice(0, 280);
+  const lastSentence = cut.search(/[^.!?]*$/);
+  return cut.slice(0, lastSentence).trim();
 };
 
 // ── Anime catalog (AniList IDs) ───────────────────────────────────────────────
