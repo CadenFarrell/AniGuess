@@ -1,6 +1,6 @@
-export default function TurnTracker({ players, currentPlayerId, lockedPositions }) {
-  const getPositionEmoji = (pos) => ['🥇', '🥈', '🥉'][pos - 1] || `#${pos}`;
+import { getPositionEmoji } from '../utils/ranking';
 
+export default function TurnTracker({ players, currentPlayerId, lockedPositions }) {
   return (
     <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6">
       <div className="flex gap-3 flex-wrap">

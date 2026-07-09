@@ -1,9 +1,11 @@
-export default function RoundEnd({ players, lockedPositions, roundNumber, totalScores, onNewRound, onEndSession }) {
-  const getPositionEmoji = (pos) => ['🥇', '🥈', '🥉'][pos - 1] || `#${pos}`;
+import { useMemo } from 'react';
+import { computeRankedPlayers, getPositionEmoji } from '../utils/ranking';
 
-  const ranked = [...players]
-    .map((p) => ({ ...p, total: totalScores[p.id] || 0 }))
-    .sort((a, b) => b.total - a.total);
+export default function RoundEnd({ players, lockedPositions, roundNumber, totalScores, onNewRound, onEndSession }) {
+  const ranked = useMemo(
+    () => computeRankedPlayers(players, totalScores),
+    [players, totalScores]
+  );
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-10">

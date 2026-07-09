@@ -1,5 +1,9 @@
 import { useState } from 'react';
 import { useProfile } from '../hooks/useProfile';
+import { useWins } from '../hooks/useWins';
+import { useEscapeKey } from '../hooks/useEscapeKey';
+import { normalizeTitle } from '../utils/ranking';
+import AniListImport from './AniListImport';
 import {
   DndContext,
   closestCenter,
@@ -42,14 +46,17 @@ function SortablePlayer({ player, onRemove, onGoToList }) {
         onClick={() => onGoToList(player)}
         className="px-3 py-1 bg-white/10 hover:bg-purple-600/50 text-white/60 hover:text-white text-sm rounded-lg transition-colors"
       >✏️ Edit List</button>
-      <button onClick={() => onRemove(player.id)} className="text-red-400 hover:text-red-300 font-bold text-lg">✕</button>
+      <button onClick={() => onRemove(player.id)} aria-label={`Remove ${player.name}`} className="text-red-400 hover:text-red-300 font-bold text-lg">✕</button>
     </div>
   );
 }
 
 export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayersChange }) {
-  const { loadOrCreateProfile } = useProfile();
+  const { loadOrCreateProfile, saveProfile } = useProfile();
+  const { getWins, resetWins } = useWins();
   const [nameInput, setNameInput] = useState('');
+  const [importTarget, setImportTarget] = useState(null);
+  const [showWins, setShowWins] = useState(false);
   const [twoStepRandom, setTwoStepRandom] = useState(false);
   const [timerEnabled, setTimerEnabled] = useState(false);
   const [sharedShowsOnly, setSharedShowsOnly] = useState(true);
@@ -73,6 +80,27 @@ export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayer
 
   const removePlayer = (id) => onPlayersChange(players.filter((p) => p.id !== id));
 
+  const startImport = () => {
+    const trimmed = nameInput.trim();
+    if (!trimmed) {
+      alert('Enter a player name first, then Import.');
+      return;
+    }
+    const { profile } = loadOrCreateProfile(trimmed);
+    if (players.some((p) => p.id === profile.id)) {
+      alert(`${profile.name} is already in the game!`);
+      return;
+    }
+    setImportTarget(profile);
+  };
+
+  const handleImported = (mergedProfile) => {
+    saveProfile(mergedProfile);
+    onPlayersChange([...players, mergedProfile]);
+    setNameInput('');
+    setImportTarget(null);
+  };
+
   const handleDragEnd = ({ active, over }) => {
     if (active.id !== over?.id) {
       const oldIndex = players.findIndex((p) => p.id === active.id);
@@ -90,7 +118,22 @@ export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayer
   const allHaveChars = players.every(
     (p) => p.animeList.reduce((s, a) => s + a.characters.length, 0) > 0
   );
-  const canStart = players.length >= 2 && allHaveChars;
+  const hasSharedAnime = players.length < 2 || players.some((p, i) =>
+    players.some((other, j) => i !== j &&
+      p.animeList.some(a => other.animeList.some(o => normalizeTitle(o.title) === normalizeTitle(a.title))))
+  );
+  const canStart = players.length >= 2 && allHaveChars && (!sharedShowsOnly || hasSharedAnime);
+
+  const winsEntries = showWins ? Object.entries(getWins()).sort((a, b) => b[1] - a[1]) : [];
+
+  const handleResetWins = () => {
+    if (window.confirm('Reset all-time wins? This cannot be undone.')) {
+      resetWins();
+      setShowWins(false);
+    }
+  };
+
+  useEscapeKey(showWins, () => setShowWins(false));
 
   return (
     <div className="min-h-screen flex flex-col items-center px-6 py-10">
@@ -100,7 +143,31 @@ export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayer
           AniGuess
         </h1>
         <p className="text-white/60 text-lg">The anime character guessing game</p>
+        <button onClick={() => setShowWins(true)} className="mt-3 px-4 py-2 bg-white/10 hover:bg-white/20 text-white/70 hover:text-white text-sm rounded-xl transition-colors">
+          🏅 All-Time Leaderboard
+        </button>
       </div>
+
+      {showWins && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4" onClick={() => setShowWins(false)} role="dialog" aria-modal="true">
+          <div className="bg-gray-900 border border-white/20 rounded-2xl p-8 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-3xl font-black text-white mb-6">🏅 All-Time Wins</h2>
+            {winsEntries.length === 0
+              ? <p className="text-white/40 text-center py-4">No games played yet!</p>
+              : winsEntries.map(([name, count], i) => (
+                <div key={name} className="flex justify-between items-center py-3 border-b border-white/10 last:border-0">
+                  <span className="text-white text-lg">{i === 0 ? '👑 ' : ''}{name}</span>
+                  <span className="text-yellow-400 font-black text-xl">{count} W</span>
+                </div>
+              ))
+            }
+            <div className="mt-6 flex gap-3">
+              <button onClick={() => setShowWins(false)} className="flex-1 py-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-colors">Close</button>
+              {winsEntries.length > 0 && <button onClick={handleResetWins} className="flex-1 py-3 bg-red-600/40 hover:bg-red-600/70 text-red-300 font-bold rounded-xl transition-colors">Reset</button>}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="w-full max-w-2xl">
         {/* Add Player */}
@@ -120,7 +187,22 @@ export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayer
           >
             Add
           </button>
+          <button
+            onClick={startImport}
+            disabled={!nameInput.trim()}
+            className="bg-white/10 hover:bg-white/20 disabled:bg-white/5 disabled:text-white/20 text-white font-bold px-5 py-4 text-lg rounded-xl transition-colors whitespace-nowrap"
+          >
+            🔗 Import
+          </button>
         </div>
+
+        {importTarget && (
+          <AniListImport
+            profile={importTarget}
+            onClose={() => setImportTarget(null)}
+            onImported={handleImported}
+          />
+        )}
 
         {/* Player List */}
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -133,6 +215,11 @@ export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayer
 
         {players.length < 2 && (
           <p className="text-white/40 text-center text-base mb-5">Add at least 2 players to start</p>
+        )}
+        {players.length >= 2 && sharedShowsOnly && !hasSharedAnime && (
+          <p className="text-yellow-400 text-center text-base mb-5">
+            ⚠️ No anime titles are shared between all players — uncheck "Shared shows only" or add matching titles.
+          </p>
         )}
 
         {/* Settings */}
@@ -166,7 +253,7 @@ export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayer
                 type="number"
                 value={timerSeconds}
                 min={30} max={300}
-                onChange={(e) => setTimerSeconds(parseInt(e.target.value))}
+                onChange={(e) => setTimerSeconds(parseInt(e.target.value) || 60)}
                 className="w-20 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-center text-lg"
               />
             </div>

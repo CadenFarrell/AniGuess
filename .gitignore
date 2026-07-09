@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+.anilist-cache/
+
+# Firebase CLI deploy cache
+.firebase/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -1,37 +1,14 @@
-export default function Leaderboard({ players, totalScores, roundNumber, onPlayAgain, onEditLists }) {
-  const allWins = JSON.parse(localStorage.getItem('aniGuessWins') || '{}');
-  const winsEntries = Object.entries(allWins).sort((a, b) => b[1] - a[1]);
-  const ranked = [...players]
-    .map((p) => ({ ...p, total: totalScores[p.id] || 0 }))
-    .sort((a, b) => b.total - a.total || a.name.localeCompare(b.name));
+import { useMemo } from 'react';
+import { computeRankedPlayers, getPositionEmoji } from '../utils/ranking';
 
-  // Assign positions accounting for ties — use a loop so we can safely
-  // reference previously computed entries (a self-referencing .map() would
-  // access the const while it's still in the temporal dead zone and throw).
-  const withPositions = [];
-  for (let i = 0; i < ranked.length; i++) {
-    const player = ranked[i];
-    if (i === 0) {
-      withPositions.push({ ...player, position: 1 });
-    } else {
-      const prev = ranked[i - 1];
-      const prevPosition = withPositions[i - 1].position;
-      withPositions.push({
-        ...player,
-        position: player.total === prev.total ? prevPosition : i + 1,
-      });
-    }
-  }
+export default function Leaderboard({ players, totalScores, roundNumber, onPlayAgain, onEditLists }) {
+  const withPositions = useMemo(
+    () => computeRankedPlayers(players, totalScores),
+    [players, totalScores]
+  );
 
   const isTied = (player) =>
     withPositions.filter((p) => p.position === player.position).length > 1;
-
-  const getPositionEmoji = (pos) => {
-    if (pos === 1) return '👑';
-    if (pos === 2) return '🥈';
-    if (pos === 3) return '🥉';
-    return `#${pos}`;
-  };
 
   // Group players by podium position (2nd, 1st, 3rd) — all tied players share the same slot
   const podiumSlots = [2, 1, 3].map((pos) => ({
@@ -54,7 +31,7 @@ export default function Leaderboard({ players, totalScores, roundNumber, onPlayA
         <p className="text-white/50 text-lg mb-10">{roundNumber} round{roundNumber !== 1 ? 's' : ''} played</p>
 
         {/* Podium */}
-        {ranked.length >= 2 && (
+        {withPositions.length >= 2 && (
           <div className="flex items-end justify-center gap-4 mb-10">
             {podiumSlots.map((slot) => {
               const { height, color, emoji } = podiumConfig[slot.pos];
@@ -91,19 +68,6 @@ export default function Leaderboard({ players, totalScores, roundNumber, onPlayA
             </div>
           ))}
         </div>
-
-        {/* Cumulative Wins */}
-        {winsEntries.length > 0 && (
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8 text-left">
-            <h3 className="text-white font-bold text-xl mb-4">🏅 All-Time Wins</h3>
-            {winsEntries.map(([name, count], i) => (
-              <div key={name} className="flex justify-between items-center py-3 border-b border-white/10 last:border-0">
-                <span className="text-white text-lg">{i === 0 ? '👑 ' : ''}{name}</span>
-                <span className="text-yellow-400 font-black text-xl">{count} W</span>
-              </div>
-            ))}
-          </div>
-        )}
 
         <div className="flex flex-col gap-4">
           <button

@@ -1,5 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import TurnTracker from './TurnTracker';
+import { normalizeTitle } from '../utils/ranking';
+import { useEscapeKey } from '../hooks/useEscapeKey';
+import { isCorrectGuess as matchGuess } from '../utils/guessMatch';
 
 export default function GameScreen({
   guesser,
@@ -21,7 +24,10 @@ export default function GameScreen({
   const [guess, setGuess] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [activeIdx, setActiveIdx] = useState(-1);
-  const allChars = guesser.animeList.flatMap(a => a.characters.map(c => ({ name: c.name, series: a.title, imageUrl: c.imageUrl })));
+  const allChars = useMemo(
+    () => guesser.animeList.flatMap(a => a.characters.map(c => ({ name: c.name, series: a.title, imageUrl: c.imageUrl }))),
+    [guesser.animeList]
+  );
   const [mode, setMode] = useState('choose'); // choose | question | guess
   const [waitingForAnswer, setWaitingForAnswer] = useState(false);
   const [pendingQuestion, setPendingQuestion] = useState('');
@@ -30,10 +36,14 @@ export default function GameScreen({
   const [timeLeft, setTimeLeft] = useState(timerSeconds);
   const [timerActive, setTimerActive] = useState(timerEnabled);
   const timerRef = useRef(null);
+  const turnEndTimerRef = useRef(null);
 
-  const peekList = sharedShowsOnly
-    ? guesser.animeList.filter(anime => players.some(p => p.id !== guesser.id && p.animeList.some(a => a.title === anime.title)))
-    : guesser.animeList;
+  const peekList = useMemo(
+    () => sharedShowsOnly
+      ? guesser.animeList.filter(anime => players.some(p => p.id !== guesser.id && p.animeList.some(a => normalizeTitle(a.title) === normalizeTitle(anime.title))))
+      : guesser.animeList,
+    [sharedShowsOnly, guesser, players]
+  );
 
   // Reset state when guesser changes (setState during render — React recommended pattern)
   const [prevGuesserID, setPrevGuesserID] = useState(guesser.id);
@@ -41,6 +51,8 @@ export default function GameScreen({
     setPrevGuesserID(guesser.id);
     setQuestion('');
     setGuess('');
+    setSuggestions([]);
+    setActiveIdx(-1);
     setMode('choose');
     setWaitingForAnswer(false);
     setPendingQuestion('');
@@ -55,15 +67,18 @@ export default function GameScreen({
     if (timerActive && timeLeft > 0) {
       timerRef.current = setTimeout(() => setTimeLeft((t) => t - 1), 1000);
     } else if (timerActive && timeLeft === 0) {
-      setTimeout(() => {
+      turnEndTimerRef.current = setTimeout(() => {
         setTimerActive(false);
         setWaitingForAnswer(false);
-        const logEntry = { type: 'timer', text: "⏱️ Time's up!" };
+        const logEntry = { id: crypto.randomUUID(), type: 'timer', text: "⏱️ Time's up!" };
         onTurnComplete(logEntry);
       }, 0);
     }
-    return () => clearTimeout(timerRef.current);
-  }, [timerActive, timeLeft, timerEnabled]); // eslint-disable-line react-hooks/exhaustive-deps
+    return () => {
+      clearTimeout(timerRef.current);
+      clearTimeout(turnEndTimerRef.current);
+    };
+  }, [timerActive, timeLeft, timerEnabled, onTurnComplete]);
 
   const submitQuestion = () => {
     if (!question.trim()) return;
@@ -79,21 +94,12 @@ export default function GameScreen({
     clearTimeout(timerRef.current);
     setTimerActive(false);
     setWaitingForAnswer(false);
-    const logEntry = { type: 'question', text: pendingQuestion, answer };
+    const logEntry = { id: crypto.randomUUID(), type: 'question', text: pendingQuestion, answer };
     setPendingQuestion('');
     onTurnComplete(logEntry);
   };
 
-  /**
-   * Check whether a guess matches the character.
-   * Accepts the canonical name OR any nickname (all case-insensitive, substring match).
-   */
-  const isCorrectGuess = (raw) => {
-    const g = raw.trim().toLowerCase();
-    if (character.name.toLowerCase().includes(g)) return true;
-    if (character.nicknames?.some((n) => n.toLowerCase().includes(g))) return true;
-    return false;
-  };
+  const isCorrectGuess = (raw) => matchGuess(character, raw);
 
   const updateGuess = (val) => {
     setGuess(val);
@@ -113,7 +119,7 @@ export default function GameScreen({
     setSuggestions([]);
     if (!guess.trim()) return;
     const correct = isCorrectGuess(guess);
-    const logEntry = { type: 'guess', text: guess.trim(), correct };
+    const logEntry = { id: crypto.randomUUID(), type: 'guess', text: guess.trim(), correct };
 
     if (correct) {
       onCorrectGuess(logEntry);
@@ -129,6 +135,8 @@ export default function GameScreen({
     setShowPeekModal(true);
     onPeek();
   };
+
+  useEscapeKey(showPeekModal, () => setShowPeekModal(false));
 
   const timerColor = timeLeft > 10 ? 'text-green-400' : timeLeft > 5 ? 'text-orange-400' : 'text-red-400';
 
@@ -233,9 +241,9 @@ export default function GameScreen({
           {suggestions.length > 0 && (
             <div className="absolute z-10 w-full bg-gray-900 border border-white/20 rounded-xl overflow-hidden mb-3">
               {suggestions.map((s, i) => (
-                <div key={i} onMouseDown={() => pickSuggestion(s.name)}
+                <div key={`${s.series}-${s.name}`} onMouseDown={() => pickSuggestion(s.name)}
                   className={`flex items-center gap-3 px-4 py-2 cursor-pointer ${ i === activeIdx ? 'bg-pink-600/30' : 'hover:bg-white/10' }`}>
-                  {s.imageUrl && <img src={s.imageUrl} className="w-9 h-9 rounded-lg object-cover flex-shrink-0" />}
+                  {s.imageUrl && <img src={s.imageUrl} loading="lazy" className="w-9 h-9 rounded-lg object-cover flex-shrink-0" />}
                   <div>
                     <p className="text-white text-sm font-semibold">{s.name}</p>
                     <p className="text-white/40 text-xs">{s.series}</p>
@@ -298,8 +306,8 @@ export default function GameScreen({
         {questionLog.length === 0 ? (
           <p className="text-white/30 text-base text-center">No questions yet</p>
         ) : (
-          questionLog.map((entry, i) => (
-            <div key={i} className="text-base py-2 border-b border-white/5 last:border-0">
+          questionLog.map((entry) => (
+            <div key={entry.id} className="text-base py-2 border-b border-white/5 last:border-0">
               {entry.type === 'question' && (
                 <span className="text-white/70">
                   ❓ {entry.text}
@@ -325,7 +333,7 @@ export default function GameScreen({
 
       {/* Peek Modal */}
       {showPeekModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4" role="dialog" aria-modal="true">
           <div className="bg-gray-900 border border-white/20 rounded-2xl p-8 max-w-lg w-full max-h-[32rem] overflow-y-auto">
             <h3 className="text-white font-black text-2xl mb-1">📋 Your Anime List</h3>
             <p className="text-white/50 text-base mb-5">Titles only — no characters!</p>

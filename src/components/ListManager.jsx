@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useProfile } from '../hooks/useProfile';
+import { normalizeTitle } from '../utils/ranking';
+import AniListImport from './AniListImport';
 
 export default function ListManager({ profile, onProfileUpdated }) {
   const { saveProfile } = useProfile();
@@ -8,6 +10,7 @@ export default function ListManager({ profile, onProfileUpdated }) {
   const [addingCharacterTo, setAddingCharacterTo] = useState(null);
   const [editingCharacter, setEditingCharacter] = useState(null);
   const [characterForm, setCharacterForm] = useState(emptyCharacterForm());
+  const [showImport, setShowImport] = useState(false);
 
   function emptyCharacterForm() {
     return { name: '', imageUrl: '', gender: 'Male', role: 'Protagonist', hairColor: '', ability: '', genre: 'Action' };
@@ -21,7 +24,7 @@ export default function ListManager({ profile, onProfileUpdated }) {
   const addAnime = () => {
     const title = newAnimeTitle.trim();
     if (!title) return;
-    if (profile.animeList.some((a) => a.title.toLowerCase() === title.toLowerCase())) {
+    if (profile.animeList.some((a) => normalizeTitle(a.title) === normalizeTitle(title))) {
       alert('You already have that anime in your list!');
       return;
     }
@@ -100,7 +103,24 @@ export default function ListManager({ profile, onProfileUpdated }) {
         >
           + Add
         </button>
+        <button
+          onClick={() => setShowImport(true)}
+          className="px-5 py-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-colors whitespace-nowrap"
+        >
+          🔗 Import from AniList
+        </button>
       </div>
+
+      {showImport && (
+        <AniListImport
+          profile={profile}
+          onClose={() => setShowImport(false)}
+          onImported={(mergedProfile) => {
+            saveUpdatedProfile(mergedProfile);
+            setShowImport(false);
+          }}
+        />
+      )}
 
       {/* Anime List */}
       {profile.animeList.length === 0 ? (
@@ -133,6 +153,7 @@ export default function ListManager({ profile, onProfileUpdated }) {
                   </button>
                   <button
                     onClick={() => deleteAnime(anime.id)}
+                    aria-label={`Delete ${anime.title}`}
                     className="px-3 py-2 bg-white/5 hover:bg-red-600/40 text-white/40 hover:text-red-300 text-sm rounded-lg transition-colors"
                   >
                     🗑️
@@ -153,10 +174,12 @@ export default function ListManager({ profile, onProfileUpdated }) {
                       <div className="flex gap-2">
                         <button
                           onClick={() => openEditCharacter(anime.id, char)}
+                          aria-label={`Edit ${char.name}`}
                           className="px-2 py-1 text-sm bg-white/5 hover:bg-white/15 text-white/60 hover:text-white rounded-lg transition-colors"
                         >✏️</button>
                         <button
                           onClick={() => deleteCharacter(anime.id, char.id)}
+                          aria-label={`Delete ${char.name}`}
                           className="px-2 py-1 text-sm bg-white/5 hover:bg-red-600/30 text-white/40 hover:text-red-300 rounded-lg transition-colors"
                         >🗑️</button>
                       </div>

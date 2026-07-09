@@ -3,6 +3,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { filterAndMapCharacterEdges } from './src/utils/anilistFormat.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CACHE_DIR = path.join(__dirname, '.anilist-cache');
@@ -86,28 +87,6 @@ async function anilist(id) {
   }
   return { genres, characters: { edges: allEdges } };
 }
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-const trimDesc = (desc = '') => {
-  const t = (desc || '')
-    .replace(/~!.*?!~/gs, '')                    // strip spoiler tags
-    .replace(/\[([^\]]+)\]\(https?:\/\/[^)]+\)/g, '$1') // [text](url) → text
-    .replace(/<br\s*\/?>/gi, ' ')                // <br> tags
-    .replace(/&quot;/g, '"')                     // HTML entities
-    .replace(/&#039;/g, "'")                     // HTML entities
-    .replace(/&amp;/g, '&')                      // HTML entities
-    .replace(/__(.*?)__/g, '$1')                 // __bold__ → plain
-    .replace(/\*\*(.*?)\*\*/g, '$1')             // **bold** → plain
-    .replace(/\(Source:[^)]*\)/gi, '')           // (Source: ...) attribution
-    .replace(/^[^.!?\n]*?\b[A-Z][\w\s]+:[^\n]*(\n|$)/gm, '') // stat/label lines (e.g. Height:, Affiliation:)
-    .replace(/\n+/g, ' ')                        // newlines → space
-    .replace(/\s{2,}/g, ' ')                     // collapse extra spaces
-    .trim();
-  if (t.length <= 280) return t;
-  const cut = t.slice(0, 280);
-  const lastSentence = cut.search(/[^.!?]*$/);
-  return cut.slice(0, lastSentence).trim();
-};
 
 // ── Anime catalog (AniList IDs) ───────────────────────────────────────────────
 const ANIME_CATALOG = {
@@ -219,20 +198,10 @@ async function buildAnimeEntry(key, { title, anilistId }) {
   const genres = media.genres ?? [];
   const edges  = media.characters?.edges ?? [];
 
-  const characters = edges
-    .filter(e =>
-      e.role === 'MAIN' ||
-      (e.role === 'SUPPORTING' && (e.node.favourites ?? 0) >= MIN_SUPPORTING_FAVOURITES)
-    )
-    .map(e => ({
-      id:          `anilist_${e.node.id}`,
-      name:        e.node.name.full,
-      role:        e.role === 'MAIN' ? 'Main' : 'Supporting',
-      gender:      e.node.gender ?? 'Unknown',
-      imageUrl:    e.node.image?.large ?? '',
-      description: trimDesc(e.node.description),
-      genres,
-    }));
+  const characters = filterAndMapCharacterEdges(edges, {
+    minSupportingFavourites: MIN_SUPPORTING_FAVOURITES,
+    genres,
+  });
 
   console.log(`${characters.length} chars`);
   return { title, characters };

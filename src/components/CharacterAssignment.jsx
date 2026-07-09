@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { normalizeTitle } from '../utils/ranking';
 
 export default function CharacterAssignment({ guesser, allPlayers, sharedShowsOnly = true, twoStepRandom = false, onCharacterAssigned, assignmentNumber, totalPlayers }) {
   const [step, setStep] = useState('lookaway');
@@ -6,12 +7,14 @@ export default function CharacterAssignment({ guesser, allPlayers, sharedShowsOn
   const [expandedAnime, setExpandedAnime] = useState(null);
   const [browseMode, setBrowseMode] = useState(false);
 
-  const filteredAnimeList = sharedShowsOnly && allPlayers?.length
-    ? guesser.animeList.filter(anime => allPlayers.some(p => p.id !== guesser.id && p.animeList.some(a => a.title === anime.title)))
-    : guesser.animeList;
+  const filteredAnimeList = (sharedShowsOnly && allPlayers?.length
+    ? guesser.animeList.filter(anime => allPlayers.some(p => p.id !== guesser.id && p.animeList.some(a => normalizeTitle(a.title) === normalizeTitle(anime.title))))
+    : guesser.animeList
+  ).filter(a => a.characters.length > 0);
 
   const pickRandom = () => {
     const animeList = filteredAnimeList;
+    if (animeList.length === 0) { setStep('noSharedShows'); return; }
     let pool;
     if (twoStepRandom) {
       const anime = animeList[Math.floor(Math.random() * animeList.length)];
@@ -92,6 +95,12 @@ export default function CharacterAssignment({ guesser, allPlayers, sharedShowsOn
               </h2>
               {sharedShowsOnly && <span className="text-white/40 text-sm ml-auto">Shared shows only</span>}
             </div>
+            {filteredAnimeList.length === 0 && (
+              <p className="text-white/50 text-lg text-center py-10">
+                No shared anime found between players. Go back and either add a matching
+                anime title to each player's list, or turn off "Shared shows only" in Setup.
+              </p>
+            )}
             {filteredAnimeList.map((anime) => (
               <div key={anime.id} className="mb-4">
                 <button
@@ -106,7 +115,7 @@ export default function CharacterAssignment({ guesser, allPlayers, sharedShowsOn
                     {anime.characters.map((char) => (
                       <div key={char.id} className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-4">
                         {char.imageUrl ? (
-                          <img src={char.imageUrl} alt={char.name} className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
+                          <img src={char.imageUrl} alt={char.name} loading="lazy" className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
                         ) : (
                           <div className="w-16 h-16 rounded-lg bg-white/10 flex items-center justify-center text-white/40 font-bold text-xl flex-shrink-0">?</div>
                         )}
@@ -130,6 +139,24 @@ export default function CharacterAssignment({ guesser, allPlayers, sharedShowsOn
           </>
         )}
 
+        {step === 'noSharedShows' && (
+          <div className="text-center">
+            <div className="text-6xl mb-5">🤷</div>
+            <h2 className="text-3xl font-black text-white mb-4">No shared anime found</h2>
+            <p className="text-white/60 text-lg mb-10">
+              {guesser.name} doesn't share any anime titles with the other players. Go back and
+              either add a matching anime title to each player's list, or turn off
+              "Shared shows only" in Setup.
+            </p>
+            <button
+              onClick={() => setStep('assign')}
+              className="w-full py-5 bg-white/10 hover:bg-white/20 text-white font-bold text-xl rounded-xl transition-colors"
+            >
+              ← Back
+            </button>
+          </div>
+        )}
+
         {step === 'confirm' && selectedCharacter && (
           <div className="text-center">
             <h2 className="text-3xl font-black text-white mb-8">Confirm this character?</h2>
@@ -139,6 +166,7 @@ export default function CharacterAssignment({ guesser, allPlayers, sharedShowsOn
                   <img
                     src={selectedCharacter.imageUrl}
                     alt={selectedCharacter.name}
+                    loading="lazy"
                     className="w-36 h-36 rounded-xl object-cover"
                   />
                 ) : (

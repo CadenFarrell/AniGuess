@@ -1,10 +1,30 @@
+import { useState } from 'react';
+import { normalizeCharacter } from '../utils/character';
+
 export default function CharacterReveal({ character, guesserName, onStartQuestioning, isLastPlayer }) {
+  const [imgError, setImgError] = useState(false);
+
+  // Reset the broken-image fallback when the character changes (setState
+  // during render — this component doesn't remount between players in
+  // the assignment flow, so there's no other hook to key this off of).
+  const [prevImageUrl, setPrevImageUrl] = useState(character.imageUrl);
+  if (prevImageUrl !== character.imageUrl) {
+    setPrevImageUrl(character.imageUrl);
+    setImgError(false);
+  }
+
+  // Normalize defensively — a character just edited via ListManager mid-session
+  // may still have the raw (unnormalized) shape until the profile is reloaded.
+  const c = normalizeCharacter(character);
+
   const facts = [
-    { emoji: '📺', label: 'Series', value: character.series },
-    { emoji: '🎭', label: 'Role', value: character.role },
-    { emoji: '👤', label: 'Gender', value: character.gender },
-    { emoji: '📖', label: 'Description', value: character.ability || character.description },
-    { emoji: '🎬', label: 'Genre', value: Array.isArray(character.genres) ? character.genres.join(', ') : character.genre },
+    { emoji: '📺', label: 'Series', value: c.series },
+    { emoji: '🎭', label: 'Role', value: c.role },
+    { emoji: '👤', label: 'Gender', value: c.gender },
+    { emoji: '💇', label: 'Hair Color', value: c.hairColor },
+    { emoji: '⚡', label: 'Ability', value: c.ability },
+    { emoji: '📖', label: 'Description', value: c.description },
+    { emoji: '🎬', label: 'Genre', value: c.genres.join(', ') },
   ].filter((f) => f.value);
 
   return (
@@ -16,12 +36,13 @@ export default function CharacterReveal({ character, guesserName, onStartQuestio
 
         <div className="flex justify-center mb-4">
           <div className="w-64 h-64 rounded-2xl overflow-hidden border-4 border-purple-500 shadow-lg shadow-purple-900/50">
-            {character.imageUrl ? (
+            {c.imageUrl && !imgError ? (
               <img
-                src={character.imageUrl}
+                src={c.imageUrl}
                 alt="character"
+                loading="lazy"
                 className="w-full h-full object-cover"
-                onError={(e) => { e.target.style.display = 'none'; }}
+                onError={() => setImgError(true)}
               />
             ) : (
               <div className="w-full h-full bg-white/10 flex items-center justify-center text-7xl text-white/30">?</div>
@@ -29,7 +50,7 @@ export default function CharacterReveal({ character, guesserName, onStartQuestio
           </div>
         </div>
 
-        <h3 className="text-3xl font-black text-white mb-6">{character.name}</h3>
+        <h3 className="text-3xl font-black text-white mb-6">{c.name}</h3>
 
         <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8 text-left space-y-3">
           {facts.map((fact, i) => (
