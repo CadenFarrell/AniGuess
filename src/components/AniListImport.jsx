@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { fetchUserAnimeList, fetchAnimeCharacters } from '../services/anilist';
+import { fetchUserAnimeList, fetchManyAnimeCharacters } from '../services/anilist';
 import { filterAndMapCharacterEdges } from '../utils/anilistFormat';
 import { mergeAnimeIntoProfile } from '../utils/profileMerge';
 import { useEscapeKey } from '../hooks/useEscapeKey';
@@ -18,7 +18,7 @@ export default function AniListImport({ profile, onClose, onImported }) {
   const [selected, setSelected] = useState(new Set());
   const [search, setSearch] = useState('');
 
-  const [progress, setProgress] = useState({ index: 0, total: 0, title: '' });
+  const [progress, setProgress] = useState({ index: 0, total: 0 });
   const [abortController, setAbortController] = useState(null);
   const [mergedProfile, setMergedProfile] = useState(null);
   const [stats, setStats] = useState(null);
@@ -69,26 +69,16 @@ export default function AniListImport({ profile, onClose, onImported }) {
     const controller = new AbortController();
     setAbortController(controller);
     setStep('importing');
-    setProgress({ index: 0, total: toImport.length, title: toImport[0].title });
+    setProgress({ index: 0, total: toImport.length });
 
-    const importedAnimeList = [];
+    let charactersById;
     try {
-      for (let i = 0; i < toImport.length; i++) {
-        const anime = toImport[i];
-        setProgress({ index: i + 1, total: toImport.length, title: anime.title });
-        const { genres, edges } = await fetchAnimeCharacters(anime.id, {
-          signal: controller.signal,
-          minSupportingFavourites,
-          mainOnly,
-        });
-        const characters = filterAndMapCharacterEdges(edges, {
-          minSupportingFavourites,
-          mainOnly,
-          maxCharacters: MAX_CHARACTERS_PER_SHOW,
-          genres,
-        });
-        importedAnimeList.push({ animeId: anime.id, title: anime.title, characters });
-      }
+      charactersById = await fetchManyAnimeCharacters(toImport.map((a) => a.id), {
+        signal: controller.signal,
+        minSupportingFavourites,
+        mainOnly,
+        onProgress: (resolved) => setProgress({ index: resolved, total: toImport.length }),
+      });
     } catch (err) {
       if (err.name === 'AbortError') {
         // Cancelled — discard partial results, return to the checklist.
@@ -101,6 +91,17 @@ export default function AniListImport({ profile, onClose, onImported }) {
       setAbortController(null);
       return;
     }
+
+    const importedAnimeList = toImport.map((anime) => {
+      const { genres, edges } = charactersById.get(anime.id) ?? { genres: [], edges: [] };
+      const characters = filterAndMapCharacterEdges(edges, {
+        minSupportingFavourites,
+        mainOnly,
+        maxCharacters: MAX_CHARACTERS_PER_SHOW,
+        genres,
+      });
+      return { animeId: anime.id, title: anime.title, characters };
+    });
 
     const { profile: merged, addedAnime, addedChars } = mergeAnimeIntoProfile(profile, importedAnimeList);
     setMergedProfile(merged);
@@ -222,10 +223,8 @@ export default function AniListImport({ profile, onClose, onImported }) {
         {step === 'importing' && (
           <div className="text-center py-6">
             <div className="text-5xl mb-4">📥</div>
-            <p className="text-white font-bold text-lg mb-1">
-              Importing {progress.index} of {progress.total}
-            </p>
-            <p className="text-white/50 mb-6 truncate">{progress.title}</p>
+            <p className="text-white font-bold text-lg mb-1">Importing characters…</p>
+            <p className="text-white/50 mb-6">{progress.index} of {progress.total} shows</p>
             <div className="w-full bg-white/10 rounded-full h-3 mb-6 overflow-hidden">
               <div
                 className="bg-gradient-to-r from-purple-600 to-pink-600 h-3 rounded-full transition-all"
