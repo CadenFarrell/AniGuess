@@ -112,30 +112,31 @@ export default function OnlineGameScreen({
 
       {mode === 'guess' && !waiting && (
         <div className="mb-5">
-          <div className="relative">
-            <input
-              type="text"
-              value={guess}
-              onChange={(e) => updateGuess(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Escape') setSuggestions([]); else if (e.key === 'Enter') submitGuess(); }}
-              placeholder="Type your guess..."
-              autoFocus
-              className="w-full bg-white/10 border border-white/20 rounded-xl px-5 py-4 text-white text-lg placeholder-white/40 outline-none focus:border-pink-500 mb-3"
-            />
-            {suggestions.length > 0 && (
-              <div className="absolute z-10 w-full bg-gray-900 border border-white/20 rounded-xl overflow-hidden mb-3">
-                {suggestions.map((s) => (
-                  <div key={`${s.series}-${s.name}`} onMouseDown={() => { setGuess(s.name); setSuggestions([]); }} className="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-white/10">
-                    {s.imageUrl && <img src={s.imageUrl} loading="lazy" className="w-9 h-9 rounded-lg object-cover flex-shrink-0" />}
-                    <div>
-                      <p className="text-white text-sm font-semibold">{s.name}</p>
-                      <p className="text-white/40 text-xs">{s.series}</p>
-                    </div>
+          <input
+            type="text"
+            value={guess}
+            onChange={(e) => updateGuess(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Escape') setSuggestions([]); else if (e.key === 'Enter') submitGuess(); }}
+            placeholder="Type your guess..."
+            autoFocus
+            className="w-full bg-white/10 border border-white/20 rounded-xl px-5 py-4 text-white text-lg placeholder-white/40 outline-none focus:border-pink-500 mb-3"
+          />
+          {/* In-flow (not absolute) so the list never overlaps the Back/Guess
+              buttons below — otherwise a click meant for Guess lands on a
+              suggestion and only the second click submits. */}
+          {suggestions.length > 0 && (
+            <div className="w-full bg-gray-900 border border-white/20 rounded-xl overflow-hidden mb-3">
+              {suggestions.map((s) => (
+                <div key={`${s.series}-${s.name}`} onMouseDown={() => { setGuess(s.name); setSuggestions([]); }} className="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-white/10">
+                  {s.imageUrl && <img src={s.imageUrl} loading="lazy" className="w-9 h-9 rounded-lg object-cover flex-shrink-0" />}
+                  <div>
+                    <p className="text-white text-sm font-semibold">{s.name}</p>
+                    <p className="text-white/40 text-xs">{s.series}</p>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                </div>
+              ))}
+            </div>
+          )}
           <div className="flex gap-3">
             <button onClick={() => { setMode('choose'); setGuess(''); setSuggestions([]); }} className="px-5 py-4 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors text-base">← Back</button>
             <button onClick={submitGuess} disabled={!guess.trim()} className="flex-1 py-4 bg-gradient-to-r from-pink-600 to-purple-600 disabled:bg-white/10 disabled:text-white/30 text-white font-bold text-lg rounded-xl transition-colors">Guess 🎯</button>

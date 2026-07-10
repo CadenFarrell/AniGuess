@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { normalizeCharacter } from '../utils/character';
 
-export default function CharacterReveal({ character, guesserName, onStartQuestioning, isLastPlayer }) {
+export default function CharacterReveal({ character, guesserName, onStartQuestioning, isLastPlayer, online = false }) {
   const [imgError, setImgError] = useState(false);
 
   // Reset the broken-image fallback when the character changes (setState
@@ -65,7 +65,11 @@ export default function CharacterReveal({ character, guesserName, onStartQuestio
         </div>
 
         <p className="text-white/50 italic text-lg mb-8">
-          Memorize this, then pass the device to <strong className="text-white">{guesserName}</strong>
+          {online ? (
+            <>Memorize this — it&apos;s <strong className="text-white">{guesserName}</strong>&apos;s character.</>
+          ) : (
+            <>Memorize this, then pass the device to <strong className="text-white">{guesserName}</strong></>
+          )}
         </p>
 
         <button

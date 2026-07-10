@@ -151,6 +151,7 @@ export default function OnlineApp({ onBack }) {
         guesserName={room.assignmentPlayer.name}
         onStartQuestioning={room.handleRevealDone}
         isLastPlayer={room.assignmentIndex === room.gameSession.players.length - 1}
+        online
       />
     );
   }

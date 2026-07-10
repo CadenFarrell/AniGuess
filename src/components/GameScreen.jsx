@@ -223,7 +223,6 @@ export default function GameScreen({
 
       {mode === 'guess' && (
         <div className="mb-5">
-          <div className="relative">
           <input
             type="text"
             value={guess}
@@ -238,8 +237,9 @@ export default function GameScreen({
             autoFocus
             className="w-full bg-white/10 border border-white/20 rounded-xl px-5 py-4 text-white text-lg placeholder-white/40 outline-none focus:border-pink-500 mb-3"
           />
+          {/* In-flow (not absolute) so the list never overlaps the Back/Guess buttons below. */}
           {suggestions.length > 0 && (
-            <div className="absolute z-10 w-full bg-gray-900 border border-white/20 rounded-xl overflow-hidden mb-3">
+            <div className="w-full bg-gray-900 border border-white/20 rounded-xl overflow-hidden mb-3">
               {suggestions.map((s, i) => (
                 <div key={`${s.series}-${s.name}`} onMouseDown={() => pickSuggestion(s.name)}
                   className={`flex items-center gap-3 px-4 py-2 cursor-pointer ${ i === activeIdx ? 'bg-pink-600/30' : 'hover:bg-white/10' }`}>
@@ -252,7 +252,6 @@ export default function GameScreen({
               ))}
             </div>
           )}
-          </div>
           <div className="flex gap-3">
             <button
               onClick={() => { setMode('choose'); setGuess(''); setSuggestions([]); }}
