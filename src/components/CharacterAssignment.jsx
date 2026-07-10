@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { normalizeTitle } from '../utils/ranking';
+import { getAssignableAnimeList, pickRandomCharacter } from '../utils/characterPool';
 
 export default function CharacterAssignment({ guesser, allPlayers, sharedShowsOnly = true, twoStepRandom = false, onCharacterAssigned, assignmentNumber, totalPlayers }) {
   const [step, setStep] = useState('lookaway');
@@ -7,22 +7,12 @@ export default function CharacterAssignment({ guesser, allPlayers, sharedShowsOn
   const [expandedAnime, setExpandedAnime] = useState(null);
   const [browseMode, setBrowseMode] = useState(false);
 
-  const filteredAnimeList = (sharedShowsOnly && allPlayers?.length
-    ? guesser.animeList.filter(anime => allPlayers.some(p => p.id !== guesser.id && p.animeList.some(a => normalizeTitle(a.title) === normalizeTitle(anime.title))))
-    : guesser.animeList
-  ).filter(a => a.characters.length > 0);
+  const filteredAnimeList = getAssignableAnimeList(guesser, allPlayers, sharedShowsOnly);
 
   const pickRandom = () => {
-    const animeList = filteredAnimeList;
-    if (animeList.length === 0) { setStep('noSharedShows'); return; }
-    let pool;
-    if (twoStepRandom) {
-      const anime = animeList[Math.floor(Math.random() * animeList.length)];
-      pool = anime.characters.map(c => ({ ...c, series: anime.title }));
-    } else {
-      pool = animeList.flatMap(a => a.characters.map(c => ({ ...c, series: a.title })));
-    }
-    setSelectedCharacter(pool[Math.floor(Math.random() * pool.length)]);
+    const character = pickRandomCharacter(filteredAnimeList, twoStepRandom);
+    if (!character) { setStep('noSharedShows'); return; }
+    setSelectedCharacter(character);
     setStep('confirm');
   };
 

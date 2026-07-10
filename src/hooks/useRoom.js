@@ -23,6 +23,7 @@ export function useRoom() {
   const [roomCode, setRoomCode] = useState(null);
   const [myPlayerId, setMyPlayerId] = useState(null);
   const [state, setState] = useState(null); // /rooms/{code}/state subtree
+  const [currentProposal, setCurrentProposal] = useState(null); // live shared pick for the current assignee
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -52,6 +53,28 @@ export function useRoom() {
     });
     return () => unsubscribe();
   }, [roomCode]);
+
+  // During the assignment phase, non-assignee devices subscribe to the current
+  // assignee's live proposal (stored in the secret assignments/{playerId} slot,
+  // which the assignee's own device is denied from reading). The forRound stamp
+  // filters out a prior round's locked pick so it doesn't linger as a stale
+  // suggestion.
+  useEffect(() => {
+    const view = state?.view;
+    const roundNumber = state?.roundNumber;
+    const assignmentPlayer = state?.gameSession?.players?.[state?.assignmentIndex];
+    // Only non-assignees during the assignment phase watch the live proposal.
+    // (Bailing without a setState here keeps the effect body render-safe; the
+    // cleanup below resets the proposal when we leave this phase.)
+    if (view !== 'assignment' || !assignmentPlayer || assignmentPlayer.id === myPlayerId) return;
+    const db = getFirebaseDb();
+    const propRef = ref(db, `rooms/${roomCode}/assignments/${assignmentPlayer.id}`);
+    const unsub = onValue(propRef, (snap) => {
+      const v = snap.val();
+      setCurrentProposal(v && v.forRound === roundNumber ? { character: v.character, by: v.by, approvals: v.approvals ?? {} } : null);
+    });
+    return () => { unsub(); setCurrentProposal(null); };
+  }, [state?.view, state?.assignmentIndex, state?.roundNumber, state?.gameSession?.players, myPlayerId, roomCode]);
 
   const createRoom = useCallback(async (localProfile) => {
     const db = getFirebaseDb();
@@ -161,13 +184,34 @@ export function useRoom() {
     });
   }, [patchState]);
 
-  // Called by a non-assignee device after picking a character for the
-  // current assignmentPlayer.
-  const handleCharacterAssigned = useCallback(async (character) => {
+  // Online "collective pick": every non-assignee shares ONE live proposal,
+  // written to the secret assignments/{playerId} slot so the assignee can't see
+  // it (the same rule that protects the final assignment). Anyone can propose or
+  // overwrite it; everyone else sees it via the currentProposal subscription.
+  const proposeCharacter = useCallback((character) => {
+    const db = getFirebaseDb();
     const assignmentPlayer = state.gameSession.players[state.assignmentIndex];
-    await writeAssignment(assignmentPlayer.id, character);
-    await patchState({ view: 'reveal' });
-  }, [state, writeAssignment, patchState]);
+    return set(ref(db, `rooms/${roomCode}/assignments/${assignmentPlayer.id}`), {
+      character,
+      by: myPlayerId,
+      forRound: state.roundNumber,
+    });
+  }, [state, roomCode, myPlayerId]);
+
+  // The proposed character is already written — locking in just advances
+  // everyone to the reveal step. Triggered automatically once every non-assignee
+  // has approved (see OnlineApp), not by a manual button.
+  const lockInAssignment = useCallback(() => patchState({ view: 'reveal' }), [patchState]);
+
+  // Records (or clears) this device's approval of the current shared proposal.
+  // Stored under the same assignee-locked slot, so it's wiped whenever
+  // proposeCharacter overwrites the proposal — forcing everyone to re-approve a
+  // changed pick.
+  const setMyApproval = useCallback((approved) => {
+    const db = getFirebaseDb();
+    const assignmentPlayer = state.gameSession.players[state.assignmentIndex];
+    return set(ref(db, `rooms/${roomCode}/assignments/${assignmentPlayer.id}/approvals/${myPlayerId}`), approved ? true : null);
+  }, [state, roomCode, myPlayerId]);
 
   const handleRevealDone = useCallback(() => {
     const { patch, next } = rules.revealDone(state);
@@ -255,9 +299,10 @@ export function useRoom() {
     roundNumber: state?.roundNumber,
     totalScores: state?.totalScores ?? {},
     pendingAction: state?.turnState?.pendingAction ?? null,
+    currentProposal,
     currentGuesser, assignmentPlayer, hasPeeked, lastLocked,
     isMyAssignmentTurn, isMyTurn,
-    handleStartGame, handleCharacterAssigned, handleRevealDone,
+    handleStartGame, proposeCharacter, lockInAssignment, setMyApproval, handleRevealDone,
     handleTurnComplete, handleCorrectGuess, handleWrongGuess,
     finishRound, handlePeek, handleNewRound, handleEndSession,
     submitPendingAction, resolvePendingAction, clearPendingAction,

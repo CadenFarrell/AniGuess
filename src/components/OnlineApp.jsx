@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRoom } from '../hooks/useRoom';
 import { useWins } from '../hooks/useWins';
 import { isCorrectGuess } from '../utils/guessMatch';
 import RoomSetup from './RoomSetup';
 import OnlineLobby from './OnlineLobby';
-import CharacterAssignment from './CharacterAssignment';
+import OnlineCharacterAssignment from './OnlineCharacterAssignment';
 import CharacterReveal from './CharacterReveal';
 import OnlineGameScreen from './OnlineGameScreen';
 import OnlineAnswererView from './OnlineAnswererView';
@@ -64,6 +64,25 @@ export default function OnlineApp({ onBack }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room.view, room.isMyTurn, room.pendingAction]);
 
+  // Unanimous approval: once every non-assignee has approved the current shared
+  // proposal, lock it in (advance to reveal). Any present device can trigger the
+  // write (it's idempotent); the ref guards each device to one trigger per
+  // assignment so we don't spam identical writes.
+  const lockedForRef = useRef(null);
+  useEffect(() => {
+    if (room.view !== 'assignment' || room.isMyAssignmentTurn || !room.gameSession) return;
+    const prop = room.currentProposal;
+    if (!prop?.character) return;
+    const needed = room.gameSession.players.length - 1;
+    const approved = prop.approvals ? Object.values(prop.approvals).filter(Boolean).length : 0;
+    const key = `${room.roundNumber}:${room.assignmentIndex}`;
+    if (approved >= needed && lockedForRef.current !== key) {
+      lockedForRef.current = key;
+      room.lockInAssignment();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room.view, room.isMyAssignmentTurn, room.currentProposal, room.assignmentIndex, room.roundNumber]);
+
   if (!room.roomCode) {
     return <RoomSetup room={room} onBack={onBack} />;
   }
@@ -93,17 +112,20 @@ export default function OnlineApp({ onBack }) {
         <WaitingScreen
           emoji="📵"
           title="Look away!"
-          subtitle="The other players are picking a character for you."
+          subtitle="The other players are choosing your character together."
         />
       );
     }
     return (
-      <CharacterAssignment
+      <OnlineCharacterAssignment
         guesser={room.assignmentPlayer}
         allPlayers={room.gameSession.players}
         sharedShowsOnly={room.gameSession.settings.sharedShowsOnly}
         twoStepRandom={room.gameSession.settings.twoStepRandom}
-        onCharacterAssigned={room.handleCharacterAssigned}
+        currentProposal={room.currentProposal}
+        myPlayerId={room.myPlayerId}
+        onPropose={room.proposeCharacter}
+        onToggleApproval={room.setMyApproval}
         assignmentNumber={room.assignmentIndex + 1}
         totalPlayers={room.gameSession.players.length}
       />
