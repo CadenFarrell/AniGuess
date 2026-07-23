@@ -5,6 +5,7 @@ export default {
   title: 'Name That Opening',
   blurb: 'Guess the anime from the sound of its opening or ending.',
   icon: '🎵',
+  accent: 'blue',
   available: false,
   Component: OpeningsGame,
 };

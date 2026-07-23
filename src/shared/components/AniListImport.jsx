@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { fetchUserAnimeList, fetchManyAnimeCharacters } from '../services/anilist';
 import { filterAndMapCharacterEdges } from '../utils/anilistFormat';
 import { mergeAnimeIntoProfile } from '../utils/profileMerge';
-import { useEscapeKey } from '../hooks/useEscapeKey';
+import { Button, Card, Checkbox, Input, Label, Modal } from '../ui';
 
 const MAX_CHARACTERS_PER_SHOW = 60;
 
@@ -23,8 +23,6 @@ export default function AniListImport({ profile, onClose, onImported }) {
   const [mergedProfile, setMergedProfile] = useState(null);
   const [stats, setStats] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
-
-  useEscapeKey(step !== 'importing', onClose);
 
   const fetchList = async () => {
     const trimmed = username.trim();
@@ -118,148 +116,175 @@ export default function AniListImport({ profile, onClose, onImported }) {
     abortController?.abort();
   };
 
+  const pct = `${(progress.index / Math.max(progress.total, 1)) * 100}%`;
+
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4" role="dialog" aria-modal="true">
-      <div className="bg-gray-900 border border-white/20 rounded-2xl p-8 max-w-lg w-full max-h-[36rem] overflow-y-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-black text-white">🔗 Import from AniList</h2>
-          {step !== 'importing' && (
-            <button onClick={onClose} aria-label="Close" className="text-white/40 hover:text-white text-xl">✕</button>
-          )}
-        </div>
-
-        {(step === 'username' || step === 'loading-list') && (
-          <div>
-            <label className="block text-white/60 text-sm font-semibold mb-1">AniList Username</label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && username.trim() && fetchList()}
-              placeholder="e.g. YourAniListName"
-              autoFocus
-              disabled={step === 'loading-list'}
-              className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/40 outline-none focus:border-purple-500 mb-4"
-            />
-            <label className="flex items-center gap-3 text-white/70 mb-4 cursor-pointer">
-              <input type="checkbox" checked={includeCurrent} onChange={(e) => setIncludeCurrent(e.target.checked)} className="w-5 h-5" />
-              Also include shows I'm currently watching
-            </label>
-
-            <button
-              onClick={() => setShowAdvanced((v) => !v)}
-              className="text-white/40 hover:text-white text-sm mb-3"
-            >
-              {showAdvanced ? '▼' : '▶'} Advanced
-            </button>
-            {showAdvanced && (
-              <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-4 space-y-3">
-                <label className="flex items-center gap-3 text-white/70 cursor-pointer">
-                  <input type="checkbox" checked={mainOnly} onChange={(e) => setMainOnly(e.target.checked)} className="w-5 h-5" />
-                  Main characters only
-                </label>
-                {!mainOnly && (
-                  <div className="flex items-center gap-3 text-white/70">
-                    <span>Min. favourites for supporting characters:</span>
-                    <input
-                      type="number"
-                      min={0}
-                      value={minSupportingFavourites}
-                      onChange={(e) => setMinSupportingFavourites(parseInt(e.target.value) || 0)}
-                      className="w-24 bg-white/10 border border-white/20 rounded-lg px-2 py-2 text-white text-center"
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-
-            <button
-              onClick={fetchList}
-              disabled={!username.trim() || step === 'loading-list'}
-              className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 disabled:bg-white/10 disabled:text-white/30 text-white font-bold rounded-xl transition-all"
-            >
-              {step === 'loading-list' ? 'Fetching your list…' : 'Fetch My List'}
-            </button>
-          </div>
-        )}
-
-        {step === 'list' && (
-          <div>
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Filter…"
-              className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white placeholder-white/40 outline-none focus:border-purple-500 mb-3"
-            />
-            <div className="flex gap-3 mb-3">
-              <button onClick={() => setSelected(new Set(animeOptions.map((a) => a.id)))} className="text-sm text-white/60 hover:text-white">Select All</button>
-              <button onClick={() => setSelected(new Set())} className="text-sm text-white/60 hover:text-white">Select None</button>
-              <span className="ml-auto text-white/40 text-sm">{selected.size} selected</span>
-            </div>
-            <div className="space-y-2 mb-4 max-h-72 overflow-y-auto">
-              {filteredOptions.map((anime) => (
-                <label key={anime.id} className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl p-3 cursor-pointer">
-                  <input type="checkbox" checked={selected.has(anime.id)} onChange={() => toggleSelected(anime.id)} className="w-5 h-5 flex-shrink-0" />
-                  {anime.coverImageUrl ? (
-                    <img src={anime.coverImageUrl} alt="" loading="lazy" className="w-10 h-14 rounded object-cover flex-shrink-0" />
-                  ) : (
-                    <div className="w-10 h-14 rounded bg-white/10 flex-shrink-0" />
-                  )}
-                  <span className="text-white text-sm">{anime.title}</span>
-                </label>
-              ))}
-            </div>
-            <button
-              onClick={startImport}
-              disabled={selected.size === 0}
-              className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 disabled:bg-white/10 disabled:text-white/30 text-white font-bold rounded-xl transition-all"
-            >
-              Import Selected ({selected.size})
-            </button>
-          </div>
-        )}
-
-        {step === 'importing' && (
-          <div className="text-center py-6">
-            <div className="text-5xl mb-4">📥</div>
-            <p className="text-white font-bold text-lg mb-1">Importing characters…</p>
-            <p className="text-white/50 mb-6">{progress.index} of {progress.total} shows</p>
-            <div className="w-full bg-white/10 rounded-full h-3 mb-6 overflow-hidden">
-              <div
-                className="bg-gradient-to-r from-purple-600 to-pink-600 h-3 rounded-full transition-all"
-                style={{ width: `${(progress.index / Math.max(progress.total, 1)) * 100}%` }}
-              />
-            </div>
-            <button onClick={cancelImport} className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors">
-              Cancel
-            </button>
-          </div>
-        )}
-
-        {step === 'done' && (
-          <div className="text-center py-6">
-            <div className="text-5xl mb-4">✅</div>
-            <p className="text-white font-bold text-lg mb-2">Import complete!</p>
-            <p className="text-white/60 mb-6">
-              +{stats?.addedAnime ?? 0} anime, +{stats?.addedChars ?? 0} characters
-            </p>
-            <button onClick={finishImport} className="w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-xl transition-all">
-              Done
-            </button>
-          </div>
-        )}
-
-        {step === 'error' && (
-          <div className="text-center py-6">
-            <div className="text-5xl mb-4">⚠️</div>
-            <p className="text-red-400 font-bold mb-6">{errorMessage}</p>
-            <button onClick={() => setStep('username')} className="w-full py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-colors">
-              Try Again
-            </button>
-          </div>
+    // The import is cancellable but not dismissable mid-flight — closing the
+    // dialog would strand the in-progress fetch, so lock it during 'importing'.
+    <Modal onClose={onClose} dismissible={step !== 'importing'}>
+      <div className="mb-6 flex items-center justify-between">
+        <h2 className="font-display text-2xl font-extrabold text-white">🔗 Import from AniList</h2>
+        {step !== 'importing' && (
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="focus-pop -mr-2 grid h-11 w-11 place-items-center rounded-pop-sm text-xl font-black text-white/40 hover:text-white"
+          >
+            ✕
+          </button>
         )}
       </div>
-    </div>
+
+      {(step === 'username' || step === 'loading-list') && (
+        <div>
+          <Label htmlFor="anilist-username">AniList Username</Label>
+          <Input
+            id="anilist-username"
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && username.trim() && fetchList()}
+            placeholder="e.g. YourAniListName"
+            autoFocus
+            disabled={step === 'loading-list'}
+            className="mb-4"
+          />
+          <Checkbox
+            label="Also include shows I'm currently watching"
+            checked={includeCurrent}
+            onChange={(e) => setIncludeCurrent(e.target.checked)}
+            className="mb-4"
+          />
+
+          <button
+            onClick={() => setShowAdvanced((v) => !v)}
+            className="focus-pop mb-3 rounded-pop-sm text-sm text-white/40 hover:text-white"
+          >
+            {showAdvanced ? '▼' : '▶'} Advanced
+          </button>
+          {showAdvanced && (
+            <Card padding="sm" className="mb-4 space-y-3">
+              <Checkbox
+                label="Main characters only"
+                checked={mainOnly}
+                onChange={(e) => setMainOnly(e.target.checked)}
+              />
+              {!mainOnly && (
+                <div className="flex items-center gap-3 text-white/70">
+                  <span>Min. favourites for supporting characters:</span>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={minSupportingFavourites}
+                    aria-label="Minimum favourites"
+                    onChange={(e) => setMinSupportingFavourites(parseInt(e.target.value) || 0)}
+                    className="w-24 px-2 text-center"
+                  />
+                </div>
+              )}
+            </Card>
+          )}
+
+          <Button
+            variant="secondary"
+            size="lg"
+            fullWidth
+            onClick={fetchList}
+            disabled={!username.trim() || step === 'loading-list'}
+          >
+            {step === 'loading-list' ? 'Fetching your list…' : 'Fetch My List'}
+          </Button>
+        </div>
+      )}
+
+      {step === 'list' && (
+        <div>
+          <Input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Filter…"
+            aria-label="Filter anime"
+            className="mb-3"
+          />
+          <div className="mb-3 flex items-center gap-3">
+            <button
+              onClick={() => setSelected(new Set(animeOptions.map((a) => a.id)))}
+              className="focus-pop rounded-pop-sm text-sm text-white/60 hover:text-white"
+            >
+              Select All
+            </button>
+            <button
+              onClick={() => setSelected(new Set())}
+              className="focus-pop rounded-pop-sm text-sm text-white/60 hover:text-white"
+            >
+              Select None
+            </button>
+            <span className="ml-auto text-sm text-white/40">{selected.size} selected</span>
+          </div>
+          <div className="mb-4 max-h-72 space-y-2 overflow-y-auto">
+            {filteredOptions.map((anime) => (
+              <label
+                key={anime.id}
+                className="flex cursor-pointer items-center gap-3 rounded-pop-sm border-2 border-white/10 bg-surface-2 p-3"
+              >
+                <input
+                  type="checkbox"
+                  checked={selected.has(anime.id)}
+                  onChange={() => toggleSelected(anime.id)}
+                  className="h-5 w-5 flex-shrink-0 accent-pop-lime"
+                />
+                {anime.coverImageUrl ? (
+                  <img src={anime.coverImageUrl} alt="" loading="lazy" className="h-14 w-10 flex-shrink-0 rounded object-cover" />
+                ) : (
+                  <div className="h-14 w-10 flex-shrink-0 rounded bg-white/10" />
+                )}
+                <span className="text-sm text-white">{anime.title}</span>
+              </label>
+            ))}
+          </div>
+          <Button
+            variant="secondary"
+            size="lg"
+            fullWidth
+            onClick={startImport}
+            disabled={selected.size === 0}
+          >
+            Import Selected ({selected.size})
+          </Button>
+        </div>
+      )}
+
+      {step === 'importing' && (
+        <div className="py-6 text-center">
+          <div className="mb-4 text-5xl">📥</div>
+          <p className="mb-1 font-display text-lg font-extrabold text-white">Importing characters…</p>
+          <p className="mb-6 text-white/50">{progress.index} of {progress.total} shows</p>
+          <div className="mb-6 h-3 w-full overflow-hidden rounded-pop-sm border-2 border-ink bg-surface-2">
+            <div className="h-full bg-pop-pink transition-all" style={{ width: pct }} />
+          </div>
+          <Button variant="neutral" onClick={cancelImport}>Cancel</Button>
+        </div>
+      )}
+
+      {step === 'done' && (
+        <div className="py-6 text-center">
+          <div className="mb-4 text-5xl">✅</div>
+          <p className="mb-2 font-display text-lg font-extrabold text-white">Import complete!</p>
+          <p className="mb-6 text-white/60">
+            +{stats?.addedAnime ?? 0} anime, +{stats?.addedChars ?? 0} characters
+          </p>
+          <Button variant="success" size="lg" fullWidth onClick={finishImport}>Done</Button>
+        </div>
+      )}
+
+      {step === 'error' && (
+        <div className="py-6 text-center">
+          <div className="mb-4 text-5xl">⚠️</div>
+          <p className="mb-6 font-display font-extrabold text-pop-red">{errorMessage}</p>
+          <Button variant="neutral" size="lg" fullWidth onClick={() => setStep('username')}>Try Again</Button>
+        </div>
+      )}
+    </Modal>
   );
 }

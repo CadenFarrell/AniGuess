@@ -21,7 +21,7 @@ query ($id: Int, $page: Int) {
         role
         node {
           id
-          name { full }
+          name { full native alternative }
           gender
           image { large }
           description(asHtml: false)

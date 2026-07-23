@@ -8,10 +8,10 @@ import CorrectGuessScreen from './components/CorrectGuessScreen';
 import RoundEnd from './components/RoundEnd';
 import Leaderboard from './components/Leaderboard';
 import { useGameSession } from './hooks/useGameSession';
-import { useGameFlow } from './hooks/useGameFlow';
-import { useEscapeKey } from '../../shared/hooks/useEscapeKey';
+import { useGameFlow, RESUMABLE_VIEWS } from './hooks/useGameFlow';
+import { Button, GhostButton, HubButton, Modal } from '../../shared/ui';
 
-function App() {
+function App({ onExit }) {
   const [view, setView] = useState('setup');
   const [listManagerProfile, setListManagerProfile] = useState(null);
   const [listManagerOrigin, setListManagerOrigin] = useState('setup');
@@ -50,29 +50,34 @@ function App() {
     setView('listManager');
   };
 
-  useEscapeKey(showResumePrompt, handleDiscardSession);
+  // Only guard the exit mid-game. Those are exactly the views useGameFlow
+  // auto-saves, so the game really is waiting on the next visit.
+  const exitConfirm = RESUMABLE_VIEWS.includes(view)
+    ? 'Return to the hub? Your game is saved — you can resume it next time.'
+    : null;
 
   return (
     <div>
-      {/* Resume Prompt */}
+      <HubButton onClick={onExit} confirm={exitConfirm} />
+
+      {/* Resume Prompt. Escape discards, as it always has — but not a stray
+          backdrop click, which would throw away an unfinished game. */}
       {showResumePrompt && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4" role="dialog" aria-modal="true">
-          <div className="bg-gray-900 border border-white/20 rounded-2xl p-8 max-w-lg w-full text-center">
-            <div className="text-6xl mb-4">🎮</div>
-            <h2 className="text-3xl font-black text-white mb-3">Resume Game?</h2>
-            <p className="text-white/60 text-lg mb-8">You have an unfinished game. Pick up where you left off?</p>
-            <div className="flex flex-col gap-3">
-              <button onClick={handleResumeSession}
-                className="w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold text-lg rounded-xl">
-                ✅ Resume Game
-              </button>
-              <button onClick={handleDiscardSession}
-                className="w-full py-4 bg-white/10 hover:bg-white/20 text-white font-bold text-lg rounded-xl transition-colors">
-                🗑️ Start Fresh
-              </button>
-            </div>
+        <Modal onClose={handleDiscardSession} closeOnBackdrop={false} className="text-center">
+          <div className="mb-4 text-6xl">🎮</div>
+          <h2 className="mb-3 font-display text-3xl font-extrabold text-white">Resume Game?</h2>
+          <p className="mb-8 text-lg text-white/60">
+            You have an unfinished game. Pick up where you left off?
+          </p>
+          <div className="flex flex-col gap-3">
+            <Button variant="success" size="lg" fullWidth onClick={handleResumeSession}>
+              ✅ Resume Game
+            </Button>
+            <Button variant="neutral" size="lg" fullWidth onClick={handleDiscardSession}>
+              🗑️ Start Fresh
+            </Button>
           </div>
-        </div>
+        </Modal>
       )}
 
       {view === 'setup' && (
@@ -81,29 +86,22 @@ function App() {
 
       {view === 'listManager' && (
         <>
-          <div className="flex items-center gap-4 m-6 mb-0">
-            <button
-              onClick={() => setView(listManagerOrigin)}
-              className="text-white/60 hover:text-white transition-colors text-lg"
-            >
-              ← Back
-            </button>
+          {/* mt-16 clears the fixed HubButton at top-left; this row is the
+              in-flow "← Back" + player switcher and would otherwise sit under it. */}
+          <div className="flex flex-wrap items-center gap-3 mx-5 mb-0 mt-16 sm:mx-6">
+            <GhostButton onClick={() => setView(listManagerOrigin)}>← Back</GhostButton>
             {/* Player switcher — shown when multiple players are available */}
             {gameSession && gameSession.players.length > 1 && (
               <div className="flex gap-2 flex-wrap">
                 {gameSession.players.map((p) => (
-                  <button
+                  <Button
                     key={p.id}
+                    size="sm"
+                    variant={listManagerProfile?.id === p.id ? 'secondary' : 'neutral'}
                     onClick={() => setListManagerProfile(gameSession.players.find(pl => pl.id === p.id))}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors
-                      ${
-                        listManagerProfile?.id === p.id
-                          ? 'bg-purple-600 text-white'
-                          : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'
-                      }`}
                   >
                     {p.name}
-                  </button>
+                  </Button>
                 ))}
               </div>
             )}
@@ -137,27 +135,24 @@ function App() {
         />
       )}
 
+      {/* GameScreen brings its own <Screen> shell now, so no outer wrapper. */}
       {view === 'game' && currentAssignment && (
-        <div className="flex justify-center">
-          <div className="w-full max-w-2xl">
-            <GameScreen
-              guesser={currentGuesser}
-              character={currentAssignment.character}
-              players={gameSession.players}
-              lockedPositions={lockedPositions}
-              questionLog={questionLogs[currentGuesser.id] || []}
-              turnCount={turnCounts[currentGuesser.id] || 0}
-              hasPeeked={hasPeeked}
-              onPeek={handlePeek}
-              onTurnComplete={handleTurnComplete}
-              onCorrectGuess={handleCorrectGuess}
-              onWrongGuess={handleWrongGuess}
-              timerEnabled={gameSession.settings.timerEnabled}
-              timerSeconds={gameSession.settings.timerSeconds}
-              sharedShowsOnly={gameSession.settings.sharedShowsOnly ?? true}
-            />
-          </div>
-        </div>
+        <GameScreen
+          guesser={currentGuesser}
+          character={currentAssignment.character}
+          players={gameSession.players}
+          lockedPositions={lockedPositions}
+          questionLog={questionLogs[currentGuesser.id] || []}
+          turnCount={turnCounts[currentGuesser.id] || 0}
+          hasPeeked={hasPeeked}
+          onPeek={handlePeek}
+          onTurnComplete={handleTurnComplete}
+          onCorrectGuess={handleCorrectGuess}
+          onWrongGuess={handleWrongGuess}
+          timerEnabled={gameSession.settings.timerEnabled}
+          timerSeconds={gameSession.settings.timerSeconds}
+          sharedShowsOnly={gameSession.settings.sharedShowsOnly ?? true}
+        />
       )}
 
       {view === 'correctGuess' && lastLocked && (

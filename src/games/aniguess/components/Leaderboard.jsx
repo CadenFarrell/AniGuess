@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { computeRankedPlayers, getPositionEmoji } from '../../../shared/utils/ranking';
+import { Button, Card, CardRow, Screen, Wordmark } from '../../../shared/ui';
 
 export default function Leaderboard({ players, totalScores, roundNumber, onPlayAgain, onEditLists }) {
   const withPositions = useMemo(
@@ -16,74 +17,75 @@ export default function Leaderboard({ players, totalScores, roundNumber, onPlayA
     players: withPositions.filter((p) => p.position === pos),
   })).filter((slot) => slot.players.length > 0);
 
+  // Gold / silver / bronze. The palette has no brown, so bronze is a knocked-
+  // back amber — still clearly a step below gold.
   const podiumConfig = {
-    1: { height: 'h-44', color: 'bg-yellow-400', emoji: '🥇' },
-    2: { height: 'h-28', color: 'bg-gray-400',   emoji: '🥈' },
-    3: { height: 'h-20', color: 'bg-amber-600',  emoji: '🥉' },
+    1: { height: 'h-44', color: 'bg-pop-amber', emoji: '🥇' },
+    2: { height: 'h-28', color: 'bg-white/70', emoji: '🥈' },
+    3: { height: 'h-20', color: 'bg-pop-amber/50', emoji: '🥉' },
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-10">
-      <div className="w-full max-w-2xl text-center">
-        <h2 className="text-5xl font-black mb-2">
-          🏆 <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500">Final Results</span>
-        </h2>
-        <p className="text-white/50 text-lg mb-10">{roundNumber} round{roundNumber !== 1 ? 's' : ''} played</p>
+    <Screen center width="md" className="text-center">
+      <Wordmark tone="amber" size="md" level={2} className="mb-3">
+        🏆 Final Results
+      </Wordmark>
+      <p className="mb-10 text-lg text-white/50">
+        {roundNumber} round{roundNumber !== 1 ? 's' : ''} played
+      </p>
 
-        {/* Podium */}
-        {withPositions.length >= 2 && (
-          <div className="flex items-end justify-center gap-4 mb-10">
-            {podiumSlots.map((slot) => {
-              const { height, color, emoji } = podiumConfig[slot.pos];
-              return (
-                <div key={slot.pos} className="flex items-end gap-2">
-                  {slot.players.map((player) => (
-                    <div key={player.id} className="flex flex-col items-center">
-                      <span className="text-3xl mb-2">{emoji}</span>
-                      <p className="text-white font-bold text-base mb-1">{player.name}</p>
-                      <p className="text-white/70 text-sm mb-1">{player.total} pts</p>
-                      {isTied(player) && <p className="text-yellow-400 text-xs mb-1">🤝</p>}
-                      <div className={`${height} ${color} w-28 rounded-t-lg`} />
-                    </div>
-                  ))}
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Full Rankings */}
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8 text-left">
-          {withPositions.map((player) => (
-            <div
-              key={player.id}
-              className={`flex justify-between items-center py-4 border-b border-white/10 last:border-0
-                ${player.position === 1 ? 'text-yellow-400' : 'text-white'}`}
-            >
-              <span className="font-bold text-lg">
-                {getPositionEmoji(player.position)} {player.name}
-                {isTied(player) && <span className="text-yellow-400 text-sm ml-2">🤝 Tied</span>}
-              </span>
-              <span className="font-black text-2xl">{player.total} pts</span>
-            </div>
-          ))}
+      {/* Podium */}
+      {withPositions.length >= 2 && (
+        <div className="mb-10 flex items-end justify-center gap-4">
+          {podiumSlots.map((slot) => {
+            const { height, color, emoji } = podiumConfig[slot.pos];
+            return (
+              <div key={slot.pos} className="flex items-end gap-2">
+                {slot.players.map((player) => (
+                  <div key={player.id} className="flex flex-col items-center">
+                    <span className="mb-2 text-3xl">{emoji}</span>
+                    <p className="mb-1 font-display text-base font-extrabold text-white">
+                      {player.name}
+                    </p>
+                    <p className="mb-1 text-sm text-white/70">{player.total} pts</p>
+                    {isTied(player) && <p className="mb-1 text-xs text-pop-amber">🤝</p>}
+                    {/* Blocks, not bars — same ink border as every other solid
+                        fill. No bottom border so they sit on the baseline. */}
+                    <div
+                      className={`${height} ${color} w-24 rounded-t-pop-sm border-2 border-b-0 border-ink sm:w-28`}
+                    />
+                  </div>
+                ))}
+              </div>
+            );
+          })}
         </div>
+      )}
 
-        <div className="flex flex-col gap-4">
-          <button
-            onClick={onPlayAgain}
-            className="w-full py-5 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-black text-2xl rounded-xl transition-all"
+      {/* Full Rankings */}
+      <Card padding="lg" className="mb-8 text-left">
+        {withPositions.map((player) => (
+          <CardRow
+            key={player.id}
+            className={player.position === 1 ? 'text-pop-amber' : 'text-white'}
           >
-            🎮 Play Again
-          </button>
-          <button
-            onClick={onEditLists}
-            className="w-full py-5 bg-white/10 hover:bg-white/20 text-white font-bold text-xl rounded-xl transition-colors"
-          >
-            ✏️ Edit Character Lists
-          </button>
-        </div>
+            <span className="font-display text-lg font-extrabold">
+              {getPositionEmoji(player.position)} {player.name}
+              {isTied(player) && <span className="ml-2 text-sm text-pop-amber">🤝 Tied</span>}
+            </span>
+            <span className="font-display text-2xl font-extrabold">{player.total} pts</span>
+          </CardRow>
+        ))}
+      </Card>
+
+      <div className="flex flex-col gap-4">
+        <Button variant="primary" size="xl" fullWidth onClick={onPlayAgain}>
+          🎮 Play Again
+        </Button>
+        <Button variant="neutral" size="lg" fullWidth onClick={onEditLists}>
+          ✏️ Edit Character Lists
+        </Button>
       </div>
-    </div>
+    </Screen>
   );
 }

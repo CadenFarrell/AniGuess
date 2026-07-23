@@ -6,6 +6,10 @@
           ".read": "auth != null",
           ".write": "auth != null && !data.exists()"
         },
+        "open": {
+          ".read": "auth != null",
+          ".write": "auth != null && root.child('rooms/'+$code+'/memberUids/'+auth.uid).exists()"
+        },
         "memberUids": {
           "$uid": {
             ".read": "auth != null && auth.uid === $uid",
@@ -13,9 +17,9 @@
           }
         },
         "claims": {
-          ".read": "auth != null && root.child('rooms/'+$code+'/memberUids/'+auth.uid).exists()",
+          ".read": "auth != null",
           "$playerId": {
-            ".write": "auth != null && root.child('rooms/'+$code+'/memberUids/'+auth.uid).val() === $playerId"
+            ".write": "auth != null && root.child('rooms/'+$code+'/memberUids/'+auth.uid).val() === $playerId && (!data.exists() || data.val() === auth.uid)"
           }
         },
         "assignments": {

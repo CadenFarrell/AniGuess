@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { useProfile } from '../../../shared/hooks/useProfile';
 import AniListImport from '../../../shared/components/AniListImport';
+import {
+  Backdrop, Badge, Banner, Button, Card, Input, Label, Screen, Wordmark,
+} from '../../../shared/ui';
 
 export default function RoomSetup({ room, onBack }) {
   const { loadOrCreateProfile, saveProfile } = useProfile();
@@ -43,92 +46,114 @@ export default function RoomSetup({ room, onBack }) {
     }
   };
 
-  if (room.error) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
-        <div className="text-5xl mb-4">⚠️</div>
-        <p className="text-red-400 font-bold mb-6">{room.error}</p>
-        <button onClick={onBack} className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl">← Back</button>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen flex flex-col items-center px-6 py-10">
-      <div className="w-full max-w-md">
-        <button onClick={onBack} className="text-white/60 hover:text-white text-lg mb-6">← Back</button>
-        <h2 className="text-3xl font-black text-white mb-6">🌐 Play Online</h2>
+    <>
+      <Backdrop />
+      <Screen onBack={onBack}>
+        <Wordmark tone="purple" size="md" level={2} className="mb-8">
+          🌐 Play Online
+        </Wordmark>
+
+        {/* Connection-level problems (sign-in failure, a saved room that
+            vanished). Dismissible — the join form below still works. */}
+        {room.error && (
+          <Banner tone="danger" onDismiss={room.dismissError} className="mb-5">
+            ⚠️ {room.error}
+          </Banner>
+        )}
 
         {!profile && (
           <div>
-            <label className="block text-white/60 text-sm font-semibold mb-1">Your name</label>
-            <input
+            <Label htmlFor="room-name">Your name</Label>
+            <Input
+              id="room-name"
               type="text"
               value={nameInput}
               onChange={(e) => setNameInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && nameInput.trim() && confirmName()}
               placeholder="Enter your name..."
               autoFocus
-              className="w-full bg-white/10 border border-white/20 rounded-xl px-5 py-4 text-white text-lg placeholder-white/40 outline-none focus:border-purple-500 mb-4"
+              className="mb-4 text-lg"
             />
-            <button
+            <Button
+              variant="primary"
+              size="lg"
+              fullWidth
               onClick={confirmName}
               disabled={!nameInput.trim()}
-              className="w-full py-4 bg-gradient-to-r from-pink-600 to-purple-600 disabled:bg-white/10 disabled:text-white/30 text-white font-bold rounded-xl transition-all"
             >
               Continue
-            </button>
+            </Button>
           </div>
         )}
 
         {profile && (
           <div>
-            <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6 flex items-center justify-between">
-              <div>
-                <p className="text-white font-bold">{profile.name}</p>
+            <Card className="mb-6 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-display font-extrabold text-white truncate">{profile.name}</p>
                 <p className="text-white/40 text-sm">
                   {profile.animeList.reduce((s, a) => s + a.characters.length, 0)} characters
                 </p>
+                {/* Player ids come from the name, so a room rejects a second
+                    person using the same one — make switching easy. */}
+                <button
+                  onClick={() => { setProfile(null); setError(''); }}
+                  className="focus-pop mt-1 rounded-pop-sm text-sm text-pop-purple hover:text-white"
+                >
+                  change name
+                </button>
               </div>
-              <button onClick={() => setShowImport(true)} className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg">
+              <Button
+                variant="neutral"
+                size="sm"
+                className="flex-shrink-0"
+                onClick={() => setShowImport(true)}
+              >
                 🔗 Import from AniList
-              </button>
-            </div>
+              </Button>
+            </Card>
 
-            {error && <p className="text-red-400 text-center mb-4">{error}</p>}
+            {error && <Banner tone="danger" className="mb-4">{error}</Banner>}
 
-            <button
+            <Button
+              variant="success"
+              size="lg"
+              fullWidth
+              className="mb-4"
               onClick={handleCreate}
               disabled={busy}
-              className="w-full py-4 mb-4 bg-gradient-to-r from-green-600 to-emerald-600 disabled:opacity-50 text-white font-bold rounded-xl transition-all"
             >
               {busy ? 'Creating…' : '➕ Create Room'}
-            </button>
+            </Button>
 
             <div className="flex gap-3">
-              <input
+              <Input
                 type="text"
                 value={codeInput}
                 onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
                 onKeyDown={(e) => e.key === 'Enter' && codeInput.trim() && handleJoin()}
                 placeholder="Room code"
                 maxLength={5}
-                className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-4 text-white text-lg text-center tracking-widest placeholder-white/40 outline-none focus:border-purple-500"
+                aria-label="Room code"
+                className="flex-1 text-center text-lg font-display font-extrabold tracking-widest"
               />
-              <button
+              <Button
+                variant="secondary"
+                size="lg"
                 onClick={handleJoin}
                 disabled={busy || !codeInput.trim()}
-                className="px-6 py-4 bg-purple-600 hover:bg-purple-500 disabled:bg-white/10 disabled:text-white/30 text-white font-bold rounded-xl transition-colors"
               >
                 Join
-              </button>
+              </Button>
             </div>
           </div>
         )}
 
         {room.roomCode && (
-          <p className="text-white/60 text-center mt-6">
-            Room code: <span className="text-white font-black text-2xl tracking-widest">{room.roomCode}</span>
+          <p className="mt-6 text-center text-white/60">
+            Room code:{' '}
+            <Badge tone="lime" className="ml-1 text-lg tracking-widest">{room.roomCode}</Badge>
           </p>
         )}
 
@@ -143,7 +168,7 @@ export default function RoomSetup({ room, onBack }) {
             }}
           />
         )}
-      </div>
-    </div>
+      </Screen>
+    </>
   );
 }

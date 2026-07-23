@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useProfile } from '../../../shared/hooks/useProfile';
 import { useWins } from '../../../shared/hooks/useWins';
-import { useEscapeKey } from '../../../shared/hooks/useEscapeKey';
 import { normalizeTitle } from '../../../shared/utils/ranking';
 import AniListImport from '../../../shared/components/AniListImport';
+import {
+  Backdrop, Badge, Banner, Button, Card, CardRow, Checkbox, Input, Modal, Screen, Wordmark,
+} from '../../../shared/ui';
 import {
   DndContext,
   closestCenter,
@@ -33,20 +35,30 @@ function SortablePlayer({ player, onRemove, onGoToList }) {
   );
 
   return (
-    <div ref={setNodeRef} style={style} className="flex items-center gap-4 bg-white/10 rounded-xl p-4 mb-3 border border-white/20">
-      <span {...attributes} {...listeners} className="cursor-grab text-white/40 text-2xl">☰</span>
-      <span className="flex-1 font-bold text-white text-lg">{player.name}</span>
-      {totalCharacters === 0 && (
-        <span className="text-yellow-400 text-sm">⚠️ No chars</span>
-      )}
-      {totalCharacters > 0 && (
-        <span className="text-green-400 text-base">{totalCharacters} chars</span>
-      )}
+    <div ref={setNodeRef} style={style} className="card-pop mb-3 flex items-center gap-3 p-4">
+      <span
+        {...attributes}
+        {...listeners}
+        className="focus-pop cursor-grab rounded-pop-sm px-1 text-2xl text-white/40 hover:text-white"
+      >
+        ☰
+      </span>
+      <span className="min-w-0 flex-1 truncate font-display font-extrabold text-lg text-white">
+        {player.name}
+      </span>
+      <Badge tone={totalCharacters > 0 ? 'lime' : 'amber'}>
+        {totalCharacters > 0 ? `${totalCharacters} chars` : '⚠️ No chars'}
+      </Badge>
+      <Button variant="neutral" size="sm" onClick={() => onGoToList(player)}>
+        ✏️ Edit List
+      </Button>
       <button
-        onClick={() => onGoToList(player)}
-        className="px-3 py-1 bg-white/10 hover:bg-purple-600/50 text-white/60 hover:text-white text-sm rounded-lg transition-colors"
-      >✏️ Edit List</button>
-      <button onClick={() => onRemove(player.id)} aria-label={`Remove ${player.name}`} className="text-red-400 hover:text-red-300 font-bold text-lg">✕</button>
+        onClick={() => onRemove(player.id)}
+        aria-label={`Remove ${player.name}`}
+        className="focus-pop grid h-11 w-11 flex-shrink-0 place-items-center rounded-pop-sm text-lg font-black text-pop-red hover:text-white"
+      >
+        ✕
+      </button>
     </div>
   );
 }
@@ -133,67 +145,75 @@ export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayer
     }
   };
 
-  useEscapeKey(showWins, () => setShowWins(false));
-
   return (
-    <div className="min-h-screen flex flex-col items-center px-6 py-10">
-      {/* Header */}
-      <div className="text-center mb-10">
-        <h1 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 mb-3">
-          AniGuess
-        </h1>
-        <p className="text-white/60 text-lg">The anime character guessing game</p>
-        <button onClick={() => setShowWins(true)} className="mt-3 px-4 py-2 bg-white/10 hover:bg-white/20 text-white/70 hover:text-white text-sm rounded-xl transition-colors">
-          🏅 All-Time Leaderboard
-        </button>
-      </div>
+    <>
+      <Backdrop />
+      <Screen width="md">
+        <div className="mb-10 text-center">
+          <Wordmark tone="pink">AniGuess</Wordmark>
+          <p className="mt-5 text-lg text-white/60">The anime character guessing game</p>
+          <Button
+            variant="neutral"
+            size="sm"
+            className="mt-4"
+            onClick={() => setShowWins(true)}
+          >
+            🏅 All-Time Leaderboard
+          </Button>
+        </div>
 
-      {showWins && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4" onClick={() => setShowWins(false)} role="dialog" aria-modal="true">
-          <div className="bg-gray-900 border border-white/20 rounded-2xl p-8 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-3xl font-black text-white mb-6">🏅 All-Time Wins</h2>
+        {showWins && (
+          <Modal onClose={() => setShowWins(false)} width="sm">
+            <h2 className="mb-6 font-display text-3xl font-extrabold text-white">
+              🏅 All-Time Wins
+            </h2>
             {winsEntries.length === 0
-              ? <p className="text-white/40 text-center py-4">No games played yet!</p>
+              ? <p className="py-4 text-center text-white/40">No games played yet!</p>
               : winsEntries.map(([name, count], i) => (
-                <div key={name} className="flex justify-between items-center py-3 border-b border-white/10 last:border-0">
-                  <span className="text-white text-lg">{i === 0 ? '👑 ' : ''}{name}</span>
-                  <span className="text-yellow-400 font-black text-xl">{count} W</span>
-                </div>
+                <CardRow key={name}>
+                  <span className="text-lg text-white">{i === 0 ? '👑 ' : ''}{name}</span>
+                  <span className="font-display text-xl font-extrabold text-pop-amber">
+                    {count} W
+                  </span>
+                </CardRow>
               ))
             }
             <div className="mt-6 flex gap-3">
-              <button onClick={() => setShowWins(false)} className="flex-1 py-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-colors">Close</button>
-              {winsEntries.length > 0 && <button onClick={handleResetWins} className="flex-1 py-3 bg-red-600/40 hover:bg-red-600/70 text-red-300 font-bold rounded-xl transition-colors">Reset</button>}
+              <Button variant="neutral" fullWidth onClick={() => setShowWins(false)}>
+                Close
+              </Button>
+              {winsEntries.length > 0 && (
+                <Button variant="danger" fullWidth onClick={handleResetWins}>
+                  Reset
+                </Button>
+              )}
             </div>
-          </div>
-        </div>
-      )}
+          </Modal>
+        )}
 
-      <div className="w-full max-w-2xl">
         {/* Add Player */}
-        <div className="flex gap-3 mb-5">
-          <input
+        <div className="mb-5 flex gap-3">
+          <Input
             type="text"
             value={nameInput}
             onChange={(e) => setNameInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && nameInput.trim() && addPlayer()}
             placeholder="Enter player name..."
-            className="flex-1 bg-white/10 border border-white/20 rounded-xl px-5 py-4 text-white text-lg placeholder-white/40 outline-none focus:border-purple-500"
+            aria-label="Player name"
+            className="flex-1 text-lg"
           />
-          <button
-            onClick={addPlayer}
-            disabled={!nameInput.trim()}
-            className="bg-purple-600 hover:bg-purple-500 disabled:bg-white/10 disabled:text-white/30 text-white font-bold px-6 py-4 text-lg rounded-xl transition-colors"
-          >
+          <Button variant="secondary" size="lg" onClick={addPlayer} disabled={!nameInput.trim()}>
             Add
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="neutral"
+            size="lg"
+            className="whitespace-nowrap"
             onClick={startImport}
             disabled={!nameInput.trim()}
-            className="bg-white/10 hover:bg-white/20 disabled:bg-white/5 disabled:text-white/20 text-white font-bold px-5 py-4 text-lg rounded-xl transition-colors whitespace-nowrap"
           >
             🔗 Import
-          </button>
+          </Button>
         </div>
 
         {importTarget && (
@@ -214,81 +234,85 @@ export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayer
         </DndContext>
 
         {players.length < 2 && (
-          <p className="text-white/40 text-center text-base mb-5">Add at least 2 players to start</p>
-        )}
-        {players.length >= 2 && sharedShowsOnly && !hasSharedAnime && (
-          <p className="text-yellow-400 text-center text-base mb-5">
-            ⚠️ No anime titles are shared between all players — uncheck "Shared shows only" or add matching titles.
+          <p className="mb-5 text-center text-base text-white/40">
+            Add at least 2 players to start
           </p>
         )}
+        {players.length >= 2 && sharedShowsOnly && !hasSharedAnime && (
+          <Banner tone="warning" className="mb-5">
+            ⚠️ No anime titles are shared between all players — uncheck &quot;Shared shows
+            only&quot; or add matching titles.
+          </Banner>
+        )}
 
-        {/* Settings */}
-        <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-8 mt-4">
-          <h3 className="text-white font-bold text-xl mb-4">⚙️ Settings</h3>
-
-          <label className="flex items-center gap-3 text-white/80 text-lg mb-4 cursor-pointer">
-            <input type="checkbox" checked={twoStepRandom} onChange={(e) => setTwoStepRandom(e.target.checked)} className="w-5 h-5" />
-            Anime-first randomizer
-          </label>
-
-          <label className="flex items-center gap-3 text-white/80 text-lg mb-4 cursor-pointer">
-            <input type="checkbox" checked={timerEnabled} onChange={(e) => setTimerEnabled(e.target.checked)} className="w-5 h-5" />
-            Enable Timer
-          </label>
-
-          <label className="flex items-center gap-3 text-white/80 text-lg mb-4 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={sharedShowsOnly}
-              onChange={(e) => setSharedShowsOnly(e.target.checked)}
-              className="w-5 h-5"
-            />
-            Shared shows only
-          </label>
+        <Card title="⚙️ Settings" padding="lg" className="mb-8 mt-4">
+          <Checkbox
+            label="Anime-first randomizer"
+            checked={twoStepRandom}
+            onChange={(e) => setTwoStepRandom(e.target.checked)}
+            className="mb-4"
+          />
+          <Checkbox
+            label="Enable Timer"
+            checked={timerEnabled}
+            onChange={(e) => setTimerEnabled(e.target.checked)}
+            className="mb-4"
+          />
+          <Checkbox
+            label="Shared shows only"
+            checked={sharedShowsOnly}
+            onChange={(e) => setSharedShowsOnly(e.target.checked)}
+            className="mb-5"
+          />
 
           {timerEnabled && (
-            <div className="flex items-center gap-3 mb-4 text-white/70 text-lg">
+            <div className="mb-5 flex items-center gap-3 text-lg text-white/70">
               <span>Seconds:</span>
-              <input
+              <Input
                 type="number"
                 value={timerSeconds}
-                min={30} max={300}
+                min={30}
+                max={300}
+                aria-label="Timer seconds"
                 onChange={(e) => setTimerSeconds(parseInt(e.target.value) || 60)}
-                className="w-20 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-center text-lg"
+                className="w-24 px-2 text-center text-lg"
               />
             </div>
           )}
 
           <div>
-            <p className="text-white/70 text-base mb-3">Points per position:</p>
+            <p className="mb-3 text-base text-white/70">Points per position:</p>
             <div className="flex gap-4">
               {['🥇', '🥈', '🥉', 'Rest'].map((label, i) => (
-                <div key={i} className="flex flex-col items-center gap-2">
+                <div key={label} className="flex flex-col items-center gap-2">
                   <span className="text-lg">{label}</span>
-                  <input
+                  <Input
                     type="number"
                     value={pointsPerPosition[i]}
                     min={0}
+                    aria-label={`Points for ${label}`}
                     onChange={(e) => updatePoints(i, e.target.value)}
-                    className="w-16 bg-white/10 border border-white/20 rounded-lg px-2 py-2 text-white text-center text-lg"
+                    className="w-16 px-2 text-center text-lg"
                   />
                 </div>
               ))}
             </div>
           </div>
-        </div>
+        </Card>
 
-        {/* Start Button */}
-        <button
-          onClick={() => onStartGame({ players, settings: { timerEnabled, timerSeconds, pointsPerPosition, sharedShowsOnly, twoStepRandom } })}
+        <Button
+          variant="primary"
+          size="xl"
+          fullWidth
+          onClick={() => onStartGame({
+            players,
+            settings: { timerEnabled, timerSeconds, pointsPerPosition, sharedShowsOnly, twoStepRandom },
+          })}
           disabled={!canStart}
-          className="w-full py-5 rounded-xl font-black text-2xl transition-all duration-200 
-            disabled:bg-white/10 disabled:text-white/30 disabled:cursor-not-allowed
-            bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white shadow-lg shadow-purple-900/50"
         >
           🎮 Start Game
-        </button>
-      </div>
-    </div>
+        </Button>
+      </Screen>
+    </>
   );
 }

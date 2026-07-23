@@ -2,43 +2,40 @@ import { useState } from 'react';
 import LocalGame from './LocalGame';
 import OnlineGame from './OnlineGame';
 import { firebaseEnabled } from '../../shared/services/firebase';
+import { Backdrop, Button, GhostButton, Screen, Wordmark } from '../../shared/ui';
 
 export default function AniGuessGame({ onExit }) {
   const [mode, setMode] = useState(null); // null | 'local' | 'online'
 
-  if (mode === 'local') return <LocalGame />;
-  if (mode === 'online') return <OnlineGame onBack={() => setMode(null)} />;
+  if (mode === 'local') return <LocalGame onExit={onExit} />;
+  if (mode === 'online') return <OnlineGame onBack={() => setMode(null)} onExit={onExit} />;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
-      <div className="w-full max-w-md">
-        <h1 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 mb-3">
+    <>
+      <Backdrop />
+      <Screen center>
+        <Wordmark tone="pink" subtitle="The anime character guessing game" className="mb-10">
           AniGuess
-        </h1>
-        <p className="text-white/60 text-lg mb-10">The anime character guessing game</p>
+        </Wordmark>
         <div className="flex flex-col gap-4">
-          <button
-            onClick={() => setMode('local')}
-            className="w-full py-5 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-black text-xl rounded-xl transition-all"
-          >
+          <Button variant="primary" size="xl" fullWidth onClick={() => setMode('local')}>
             📱 Play on this device
-          </button>
-          <button
-            onClick={() => firebaseEnabled && setMode('online')}
+          </Button>
+          <Button
+            variant="secondary"
+            size="xl"
+            fullWidth
+            onClick={() => setMode('online')}
             disabled={!firebaseEnabled}
             title={!firebaseEnabled ? 'Online play requires Firebase configuration (see .env.local.example)' : ''}
-            className="w-full py-5 bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed text-white font-black text-xl rounded-xl transition-colors"
           >
             🌐 Play Online {!firebaseEnabled && '(not configured)'}
-          </button>
-          <button
-            onClick={onExit}
-            className="text-white/60 hover:text-white transition-colors text-lg mt-2"
-          >
-            ← Back to hub
-          </button>
+          </Button>
+          <div className="mt-2 text-center">
+            <GhostButton onClick={onExit}>← Back to hub</GhostButton>
+          </div>
         </div>
-      </div>
-    </div>
+      </Screen>
+    </>
   );
 }

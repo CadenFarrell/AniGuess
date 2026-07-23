@@ -3,6 +3,11 @@ import { useGameSession } from './useGameSession';
 import { useWins } from '../../../shared/hooks/useWins';
 import * as rules from '../rules';
 
+// Views that describe a game actually in progress. The list-editing and
+// menu screens are deliberately excluded: saving one of those would offer to
+// "resume" into a screen that has no game state behind it.
+export const RESUMABLE_VIEWS = ['assignment', 'reveal', 'game', 'correctGuess', 'roundEnd'];
+
 // Owns all game-flow state (assignment, turns, scoring, session persistence).
 // `view`/`setView` stay owned by LocalGame.jsx, which remains the thin view-router;
 // handlers here call setView to navigate between screens. The actual turn/
@@ -38,7 +43,8 @@ export function useGameFlow({ view, setView }) {
   useEffect(() => {
     const existing = loadSession();
     if (!existing) return;
-    if (Array.isArray(existing.assignments) && existing.gameSession?.players) {
+    if (Array.isArray(existing.assignments) && existing.gameSession?.players?.length
+        && RESUMABLE_VIEWS.includes(existing.view)) {
       setSavedSession(existing);
       setShowResumePrompt(true);
     } else {
@@ -51,7 +57,7 @@ export function useGameFlow({ view, setView }) {
 
   // Auto-save session
   useEffect(() => {
-    if (gameSession && view !== 'setup' && view !== 'leaderboard') {
+    if (gameSession && RESUMABLE_VIEWS.includes(view)) {
       saveSession({
         view, gameSession, assignmentIndex, assignments,
         currentPlayerIndex, lockedPositions, peekedPlayers,

@@ -117,6 +117,22 @@
             "series": "High School DxD"
           },
           {
+            "id": "anilist_59431",
+            "name": "Tsubaki Shinra",
+            "role": "Supporting",
+            "gender": "Female",
+            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b59431-2FaYIlCi2mE8.png",
+            "description": "The Vice-President of the Student Council and Souna's Queen. Her relationship with Souna is similar to that of Rias and Akeno. She is the fourth most popular girl in the school.",
+            "genres": [
+              "Action",
+              "Comedy",
+              "Ecchi",
+              "Fantasy",
+              "Romance"
+            ],
+            "series": "High School DxD"
+          },
+          {
             "id": "anilist_58341",
             "name": "Ravel Phenex",
             "role": "Supporting",
@@ -661,7 +677,7 @@
           },
           {
             "id": "anilist_126290",
-            "name": "Kyouryuu no Hime",
+            "name": "Princess of the Klaxosaurs",
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b126290-v3aLCi4pQijJ.png",
@@ -1578,7 +1594,7 @@
             "name": "Tomo Hosaka",
             "role": "Supporting",
             "gender": "Female",
-            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b66645-wSoq0pZ4Oa5H.png",
+            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b66645-Np9FjjBajBkd.jpg",
             "description": "Argo \"The Rat\" serves as an information broker and courier in the Sword Art Online death game. Kirito and Argo suspect each-other without doubt to be a fellow beta testers but refuses to ever confirm the topic.",
             "genres": [
               "Action",
@@ -2686,7 +2702,7 @@
           },
           {
             "id": "anilist_24506",
-            "name": "Shiina",
+            "name": "Eri Shiina",
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/24506.jpg",
@@ -3136,6 +3152,19 @@
             "series": "Classroom of the Elite"
           },
           {
+            "id": "anilist_191401",
+            "name": "Chiaki Matsushita",
+            "role": "Supporting",
+            "gender": "Female",
+            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b191401-QIpXOM9iZoG2.jpg",
+            "description": "Matsushita is one of the students of class 2-D. She has a quiet older sister type of personality. She is generally kind to all the boys and girls alike, but she does not actively go out to make friends.",
+            "genres": [
+              "Drama",
+              "Psychological"
+            ],
+            "series": "Classroom of the Elite"
+          },
+          {
             "id": "anilist_123216",
             "name": "Honami Ichinose",
             "role": "Supporting",
@@ -3193,7 +3222,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b163519-as1ccGaDehxI.jpg",
-            "description": "She is a student of class 2-D.",
+            "description": "She is a student of class 1-D.",
             "genres": [
               "Drama",
               "Psychological"
@@ -3707,7 +3736,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b90170-sHsO9ojQDLa3.jpg",
-            "description": "Sin Archbishop of the Witch Cult, representing sloth. He is utterly insane.",
+            "description": "Sin Archbishop of the Witch Cult, representing sloth.",
             "genres": [
               "Action",
               "Adventure",
@@ -3803,7 +3832,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b191242-uQJUPMyknaTb.png",
-            "description": "A third-year middle school student and a member of Elmei Junior and Senior High's boys' badminton team. While not the most-talented player, Taiki is nonetheless extremely hardworking.",
+            "description": "A third-year middle school student and a member of Eimei Junior and Senior High's boys' badminton team. While not the most-talented player, Taiki is nonetheless extremely hardworking.",
             "genres": [
               "Romance",
               "Slice of Life",
@@ -3963,7 +3992,7 @@
           },
           {
             "id": "anilist_152231",
-            "name": "Tenshi no Akuma",
+            "name": "Angel Devil",
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b152231-vHM4WlaYIVB5.jpg",
@@ -4023,7 +4052,7 @@
           },
           {
             "id": "anilist_157231",
-            "name": "Bouryoku no Majin",
+            "name": "Violence Fiend",
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157231-hV81SwGqxl2R.jpg",
@@ -4053,7 +4082,7 @@
           },
           {
             "id": "anilist_172887",
-            "name": "Mirai no Akuma",
+            "name": "Future Devil",
             "role": "Supporting",
             "gender": "Unknown",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b172887-qMCjXPXMSKRk.png",
@@ -4072,7 +4101,22 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b144593-hdCTT9t54z0s.png",
-            "description": "A Public Safety Devil Hunter from Special Division 1 Kishibe is a grizzled man with scraggly facial hair and a stitched scar running across his left cheek from his mouth. He normally wears the standard Public Safety devil hunter uniform with a large overcoat.",
+            "description": "A Public Safety Devil Hunter from Special Division 1. Kishibe is a grizzled man with scraggly facial hair and a stitched scar running across his left cheek from his mouth. He normally wears the standard Public Safety devil hunter uniform with a large overcoat.",
+            "genres": [
+              "Action",
+              "Drama",
+              "Horror",
+              "Supernatural"
+            ],
+            "series": "Chainsaw Man"
+          },
+          {
+            "id": "anilist_174264",
+            "name": "Akane Sawatari ",
+            "role": "Supporting",
+            "gender": "Female",
+            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b174264-dLiZkMXoltQ9.png",
+            "description": "An enigmatic former Private Detective Hunter, she pledged her allegiance with the Gun Devil after making a contract with him and as a result, she seeks to obtain Denji's heart for her master.",
             "genres": [
               "Action",
               "Drama",
@@ -4561,7 +4605,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b1117-Zc6IwzGMj4Qy.png",
-            "description": "An elite Knightmare Frame pilot and a Purist, who appears to be more collected than Jeremiah in battle. She was one of the first to have been under the power of Geass' influence and is one of the few still loyal to Jeremiah even after his fall in disgrace. -From Wikipedia",
+            "description": "An elite Knightmare Frame pilot and a Purist, who appears to be more collected than Jeremiah in battle. She was one of the first to have been under the power of Geass' influence and is one of the few still loyal to Jeremiah even after his fall in disgrace.",
             "genres": [
               "Action",
               "Drama",
@@ -4849,7 +4893,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n130715-IYNBAHBQa14y.png",
-            "description": "He Trained at the academy with Shinra. Although he follows his own personal code of chivalry as the self-proclaimed Knight King, he is incredibly stupid. But girls love him.",
+            "description": "He trained at the academy with Shinra. Although he follows his own personal code of chivalry as the self-proclaimed Knight King, he is incredibly stupid. But girls love him.",
             "genres": [
               "Action",
               "Drama",
@@ -5015,6 +5059,21 @@
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b150322-c5usQsoIu6bs.png",
             "description": "Lisa Isaribi, formerly known as Feeler during her service in the Knights of the Ashen Flame, is a former Third Generation Pyrokinetic. She is a member of Special Fire Force Company 8.",
+            "genres": [
+              "Action",
+              "Drama",
+              "Sci-Fi",
+              "Supernatural"
+            ],
+            "series": "Fire Force"
+          },
+          {
+            "id": "anilist_161515",
+            "name": "Assault",
+            "role": "Supporting",
+            "gender": "Male",
+            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b161515-TrcGb7DuXhpM.png",
+            "description": "Assault has dark skin and light spiky hair, three piercing in each of his ears, and two piercings in-place of his absent eyebrows.",
             "genres": [
               "Action",
               "Drama",
@@ -5297,7 +5356,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b88349-5dsNUah3oBj8.png",
-            "description": "Eris Boreas Greyrat is a noble girl and distant relative of Rudeus. She is a tsundere character with a short temper but has potential in the Sword-God style.",
+            "description": "Eris Boreas Greyrat is a noble girl and distant relative of Rudeus. She is a tsundere with a short temper but has potential in the Sword-God style.",
             "genres": [
               "Adventure",
               "Drama",
@@ -5513,7 +5572,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/6045-uXrSnt8CwMFz.jpg",
-            "description": "A 17 year old sophomore high school student, Takashi is in the same class as Rei whom he has been friends with since childhood,He's loved her ever since she made a childhood promise to marry him when they were older.",
+            "description": "A sophomore high school student, Takashi is in the same class as Rei whom he has been friends with since childhood,He's loved her ever since she made a childhood promise to marry him when they were older.",
             "genres": [
               "Action",
               "Drama",
@@ -5732,7 +5791,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b74587-mmTDJoCpsER9.jpg",
-            "description": "Hachiman's classmate who seems like a delinquent, but wants to make friends. She cares deeply for her brother as she hid her name and age to work in night-shift part-time jobs in order to pay school fees and reduce her family's load.",
+            "description": "Hachiman Hikigaya's classmate who seems like a delinquent, but wants to make friends. She cares deeply for her brother as she hid her name and age to work in night-shift part-time jobs in order to pay school fees and reduce her family's load.",
             "genres": [
               "Comedy",
               "Drama",
@@ -5843,7 +5902,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b88264-v9VFbSWtQq2C.png",
-            "description": "Stella Vermillion is an A-rank Apprentice Knight and princess of the Vermillion Kingdom. Stella initially appears to be feisty, hot-blooded, and quick to anger possibly due to her sheltered upbringing.",
+            "description": "Stella Vermillion is an A-rank Apprentice Knight and second princess of the Vermillion Kingdom. Stella initially appears to be feisty, hot-blooded, and quick to anger possibly due to her sheltered upbringing.",
             "genres": [
               "Action",
               "Ecchi",
@@ -6145,7 +6204,7 @@
             "id": "anilist_131043",
             "name": "Hakurou",
             "role": "Supporting",
-            "gender": "Unknown",
+            "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b131043-AyEdKg1Xkjrd.png",
             "description": "Hakurou is a Fair Oni and is a loyal follower of Rimuru Tempest. He was one of the survivors of the Orc attack. He was also the teacher of the Dwarven King.",
             "genres": [
@@ -6175,7 +6234,7 @@
             "id": "anilist_129348",
             "name": "Rigurd",
             "role": "Supporting",
-            "gender": "Unknown",
+            "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b129348-uWQXM503laJT.jpg",
             "description": "Formerly the chief of the goblin village Rimuru comes across. He's now the acting prime minister of the Jura Tempest Federation. He evolved into a hobgoblin when Rimuru named him.",
             "genres": [
@@ -6190,7 +6249,7 @@
             "id": "anilist_129919",
             "name": "Ellen",
             "role": "Supporting",
-            "gender": "Unknown",
+            "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b129919-EpaC3tWzCDpF.jpg",
             "description": "Eren is an adventurer and a member of Kaval's Party.",
             "genres": [
@@ -6250,7 +6309,7 @@
             "id": "anilist_129350",
             "name": "Gobta",
             "role": "Supporting",
-            "gender": "Unknown",
+            "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b129350-qF2RlaSXb8Ro.jpg",
             "description": "Gobta is a hobgoblin and is one of Rimuru Tempest's followers. Though he seems to be air-headed he tends to be a hard-worker and dependable when the time calls for it.",
             "genres": [
@@ -6340,7 +6399,7 @@
             "id": "anilist_133522",
             "name": "Geld",
             "role": "Supporting",
-            "gender": "Unknown",
+            "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b133522-CkNIcvE1JJ08.jpg",
             "description": "He is one of the fourth group of subordinates to be named by Rimuru Tempest. As the right-hand man of the deceased Orc Lord, he was given the same name as him, as a memento and token of appreciation, similar to how Rigur was named after his older brother.",
             "genres": [
@@ -7933,7 +7992,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b502-Nc5U3ghTR7Gy.png",
-            "description": "In Fate/stay night In Fate/stay night: Heaven's Feel In Fate/Grand Order - First Order",
+            "description": "In Fate/stay night:",
             "genres": [
               "Action",
               "Fantasy",
@@ -8023,7 +8082,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b504-2k7LldrHYSAP.png",
-            "description": "In Fate/Stay Night",
+            "description": "",
             "genres": [
               "Action",
               "Fantasy",
@@ -8051,9 +8110,9 @@
             "id": "anilist_505",
             "name": "Taiga Fujimura",
             "role": "Supporting",
-            "gender": "Unknown",
+            "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b505-QL0cNIE6Q0RI.png",
-            "description": "She is an English teacher at Shirō's school, homeroom instructor of Shirō's class and the supervising teacher for the archery dojo.",
+            "description": "She is an English teacher at Shirou's school, homeroom instructor of Shirou's class and the supervising teacher for the archery dojo. After Kiritsugu died, Taiga became Shirou's guardian and has been living with him for several years.",
             "genres": [
               "Action",
               "Fantasy",
@@ -8959,23 +9018,6 @@
             "series": "Tokyo Ghoul"
           },
           {
-            "id": "anilist_88428",
-            "name": "Yakumo Oomori",
-            "role": "Supporting",
-            "gender": "Male",
-            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/88428.jpg",
-            "description": "A white-haired brute with sharp lizard eyes. Yamori is ghoul who is as scary as he looks. Normally in a entirely white suit and black dress shirt, he resembles a typical gangster.",
-            "genres": [
-              "Action",
-              "Drama",
-              "Horror",
-              "Mystery",
-              "Psychological",
-              "Supernatural"
-            ],
-            "series": "Tokyo Ghoul"
-          },
-          {
             "id": "anilist_88409",
             "name": "Nishiki Nishio",
             "role": "Supporting",
@@ -9280,7 +9322,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b207989-NncMS5UmEbOn.jpg",
-            "description": "Tsubasa's senpai or upperclassman one grade above him. She is a gal like Fuyuki, who respects her a lot. She has white-grey short hair. She is really timid and insecure, even though she's considered really talented, especially at studying.",
+            "description": "Tsubasa Shiki's senpai or upperclassman one grade above him. She is a gal like Fuyuki, who respects her a lot. She is really timid and insecure, even though she's considered really talented, especially at studying.",
             "genres": [
               "Comedy",
               "Romance",
@@ -9326,7 +9368,7 @@
             "id": "anilist_46557",
             "name": "Kiyoshi Fujino",
             "role": "Main",
-            "gender": "Unknown",
+            "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b46557-fJ8Va6GtynPM.jpg",
             "description": "Kiyoshi is the main character of the series and the first boy in Hachimitsu Academy to make contact with a girl.",
             "genres": [
@@ -9339,7 +9381,7 @@
             "id": "anilist_64855",
             "name": "Reiji Andou",
             "role": "Main",
-            "gender": "Unknown",
+            "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/64855-dqYSdXomkkBS.png",
             "description": "Nicknamed \"Andre\", he is the fat one of the group. He cares deeply about his friends, and is also an extreme masochist.",
             "genres": [
@@ -9378,7 +9420,7 @@
             "id": "anilist_64853",
             "name": "Shingo Wakamoto",
             "role": "Main",
-            "gender": "Unknown",
+            "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/64853-na3jSPCPWhLZ.png",
             "description": "Shingo is a blonde guy who looks like a delinquent. He has a crush on Anzu.",
             "genres": [
@@ -9391,7 +9433,7 @@
             "id": "anilist_64857",
             "name": "Kurihara",
             "role": "Supporting",
-            "gender": "Unknown",
+            "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b64857-77lOiS9FSocO.png",
             "description": "He is the chairman of Hachimitsu Private Academy.",
             "genres": [
@@ -9404,9 +9446,9 @@
             "id": "anilist_89755",
             "name": "Anzu Yokoyama",
             "role": "Supporting",
-            "gender": "Unknown",
+            "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/89755-F2bYkxr4h5K3.png",
-            "description": "She is a second-year student in attendance at Hachimitsu Academy and also the love interest of Shingo Wakamoto. </br></br>",
+            "description": "She is a second-year student in attendance at Hachimitsu Academy and also the love interest of Shingo Wakamoto.",
             "genres": [
               "Comedy",
               "Ecchi"
@@ -9430,7 +9472,7 @@
             "id": "anilist_64861",
             "name": "Mari Kurihara",
             "role": "Supporting",
-            "gender": "Unknown",
+            "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b64861-gzmOZka1FnyB.png",
             "description": "Mari is the president of the underground student council.",
             "genres": [
@@ -9456,7 +9498,7 @@
             "id": "anilist_47117",
             "name": "Meiko Shiraki",
             "role": "Supporting",
-            "gender": "Unknown",
+            "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b47117-mAQMfzqe56qJ.jpg",
             "description": "Vice president of the underground student council, she is a voluptuous girl who roams around campus in an scantly outfit and whose reputation of being a sadist and a man hater is well known especially to the five boys whom she has mistreated during their detention.",
             "genres": [
@@ -9741,7 +9783,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n18056-fCHMXALzWvOL.png",
-            "description": "Nara Shikaku is the father of Shikamaru and the husband of Yoshino, and, like his son, he was part of an Ino-Shika-Cho trio, together with Choza Akimichi and Inoichi Yamanaka. Like his son, he is the Shika in the group name.",
+            "description": "Nara Shikaku is the father of Shikamaru and the husband of Yoshino, and, like his son, he was part of an Ino-Shika-Cho trio, together with Chouza Akimichi and Inoichi Yamanaka. Like his son, he is the Shika in the group name.",
             "genres": [
               "Action",
               "Adventure",
@@ -9758,7 +9800,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b1555-Q41GLTV3FvYF.png",
-            "description": "Ninja Registration Nº: 012612 Hyuuga Hinata is the eldest daughter of the Hyuuga clan's main branch. Hinata was trained by her father, Hiashi Hyuuga, to become the clan's heiress, though in time he came to deem her a lost cause.",
+            "description": "Hyuuga Hinata is the eldest daughter of the Hyuuga clan's main branch. Hinata was trained by her father, Hiashi Hyuuga, to become the clan's heiress, though in time he came to deem her a lost cause.",
             "genres": [
               "Action",
               "Adventure",
@@ -9963,6 +10005,23 @@
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b307-xieUEdhdTVwQ.png",
             "description": "He is the leader of Team Guy, consisting of Rock Lee, Neji Hyuga, and Tenten. Guy, and by extension Lee, lives his life by his own \"My Rules\" philosophy, which involves setting tougher self-imposed penalties for failure so something good comes of it.",
+            "genres": [
+              "Action",
+              "Adventure",
+              "Comedy",
+              "Drama",
+              "Fantasy",
+              "Supernatural"
+            ],
+            "series": "Naruto"
+          },
+          {
+            "id": "anilist_7738",
+            "name": "Hayate Gekkou",
+            "role": "Supporting",
+            "gender": "Male",
+            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n7738-jp6LVMZ3nwXR.png",
+            "description": "",
             "genres": [
               "Action",
               "Adventure",
@@ -10195,6 +10254,23 @@
             "series": "Naruto"
           },
           {
+            "id": "anilist_16952",
+            "name": "Gamatatsu",
+            "role": "Supporting",
+            "gender": "Unknown",
+            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/16952.jpg",
+            "description": "Gamatatsu (ガマ竜; Literally meaning \"Toad Dragon\") is one of Gamabunta's children and Gamakichi's younger brother who has a fixation with snacks. Gamatatsu has shown that he'd choose snacks over someone's life.",
+            "genres": [
+              "Action",
+              "Adventure",
+              "Comedy",
+              "Drama",
+              "Fantasy",
+              "Supernatural"
+            ],
+            "series": "Naruto"
+          },
+          {
             "id": "anilist_16999",
             "name": "Gamakichi",
             "role": "Supporting",
@@ -10251,7 +10327,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n18056-fCHMXALzWvOL.png",
-            "description": "Nara Shikaku is the father of Shikamaru and the husband of Yoshino, and, like his son, he was part of an Ino-Shika-Cho trio, together with Choza Akimichi and Inoichi Yamanaka. Like his son, he is the Shika in the group name.",
+            "description": "Nara Shikaku is the father of Shikamaru and the husband of Yoshino, and, like his son, he was part of an Ino-Shika-Cho trio, together with Chouza Akimichi and Inoichi Yamanaka. Like his son, he is the Shika in the group name.",
             "genres": [
               "Action",
               "Adventure",
@@ -10503,7 +10579,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b271882-lDkot5XAiMgH.png",
-            "description": "Shikimori's older brother.",
+            "description": "Older brother of Miyako Shikimori.",
             "genres": [
               "Comedy",
               "Romance",
@@ -10809,7 +10885,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n18056-fCHMXALzWvOL.png",
-            "description": "Nara Shikaku is the father of Shikamaru and the husband of Yoshino, and, like his son, he was part of an Ino-Shika-Cho trio, together with Choza Akimichi and Inoichi Yamanaka. Like his son, he is the Shika in the group name.",
+            "description": "Nara Shikaku is the father of Shikamaru and the husband of Yoshino, and, like his son, he was part of an Ino-Shika-Cho trio, together with Chouza Akimichi and Inoichi Yamanaka. Like his son, he is the Shika in the group name.",
             "genres": [
               "Action",
               "Adventure",
@@ -10826,7 +10902,7 @@
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b1555-Q41GLTV3FvYF.png",
-            "description": "Ninja Registration Nº: 012612 Hyuuga Hinata is the eldest daughter of the Hyuuga clan's main branch. Hinata was trained by her father, Hiashi Hyuuga, to become the clan's heiress, though in time he came to deem her a lost cause.",
+            "description": "Hyuuga Hinata is the eldest daughter of the Hyuuga clan's main branch. Hinata was trained by her father, Hiashi Hyuuga, to become the clan's heiress, though in time he came to deem her a lost cause.",
             "genres": [
               "Action",
               "Adventure",
@@ -11031,6 +11107,23 @@
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b307-xieUEdhdTVwQ.png",
             "description": "He is the leader of Team Guy, consisting of Rock Lee, Neji Hyuga, and Tenten. Guy, and by extension Lee, lives his life by his own \"My Rules\" philosophy, which involves setting tougher self-imposed penalties for failure so something good comes of it.",
+            "genres": [
+              "Action",
+              "Adventure",
+              "Comedy",
+              "Drama",
+              "Fantasy",
+              "Supernatural"
+            ],
+            "series": "Naruto"
+          },
+          {
+            "id": "anilist_7738",
+            "name": "Hayate Gekkou",
+            "role": "Supporting",
+            "gender": "Male",
+            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n7738-jp6LVMZ3nwXR.png",
+            "description": "",
             "genres": [
               "Action",
               "Adventure",
@@ -11263,6 +11356,23 @@
             "series": "Naruto"
           },
           {
+            "id": "anilist_16952",
+            "name": "Gamatatsu",
+            "role": "Supporting",
+            "gender": "Unknown",
+            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/16952.jpg",
+            "description": "Gamatatsu (ガマ竜; Literally meaning \"Toad Dragon\") is one of Gamabunta's children and Gamakichi's younger brother who has a fixation with snacks. Gamatatsu has shown that he'd choose snacks over someone's life.",
+            "genres": [
+              "Action",
+              "Adventure",
+              "Comedy",
+              "Drama",
+              "Fantasy",
+              "Supernatural"
+            ],
+            "series": "Naruto"
+          },
+          {
             "id": "anilist_16999",
             "name": "Gamakichi",
             "role": "Supporting",
@@ -11319,7 +11429,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/n18056-fCHMXALzWvOL.png",
-            "description": "Nara Shikaku is the father of Shikamaru and the husband of Yoshino, and, like his son, he was part of an Ino-Shika-Cho trio, together with Choza Akimichi and Inoichi Yamanaka. Like his son, he is the Shika in the group name.",
+            "description": "Nara Shikaku is the father of Shikamaru and the husband of Yoshino, and, like his son, he was part of an Ino-Shika-Cho trio, together with Chouza Akimichi and Inoichi Yamanaka. Like his son, he is the Shika in the group name.",
             "genres": [
               "Action",
               "Adventure",
@@ -11427,7 +11537,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/6045-uXrSnt8CwMFz.jpg",
-            "description": "A 17 year old sophomore high school student, Takashi is in the same class as Rei whom he has been friends with since childhood,He's loved her ever since she made a childhood promise to marry him when they were older.",
+            "description": "A sophomore high school student, Takashi is in the same class as Rei whom he has been friends with since childhood,He's loved her ever since she made a childhood promise to marry him when they were older.",
             "genres": [
               "Action",
               "Drama",
@@ -11677,6 +11787,22 @@
             "series": "High School DxD"
           },
           {
+            "id": "anilist_59431",
+            "name": "Tsubaki Shinra",
+            "role": "Supporting",
+            "gender": "Female",
+            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b59431-2FaYIlCi2mE8.png",
+            "description": "The Vice-President of the Student Council and Souna's Queen. Her relationship with Souna is similar to that of Rias and Akeno. She is the fourth most popular girl in the school.",
+            "genres": [
+              "Action",
+              "Comedy",
+              "Ecchi",
+              "Fantasy",
+              "Romance"
+            ],
+            "series": "High School DxD"
+          },
+          {
             "id": "anilist_58341",
             "name": "Ravel Phenex",
             "role": "Supporting",
@@ -11824,7 +11950,7 @@
           },
           {
             "id": "anilist_152231",
-            "name": "Tenshi no Akuma",
+            "name": "Angel Devil",
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b152231-vHM4WlaYIVB5.jpg",
@@ -11884,7 +12010,7 @@
           },
           {
             "id": "anilist_157231",
-            "name": "Bouryoku no Majin",
+            "name": "Violence Fiend",
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157231-hV81SwGqxl2R.jpg",
@@ -11914,7 +12040,7 @@
           },
           {
             "id": "anilist_172887",
-            "name": "Mirai no Akuma",
+            "name": "Future Devil",
             "role": "Supporting",
             "gender": "Unknown",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b172887-qMCjXPXMSKRk.png",
@@ -11933,7 +12059,22 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b144593-hdCTT9t54z0s.png",
-            "description": "A Public Safety Devil Hunter from Special Division 1 Kishibe is a grizzled man with scraggly facial hair and a stitched scar running across his left cheek from his mouth. He normally wears the standard Public Safety devil hunter uniform with a large overcoat.",
+            "description": "A Public Safety Devil Hunter from Special Division 1. Kishibe is a grizzled man with scraggly facial hair and a stitched scar running across his left cheek from his mouth. He normally wears the standard Public Safety devil hunter uniform with a large overcoat.",
+            "genres": [
+              "Action",
+              "Drama",
+              "Horror",
+              "Supernatural"
+            ],
+            "series": "Chainsaw Man"
+          },
+          {
+            "id": "anilist_174264",
+            "name": "Akane Sawatari ",
+            "role": "Supporting",
+            "gender": "Female",
+            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b174264-dLiZkMXoltQ9.png",
+            "description": "An enigmatic former Private Detective Hunter, she pledged her allegiance with the Gun Devil after making a contract with him and as a result, she seeks to obtain Denji's heart for her master.",
             "genres": [
               "Action",
               "Drama",
@@ -12715,7 +12856,7 @@
             "name": "Tomo Hosaka",
             "role": "Supporting",
             "gender": "Female",
-            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b66645-wSoq0pZ4Oa5H.png",
+            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b66645-Np9FjjBajBkd.jpg",
             "description": "Argo \"The Rat\" serves as an information broker and courier in the Sword Art Online death game. Kirito and Argo suspect each-other without doubt to be a fellow beta testers but refuses to ever confirm the topic.",
             "genres": [
               "Action",
@@ -13037,7 +13178,7 @@
             "role": "Main",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b191242-uQJUPMyknaTb.png",
-            "description": "A third-year middle school student and a member of Elmei Junior and Senior High's boys' badminton team. While not the most-talented player, Taiki is nonetheless extremely hardworking.",
+            "description": "A third-year middle school student and a member of Eimei Junior and Senior High's boys' badminton team. While not the most-talented player, Taiki is nonetheless extremely hardworking.",
             "genres": [
               "Romance",
               "Slice of Life",
@@ -13836,7 +13977,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b88264-v9VFbSWtQq2C.png",
-            "description": "Stella Vermillion is an A-rank Apprentice Knight and princess of the Vermillion Kingdom. Stella initially appears to be feisty, hot-blooded, and quick to anger possibly due to her sheltered upbringing.",
+            "description": "Stella Vermillion is an A-rank Apprentice Knight and second princess of the Vermillion Kingdom. Stella initially appears to be feisty, hot-blooded, and quick to anger possibly due to her sheltered upbringing.",
             "genres": [
               "Action",
               "Ecchi",
@@ -14256,7 +14397,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b88349-5dsNUah3oBj8.png",
-            "description": "Eris Boreas Greyrat is a noble girl and distant relative of Rudeus. She is a tsundere character with a short temper but has potential in the Sword-God style.",
+            "description": "Eris Boreas Greyrat is a noble girl and distant relative of Rudeus. She is a tsundere with a short temper but has potential in the Sword-God style.",
             "genres": [
               "Adventure",
               "Drama",
@@ -14573,7 +14714,7 @@
           },
           {
             "id": "anilist_24506",
-            "name": "Shiina",
+            "name": "Eri Shiina",
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/24506.jpg",
@@ -17862,7 +18003,7 @@
           },
           {
             "id": "anilist_152231",
-            "name": "Tenshi no Akuma",
+            "name": "Angel Devil",
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b152231-vHM4WlaYIVB5.jpg",
@@ -17922,7 +18063,7 @@
           },
           {
             "id": "anilist_157231",
-            "name": "Bouryoku no Majin",
+            "name": "Violence Fiend",
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157231-hV81SwGqxl2R.jpg",
@@ -17952,7 +18093,7 @@
           },
           {
             "id": "anilist_172887",
-            "name": "Mirai no Akuma",
+            "name": "Future Devil",
             "role": "Supporting",
             "gender": "Unknown",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b172887-qMCjXPXMSKRk.png",
@@ -17971,7 +18112,22 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b144593-hdCTT9t54z0s.png",
-            "description": "A Public Safety Devil Hunter from Special Division 1 Kishibe is a grizzled man with scraggly facial hair and a stitched scar running across his left cheek from his mouth. He normally wears the standard Public Safety devil hunter uniform with a large overcoat.",
+            "description": "A Public Safety Devil Hunter from Special Division 1. Kishibe is a grizzled man with scraggly facial hair and a stitched scar running across his left cheek from his mouth. He normally wears the standard Public Safety devil hunter uniform with a large overcoat.",
+            "genres": [
+              "Action",
+              "Drama",
+              "Horror",
+              "Supernatural"
+            ],
+            "series": "Chainsaw Man"
+          },
+          {
+            "id": "anilist_174264",
+            "name": "Akane Sawatari ",
+            "role": "Supporting",
+            "gender": "Female",
+            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b174264-dLiZkMXoltQ9.png",
+            "description": "An enigmatic former Private Detective Hunter, she pledged her allegiance with the Gun Devil after making a contract with him and as a result, she seeks to obtain Denji's heart for her master.",
             "genres": [
               "Action",
               "Drama",
@@ -19117,7 +19273,7 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b90170-sHsO9ojQDLa3.jpg",
-            "description": "Sin Archbishop of the Witch Cult, representing sloth. He is utterly insane.",
+            "description": "Sin Archbishop of the Witch Cult, representing sloth.",
             "genres": [
               "Action",
               "Adventure",
@@ -19301,7 +19457,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b88349-5dsNUah3oBj8.png",
-            "description": "Eris Boreas Greyrat is a noble girl and distant relative of Rudeus. She is a tsundere character with a short temper but has potential in the Sword-God style.",
+            "description": "Eris Boreas Greyrat is a noble girl and distant relative of Rudeus. She is a tsundere with a short temper but has potential in the Sword-God style.",
             "genres": [
               "Adventure",
               "Drama",
@@ -19700,7 +19856,7 @@
           },
           {
             "id": "anilist_126290",
-            "name": "Kyouryuu no Hime",
+            "name": "Princess of the Klaxosaurs",
             "role": "Supporting",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b126290-v3aLCi4pQijJ.png",
@@ -20389,7 +20545,7 @@
           },
           {
             "id": "anilist_152231",
-            "name": "Tenshi no Akuma",
+            "name": "Angel Devil",
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b152231-vHM4WlaYIVB5.jpg",
@@ -20449,7 +20605,7 @@
           },
           {
             "id": "anilist_157231",
-            "name": "Bouryoku no Majin",
+            "name": "Violence Fiend",
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b157231-hV81SwGqxl2R.jpg",
@@ -20479,7 +20635,7 @@
           },
           {
             "id": "anilist_172887",
-            "name": "Mirai no Akuma",
+            "name": "Future Devil",
             "role": "Supporting",
             "gender": "Unknown",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b172887-qMCjXPXMSKRk.png",
@@ -20498,7 +20654,22 @@
             "role": "Supporting",
             "gender": "Male",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b144593-hdCTT9t54z0s.png",
-            "description": "A Public Safety Devil Hunter from Special Division 1 Kishibe is a grizzled man with scraggly facial hair and a stitched scar running across his left cheek from his mouth. He normally wears the standard Public Safety devil hunter uniform with a large overcoat.",
+            "description": "A Public Safety Devil Hunter from Special Division 1. Kishibe is a grizzled man with scraggly facial hair and a stitched scar running across his left cheek from his mouth. He normally wears the standard Public Safety devil hunter uniform with a large overcoat.",
+            "genres": [
+              "Action",
+              "Drama",
+              "Horror",
+              "Supernatural"
+            ],
+            "series": "Chainsaw Man"
+          },
+          {
+            "id": "anilist_174264",
+            "name": "Akane Sawatari ",
+            "role": "Supporting",
+            "gender": "Female",
+            "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b174264-dLiZkMXoltQ9.png",
+            "description": "An enigmatic former Private Detective Hunter, she pledged her allegiance with the Gun Devil after making a contract with him and as a result, she seeks to obtain Denji's heart for her master.",
             "genres": [
               "Action",
               "Drama",
@@ -20579,7 +20750,7 @@
             "role": "Main",
             "gender": "Female",
             "imageUrl": "https://s4.anilist.co/file/anilistcdn/character/large/b88264-v9VFbSWtQq2C.png",
-            "description": "Stella Vermillion is an A-rank Apprentice Knight and princess of the Vermillion Kingdom. Stella initially appears to be feisty, hot-blooded, and quick to anger possibly due to her sheltered upbringing.",
+            "description": "Stella Vermillion is an A-rank Apprentice Knight and second princess of the Vermillion Kingdom. Stella initially appears to be feisty, hot-blooded, and quick to anger possibly due to her sheltered upbringing.",
             "genres": [
               "Action",
               "Ecchi",

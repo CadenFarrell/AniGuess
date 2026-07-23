@@ -1,5 +1,7 @@
 import { Component } from 'react';
 import { storage } from '../services/storage';
+import Button from '../ui/Button';
+import Screen from '../ui/Screen';
 
 // The one deliberate exception to "no class components" — React requires
 // a class component for componentDidCatch/getDerivedStateFromError.
@@ -22,21 +24,20 @@ export default class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex flex-col items-center justify-center px-6 py-10 text-center">
-          <div className="w-full max-w-lg">
-            <div className="text-6xl mb-4">💥</div>
-            <h2 className="text-3xl font-black text-white mb-3">Something went wrong</h2>
-            <p className="text-white/60 text-lg mb-8">
-              AniGuess hit an unexpected error. Resetting your in-progress game usually fixes it.
-            </p>
-            <button
-              onClick={this.handleReset}
-              className="w-full py-4 bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold text-lg rounded-xl transition-all"
-            >
-              🔄 Reset Game & Reload
-            </button>
-          </div>
-        </div>
+        // No <Backdrop /> here: the boundary catches render crashes, so it has
+        // to stay as close to plain markup as possible.
+        <Screen center width="md" className="text-center">
+          <div className="text-6xl mb-4">💥</div>
+          <h2 className="font-display text-3xl font-extrabold text-white mb-3">
+            Something went wrong
+          </h2>
+          <p className="text-white/60 text-lg mb-8">
+            AniGuess hit an unexpected error. Resetting your in-progress game usually fixes it.
+          </p>
+          <Button variant="primary" size="lg" fullWidth onClick={this.handleReset}>
+            🔄 Reset Game &amp; Reload
+          </Button>
+        </Screen>
       );
     }
     return this.props.children;

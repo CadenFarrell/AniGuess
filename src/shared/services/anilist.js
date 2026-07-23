@@ -35,7 +35,7 @@ function buildBatchCharacterQuery(ids, page) {
       pageInfo { hasNextPage }
       edges {
         role
-        node { id name { full } gender image { large } description(asHtml: false) favourites }
+        node { id name { full native alternative } gender image { large } description(asHtml: false) favourites }
       }
     }
   }`);

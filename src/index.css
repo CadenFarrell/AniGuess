@@ -1,18 +1,176 @@
 @import "tailwindcss";
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* ---------------------------------------------------------------------------
+   Fonts — self-hosted so there is no CDN request and no flash of fallback.
+   Both files are variable fonts, so one file per subset covers every weight.
+   latin-ext matters here: romanized anime titles are full of ō / ū / ā.
+--------------------------------------------------------------------------- */
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/baloo2-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/baloo2-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('/fonts/nunito-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('/fonts/nunito-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
-body {
-  font-family: 'Segoe UI', sans-serif;
-  background: #0f0f1a;
-  color: #ffffff;
-  min-height: 100vh;
+/* ---------------------------------------------------------------------------
+   Design tokens. Tailwind v4 turns each namespace into utilities, so
+   --color-pop-pink gives bg-pop-pink / text-pop-pink / border-pop-pink,
+   --radius-pop gives rounded-pop, --shadow-pop gives shadow-pop, and so on.
+   Restyling the app should mean editing values here, not sweeping components.
+--------------------------------------------------------------------------- */
+@theme {
+  /* Surfaces. The canvas is unchanged from the pre-redesign app on purpose —
+     the "pop" comes from what sits on top of it, not from the backdrop. */
+  --color-canvas: #0f0f1a;
+  --color-surface: #1b1b2e;
+  --color-surface-2: #262640;
+  --color-ink: #07070d; /* the near-black used for every border and hard shadow */
+
+  /* Accents. Each one has a fixed semantic job — do not pick these by vibe at
+     the call site, or the color stops meaning anything. */
+  --color-pop-pink: #ff4d8d; /* primary actions, guessing */
+  --color-pop-purple: #b26bf8; /* secondary actions, whose-turn-it-is
+     (a touch brighter than Tailwind purple-500 so it clears AA as small text
+     on the surface cards, where #a855f7 fell to 4.27) */
+  --color-pop-lime: #7bd83c; /* yes, correct, ready */
+  --color-pop-red: #ff5a5a; /* no, wrong, destructive */
+  --color-pop-amber: #ffc233; /* warnings, scores, the timer */
+  --color-pop-blue: #3b9cff; /* asking a question */
+
+  --font-display: 'Baloo 2', 'Segoe UI', sans-serif;
+  --font-sans: 'Nunito', 'Segoe UI', sans-serif;
+
+  --radius-pop: 1.25rem;
+  --radius-pop-sm: 0.875rem;
+
+  --shadow-pop: 0 6px 0 0 var(--color-ink);
+  --shadow-pop-sm: 0 4px 0 0 var(--color-ink);
 }
 
-input, select, textarea {
-  font-family: inherit;
+/* Must stay inside @layer base. Unlayered rules beat every @layer, so a bare
+   `* { margin: 0; padding: 0 }` out here silently overrides Tailwind's own
+   margin/padding utilities (mb-6, px-6, mx-auto, ...) across the whole app.
+   Inside base, the utilities layer wins as intended. */
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--color-canvas);
+    color: #ffffff;
+    min-height: 100vh;
+  }
+
+  input, select, textarea {
+    font-family: inherit;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The signature recipes. A "pop" control is a solid block with a thick dark
+   border and a hard offset shadow underneath; hovering lifts it and pressing
+   pushes it down into its own shadow. Kept as utilities so the React
+   primitives in src/shared/ui stay short and the physics live in one place.
+--------------------------------------------------------------------------- */
+/* Note: no border-colour here. On a bright fill the border wants to be ink,
+   but on a dark surface an ink border is invisible against the canvas — so the
+   colour is the caller's choice and only the geometry is shared. */
+@utility btn-pop {
+  @apply font-display font-extrabold tracking-wide rounded-pop
+         border-2 shadow-pop transition-transform duration-100
+         disabled:cursor-not-allowed;
+
+  &:hover:not(:disabled) {
+    @apply -translate-y-0.5;
+    box-shadow: 0 8px 0 0 var(--color-ink);
+  }
+  /* Travels the full shadow depth so the block visibly bottoms out. */
+  &:active:not(:disabled) {
+    @apply translate-y-1.5;
+    box-shadow: 0 0 0 0 var(--color-ink);
+  }
+}
+
+/* Dark-on-dark, so the edge is a light hairline and the ink shadow underneath
+   supplies the depth. Using border-ink here would erase the card's outline. */
+@utility card-pop {
+  @apply bg-surface border-2 border-white/15 rounded-pop shadow-pop-sm;
+}
+
+/* Stickers always sit on a bright fill, so ink is right for them. */
+@utility sticker {
+  @apply font-display font-extrabold uppercase tracking-wider
+         border-2 border-ink rounded-pop shadow-pop;
+}
+
+/* Every interactive element gets this. The old screens set outline-none on
+   inputs and signalled focus with a border-color change alone, which is
+   invisible on the dark canvas — this is the fix, applied centrally. */
+@utility focus-pop {
+  @apply outline-none focus-visible:ring-4 focus-visible:ring-white/80
+         focus-visible:ring-offset-2 focus-visible:ring-offset-canvas;
+}
+
+/* Slow drifting colour blobs behind the hub. Purely decorative. */
+@keyframes blob-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(6%, -8%) scale(1.12); }
+  66% { transform: translate(-5%, 6%) scale(0.94); }
+}
+
+@utility blob {
+  @apply pointer-events-none absolute rounded-full blur-3xl opacity-25;
+  animation: blob-drift 24s ease-in-out infinite;
+}
+
+/* Nothing above should move for anyone who has asked the OS to stop it. */
+@media (prefers-reduced-motion: reduce) {
+  .btn-pop {
+    transition: none;
+  }
+  .btn-pop:hover:not(:disabled),
+  .btn-pop:active:not(:disabled) {
+    transform: none;
+  }
+  .blob {
+    animation: none;
+  }
 }

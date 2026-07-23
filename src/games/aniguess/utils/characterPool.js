@@ -15,11 +15,18 @@ export function getAssignableAnimeList(guesser, allPlayers, sharedShowsOnly = tr
   ).filter((a) => a.characters.length > 0);
 }
 
+// Identity for a picked character. Not `id`: AniList characters and the ones
+// ListManager creates (Date.now()) don't share an id space, so an id can
+// collide across sources.
+const characterKey = (c) => `${c.series}::${c.name}`;
+
 // Picks a random character from the given anime list, tagging it with its
 // series. twoStepRandom picks a show first (every show equally likely) then a
 // character within it; otherwise every character across all shows is equally
-// likely. Returns null if there's nothing to pick from.
-export function pickRandomCharacter(animeList, twoStepRandom = false) {
+// likely. `excluding` (a previously picked character) is left out so a re-roll
+// never hands back what's already on screen — unless it's the only option.
+// Returns null if there's nothing to pick from.
+export function pickRandomCharacter(animeList, twoStepRandom = false, excluding = null) {
   if (!animeList || animeList.length === 0) return null;
   let pool;
   if (twoStepRandom) {
@@ -27,6 +34,10 @@ export function pickRandomCharacter(animeList, twoStepRandom = false) {
     pool = anime.characters.map((c) => ({ ...c, series: anime.title }));
   } else {
     pool = animeList.flatMap((a) => a.characters.map((c) => ({ ...c, series: a.title })));
+  }
+  if (excluding) {
+    const remaining = pool.filter((c) => characterKey(c) !== characterKey(excluding));
+    if (remaining.length > 0) pool = remaining;
   }
   return pool[Math.floor(Math.random() * pool.length)];
 }

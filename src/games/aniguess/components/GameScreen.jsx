@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import TurnTracker from './TurnTracker';
+import QuestionLog from './QuestionLog';
+import PeekPanel from './PeekPanel';
 import { normalizeTitle } from '../../../shared/utils/ranking';
-import { useEscapeKey } from '../../../shared/hooks/useEscapeKey';
 import { isCorrectGuess as matchGuess } from '../utils/guessMatch';
+import { rankSuggestions } from '../utils/guessSuggest';
+import { Avatar, Button, GhostButton, Input, Modal, Screen } from '../../../shared/ui';
 
 export default function GameScreen({
   guesser,
@@ -31,8 +34,10 @@ export default function GameScreen({
   const [mode, setMode] = useState('choose'); // choose | question | guess
   const [waitingForAnswer, setWaitingForAnswer] = useState(false);
   const [pendingQuestion, setPendingQuestion] = useState('');
-  const [showPeekModal, setShowPeekModal] = useState(false);
-  const [wrongMessage, setWrongMessage] = useState('');
+  // A wrong guess / expired timer ends the turn, which swaps in the next
+  // player and resets this component — so the result has to be acknowledged
+  // before it's committed, or nobody ever sees what happened.
+  const [turnOver, setTurnOver] = useState(null); // { reason, logEntry }
   const [timeLeft, setTimeLeft] = useState(timerSeconds);
   const [timerActive, setTimerActive] = useState(timerEnabled);
   const timerRef = useRef(null);
@@ -56,7 +61,7 @@ export default function GameScreen({
     setMode('choose');
     setWaitingForAnswer(false);
     setPendingQuestion('');
-    setWrongMessage('');
+    setTurnOver(null);
     setTimeLeft(timerSeconds);
     setTimerActive(timerEnabled); // Start timer at the beginning of each turn
   }
@@ -70,15 +75,17 @@ export default function GameScreen({
       turnEndTimerRef.current = setTimeout(() => {
         setTimerActive(false);
         setWaitingForAnswer(false);
-        const logEntry = { id: crypto.randomUUID(), type: 'timer', text: "⏱️ Time's up!" };
-        onTurnComplete(logEntry);
+        setTurnOver({
+          reason: 'timer',
+          logEntry: { id: crypto.randomUUID(), type: 'timer', text: "⏱️ Time's up!" },
+        });
       }, 0);
     }
     return () => {
       clearTimeout(timerRef.current);
       clearTimeout(turnEndTimerRef.current);
     };
-  }, [timerActive, timeLeft, timerEnabled, onTurnComplete]);
+  }, [timerActive, timeLeft, timerEnabled]);
 
   const submitQuestion = () => {
     if (!question.trim()) return;
@@ -104,9 +111,7 @@ export default function GameScreen({
   const updateGuess = (val) => {
     setGuess(val);
     setActiveIdx(-1);
-    if (val.trim().length < 1) { setSuggestions([]); return; }
-    const q = val.toLowerCase();
-    setSuggestions(allChars.filter(c => c.name.toLowerCase().includes(q)).slice(0, 5));
+    setSuggestions(rankSuggestions(allChars, val));
   };
 
   const pickSuggestion = (name) => {
@@ -124,25 +129,25 @@ export default function GameScreen({
     if (correct) {
       onCorrectGuess(logEntry);
     } else {
-      setWrongMessage("Not quite — your turn is over!");
-      setTimeout(() => setWrongMessage(''), 2500);
+      clearTimeout(timerRef.current);
+      setTimerActive(false);
       setGuess('');
-      onWrongGuess(logEntry);
+      setTurnOver({ reason: 'wrong', logEntry });
     }
   };
 
-  const handlePeek = () => {
-    setShowPeekModal(true);
-    onPeek();
+  // Commits the turn-ending action the player just acknowledged.
+  const confirmTurnOver = () => {
+    const { reason, logEntry } = turnOver;
+    setTurnOver(null);
+    if (reason === 'timer') onTurnComplete(logEntry);
+    else onWrongGuess(logEntry);
   };
 
-  useEscapeKey(showPeekModal, () => setShowPeekModal(false));
-
-  const timerColor = timeLeft > 10 ? 'text-green-400' : timeLeft > 5 ? 'text-orange-400' : 'text-red-400';
+  const timerColor = timeLeft > 10 ? 'text-pop-lime' : timeLeft > 5 ? 'text-pop-amber' : 'text-pop-red';
 
   return (
-    <div className="min-h-screen px-6 py-8 max-w-2xl mx-auto">
-
+    <Screen width="md">
       <TurnTracker
         players={players}
         currentPlayerId={guesser.id}
@@ -150,80 +155,68 @@ export default function GameScreen({
       />
 
       {/* Header */}
-      <div className="text-center mb-6">
-        <h2 className="text-3xl font-black text-white">
-          🎮 {guesser.name}'s Turn
+      <div className="mb-6 text-center">
+        <h2 className="font-display text-3xl font-extrabold text-white">
+          🎮 {guesser.name}&apos;s Turn
         </h2>
-        <p className="text-white/50 text-base mt-1">Turn {turnCount + 1} · Ask a question or submit a guess</p>
+        <p className="mt-1 text-base text-white/50">
+          Turn {turnCount + 1} · Ask a question or submit a guess
+        </p>
       </div>
 
       {/* Timer */}
       {timerEnabled && timerActive && (
-        <div className={`text-center text-5xl font-black mb-4 ${timerColor}`}>
+        <div className={`mb-4 text-center font-display text-5xl font-extrabold ${timerColor}`}>
           ⏱️ {timeLeft}s
         </div>
       )}
 
-      {/* Peek */}
-      <button
-        onClick={handlePeek}
-        disabled={hasPeeked}
-        className={`w-full py-3 mb-5 rounded-xl font-bold text-base transition-all
-          ${hasPeeked ? 'bg-white/5 text-white/30 cursor-not-allowed' : 'bg-purple-900/50 hover:bg-purple-900 text-purple-300 border border-purple-700'}`}
-      >
-        {hasPeeked ? '📋 Already peeked this round' : '📋 Peek at my anime list (once per round)'}
-      </button>
+      <PeekPanel peekList={peekList} hasPeeked={hasPeeked} onPeek={onPeek} />
 
       {/* Action Area */}
       {mode === 'choose' && !waitingForAnswer && (
-        <div className="flex gap-4 mb-5">
-          <button
-            onClick={() => setMode('question')}
-            className="flex-1 py-5 bg-gradient-to-br from-blue-700 to-blue-900 hover:from-blue-600 hover:to-blue-800 text-white font-black text-lg rounded-xl border border-blue-600 transition-all"
-          >
+        <div className="mb-5 flex gap-4">
+          <Button variant="info" size="lg" className="flex-1" onClick={() => setMode('question')}>
             ❓ Ask a Question
-          </button>
-          <button
-            onClick={() => setMode('guess')}
-            className="flex-1 py-5 bg-gradient-to-br from-pink-700 to-purple-900 hover:from-pink-600 hover:to-purple-800 text-white font-black text-lg rounded-xl border border-pink-600 transition-all"
-          >
+          </Button>
+          <Button variant="primary" size="lg" className="flex-1" onClick={() => setMode('guess')}>
             🎯 Submit Guess
-          </button>
+          </Button>
         </div>
       )}
 
       {mode === 'question' && !waitingForAnswer && (
         <div className="mb-5">
-          <input
+          <Input
             type="text"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && question.trim() && submitQuestion()}
             placeholder="Type your yes/no question..."
+            aria-label="Your question"
             autoFocus
-            className="w-full bg-white/10 border border-white/20 rounded-xl px-5 py-4 text-white text-lg placeholder-white/40 outline-none focus:border-blue-500 mb-3"
+            className="mb-3 text-lg"
           />
           <div className="flex gap-3">
-            <button
-              onClick={() => { setMode('choose'); setQuestion(''); }}
-              className="px-5 py-4 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors text-base"
-            >
+            <GhostButton onClick={() => { setMode('choose'); setQuestion(''); }}>
               ← Back
-            </button>
-            <button
+            </GhostButton>
+            <Button
+              variant="info"
+              size="lg"
+              className="flex-1"
               onClick={submitQuestion}
               disabled={!question.trim()}
-              className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-white/10 disabled:text-white/30 text-white font-bold text-lg rounded-xl transition-colors"
             >
               Ask ❓
-            </button>
+            </Button>
           </div>
         </div>
       )}
 
       {mode === 'guess' && (
         <div className="mb-5">
-          <input
+          <Input
             type="text"
             value={guess}
             onChange={(e) => updateGuess(e.target.value)}
@@ -234,128 +227,90 @@ export default function GameScreen({
               else if (e.key === 'Escape') setSuggestions([]);
             }}
             placeholder="Type your guess..."
+            aria-label="Your guess"
             autoFocus
-            className="w-full bg-white/10 border border-white/20 rounded-xl px-5 py-4 text-white text-lg placeholder-white/40 outline-none focus:border-pink-500 mb-3"
+            className="mb-3 text-lg"
           />
           {/* In-flow (not absolute) so the list never overlaps the Back/Guess buttons below. */}
           {suggestions.length > 0 && (
-            <div className="w-full bg-gray-900 border border-white/20 rounded-xl overflow-hidden mb-3">
+            <div className="mb-3 max-h-72 w-full overflow-y-auto overflow-x-hidden rounded-pop border-2 border-white/15 bg-surface">
               {suggestions.map((s, i) => (
-                <div key={`${s.series}-${s.name}`} onMouseDown={() => pickSuggestion(s.name)}
-                  className={`flex items-center gap-3 px-4 py-2 cursor-pointer ${ i === activeIdx ? 'bg-pink-600/30' : 'hover:bg-white/10' }`}>
-                  {s.imageUrl && <img src={s.imageUrl} loading="lazy" className="w-9 h-9 rounded-lg object-cover flex-shrink-0" />}
+                <div
+                  key={`${s.series}-${s.name}`}
+                  onMouseDown={() => pickSuggestion(s.name)}
+                  className={`flex cursor-pointer items-center gap-3 px-4 py-2
+                    ${i === activeIdx ? 'bg-pop-pink/30' : 'hover:bg-white/10'}`}
+                >
+                  <Avatar src={s.imageUrl} size="sm" />
                   <div>
-                    <p className="text-white text-sm font-semibold">{s.name}</p>
-                    <p className="text-white/40 text-xs">{s.series}</p>
+                    <p className="text-sm font-semibold text-white">{s.name}</p>
+                    <p className="text-xs text-white/40">{s.series}</p>
                   </div>
                 </div>
               ))}
             </div>
           )}
           <div className="flex gap-3">
-            <button
-              onClick={() => { setMode('choose'); setGuess(''); setSuggestions([]); }}
-              className="px-5 py-4 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors text-base"
-            >
+            <GhostButton onClick={() => { setMode('choose'); setGuess(''); setSuggestions([]); }}>
               ← Back
-            </button>
-            <button
+            </GhostButton>
+            <Button
+              variant="primary"
+              size="lg"
+              className="flex-1"
               onClick={submitGuess}
               disabled={!guess.trim()}
-              className="flex-1 py-4 bg-gradient-to-r from-pink-600 to-purple-600 disabled:bg-white/10 disabled:text-white/30 text-white font-bold text-lg rounded-xl transition-colors"
             >
               Guess 🎯
-            </button>
+            </Button>
           </div>
-          {wrongMessage && (
-            <p className="text-red-400 text-center mt-3 font-bold text-lg">{wrongMessage}</p>
-          )}
         </div>
       )}
 
       {/* Yes / No buttons */}
       {waitingForAnswer && (
         <div className="mb-5">
-          <p className="text-white/60 text-center text-base mb-4">
-            ❓ <span className="text-white font-bold text-lg">{pendingQuestion}</span>
+          <p className="mb-4 text-center text-base text-white/60">
+            ❓ <span className="font-display text-lg font-extrabold text-white">{pendingQuestion}</span>
           </p>
-          <p className="text-white/40 text-center text-sm mb-4">Everyone else — answer this question</p>
+          <p className="mb-4 text-center text-sm text-white/40">
+            Everyone else — answer this question
+          </p>
           <div className="flex gap-4">
-            <button
-              onClick={() => answerQuestion('Yes')}
-              className="flex-1 py-6 text-3xl font-black bg-gradient-to-br from-green-600 to-emerald-700 hover:from-green-500 hover:to-emerald-600 text-white rounded-xl transition-all"
-            >
+            <Button variant="success" size="xl" className="flex-1" onClick={() => answerQuestion('Yes')}>
               ✅ Yes
-            </button>
-            <button
-              onClick={() => answerQuestion('No')}
-              className="flex-1 py-6 text-3xl font-black bg-gradient-to-br from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white rounded-xl transition-all"
-            >
+            </Button>
+            <Button variant="danger" size="xl" className="flex-1" onClick={() => answerQuestion('No')}>
               ❌ No
-            </button>
+            </Button>
           </div>
         </div>
       )}
 
-      {/* Question Log */}
-      <div className="bg-white/5 border border-white/10 rounded-xl p-4 max-h-72 overflow-y-auto">
-        <h4 className="text-white/60 text-sm font-bold uppercase tracking-wider mb-3">
-          {guesser.name}'s Question Log
-        </h4>
-        {questionLog.length === 0 ? (
-          <p className="text-white/30 text-base text-center">No questions yet</p>
-        ) : (
-          questionLog.map((entry) => (
-            <div key={entry.id} className="text-base py-2 border-b border-white/5 last:border-0">
-              {entry.type === 'question' && (
-                <span className="text-white/70">
-                  ❓ {entry.text}
-                  {entry.answer && (
-                    <strong className={entry.answer === 'Yes' ? 'text-green-400' : 'text-red-400'}>
-                      {' '}— {entry.answer}
-                    </strong>
-                  )}
-                </span>
-              )}
-              {entry.type === 'guess' && (
-                <span className={entry.correct ? 'text-green-400' : 'text-red-400'}>
-                  🎯 {entry.text} {entry.correct ? '✅' : '❌'}
-                </span>
-              )}
-              {entry.type === 'timer' && (
-                <span className="text-orange-400">{entry.text}</span>
-              )}
-            </div>
-          ))
-        )}
-      </div>
+      <QuestionLog title={`${guesser.name}'s Question Log`} entries={questionLog} />
 
-      {/* Peek Modal */}
-      {showPeekModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4" role="dialog" aria-modal="true">
-          <div className="bg-gray-900 border border-white/20 rounded-2xl p-8 max-w-lg w-full max-h-[32rem] overflow-y-auto">
-            <h3 className="text-white font-black text-2xl mb-1">📋 Your Anime List</h3>
-            <p className="text-white/50 text-base mb-5">Titles only — no characters!</p>
-            {peekList.length === 0 ? (
-              <p className="text-white/50 text-lg">No shared anime found.</p>
-            ) : (
-              <ul className="space-y-2">
-                {peekList.map((anime) => (
-                  <li key={anime.id} className="text-white/80 text-lg py-2 border-b border-white/10">
-                    {anime.title}
-                  </li>
-                ))}
-              </ul>
-            )}
-            <button
-              onClick={() => setShowPeekModal(false)}
-              className="mt-5 w-full py-4 bg-purple-600 hover:bg-purple-500 text-white font-bold text-lg rounded-xl transition-colors"
-            >
-              Got it — close
-            </button>
-          </div>
-        </div>
+      {/* Turn-over acknowledgement — blocks until the device is handed on, so
+          the result doesn't vanish the instant the next player's turn loads.
+          Deliberately not dismissible: the log entry is only committed by the
+          button, so an Escape or backdrop click would drop the turn's result. */}
+      {turnOver && (
+        <Modal dismissible={false} bare width="md" className="text-center">
+          <div className="mb-6 text-8xl">{turnOver.reason === 'timer' ? '⏱️' : '❌'}</div>
+          <h2 className="mb-3 font-display text-4xl font-extrabold text-white">
+            {turnOver.reason === 'timer' ? "Time's up!" : 'Not quite!'}
+          </h2>
+          {turnOver.reason === 'wrong' && (
+            <p className="mb-3 text-xl text-white/60">
+              <span className="font-bold text-white">&quot;{turnOver.logEntry.text}&quot;</span>{' '}
+              isn&apos;t your character.
+            </p>
+          )}
+          <p className="mb-10 text-lg text-white/50">{guesser.name}&apos;s turn is over.</p>
+          <Button variant="primary" size="xl" fullWidth onClick={confirmTurnOver}>
+            Pass the device →
+          </Button>
+        </Modal>
       )}
-    </div>
+    </Screen>
   );
 }
