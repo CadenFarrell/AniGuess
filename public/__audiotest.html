@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>audio probe</title></head>
+<body style="font:14px monospace;padding:16px">
+<pre id="out">running…</pre>
+<script>
+const URL_OGG = 'https://a.animethemes.moe/KimetsuNoYaiba-OP1-NCBD1080.ogg';
+const out = document.getElementById('out');
+const log = [];
+const say = (k, v) => { log.push(k + ': ' + v); out.textContent = log.join('\n'); };
+
+(async () => {
+  const probe = document.createElement('audio');
+  say('canPlayType ogg/vorbis', probe.canPlayType('audio/ogg; codecs="vorbis"'));
+
+  // 1. plain <audio> metadata load
+  const el = new Audio();
+  el.preload = 'metadata';
+  el.src = URL_OGG;
+  const t0 = performance.now();
+  const audioRes = await new Promise((res) => {
+    el.addEventListener('loadedmetadata', () => res('OK duration=' + el.duration.toFixed(1) + 's in ' + Math.round(performance.now() - t0) + 'ms'), { once: true });
+    el.addEventListener('error', () => res('ERROR code=' + (el.error && el.error.code)), { once: true });
+    setTimeout(() => res('TIMEOUT readyState=' + el.readyState + ' networkState=' + el.networkState), 25000);
+  });
+  say('audio element', audioRes);
+
+  // 2. seek to a random offset — the snippet mechanic
+  if (audioRes.startsWith('OK')) {
+    const seekRes = await new Promise((res) => {
+      el.currentTime = 30;
+      el.addEventListener('seeked', () => res('OK at ' + el.currentTime.toFixed(1) + 's'), { once: true });
+      setTimeout(() => res('TIMEOUT'), 15000);
+    });
+    say('seek to 30s', seekRes);
+  }
+
+  // 3. cross-origin fetch (Web Audio prerequisite)
+  try {
+    const r = await fetch(URL_OGG);
+    say('fetch', 'OK status=' + r.status);
+  } catch (e) {
+    say('fetch', 'BLOCKED ' + e.message);
+  }
+
+  // 4. crossOrigin=anonymous element (MediaElementSource prerequisite)
+  const co = new Audio();
+  co.crossOrigin = 'anonymous';
+  co.preload = 'metadata';
+  co.src = URL_OGG;
+  const coRes = await new Promise((res) => {
+    co.addEventListener('loadedmetadata', () => res('OK'), { once: true });
+    co.addEventListener('error', () => res('ERROR code=' + (co.error && co.error.code)), { once: true });
+    setTimeout(() => res('TIMEOUT'), 20000);
+  });
+  say('crossOrigin=anonymous', coRes);
+
+  say('DONE', '');
+})();
+</script>
+</body>
+</html>
