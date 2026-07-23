@@ -1,10 +1,10 @@
-import OpeningsGame from './OpeningsGame';
+import AniTuneGame from './AniTuneGame';
 
 export default {
-  id: 'openings',
-  title: 'Name That Opening',
+  id: 'anitune',
+  title: 'AniTune',
   blurb: 'Guess the anime from the sound of its opening or ending.',
   icon: '🎵',
   available: false,
-  Component: OpeningsGame,
+  Component: AniTuneGame,
 };
