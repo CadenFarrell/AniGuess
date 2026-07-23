@@ -1,11 +1,18 @@
 import { useState } from 'react';
 import { useProfile } from '../../../shared/hooks/useProfile';
 import { getEligibleAnimeList } from '../utils/questionPool';
+import { RACE, SIMULTANEOUS } from '../rules';
+
+const MODES = [
+  { id: RACE, icon: '🔔', label: 'Race', blurb: 'First correct answer takes the point. Miss and you’re out for that song.' },
+  { id: SIMULTANEOUS, icon: '🤫', label: 'Everyone guesses', blurb: 'Pass the device round. Everyone who gets it right scores.' },
+];
 
 export default function AniTuneSetup({ onStart, onExit, preparing, progress, error }) {
   const { loadOrCreateProfile } = useProfile();
   const [players, setPlayers] = useState([]);
   const [nameInput, setNameInput] = useState('');
+  const [mode, setMode] = useState(RACE);
   const [sharedSongsOnly, setSharedSongsOnly] = useState(true);
   const [includeOpenings, setIncludeOpenings] = useState(true);
   const [includeEndings, setIncludeEndings] = useState(true);
@@ -86,6 +93,25 @@ export default function AniTuneSetup({ onStart, onExit, preparing, progress, err
             ))}
           </div>
         )}
+
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          {MODES.map((m) => (
+            <button
+              key={m.id}
+              onClick={() => setMode(m.id)}
+              disabled={preparing}
+              className={`text-left p-4 rounded-xl border transition-colors disabled:opacity-40 ${
+                mode === m.id
+                  ? 'bg-purple-600/20 border-purple-500'
+                  : 'bg-white/5 border-white/10 hover:border-white/25'
+              }`}
+            >
+              <span className="text-2xl">{m.icon}</span>
+              <p className="text-white font-bold mt-1">{m.label}</p>
+              <p className="text-white/40 text-xs mt-1">{m.blurb}</p>
+            </button>
+          ))}
+        </div>
 
         <div className="bg-white/5 rounded-xl p-5 mb-6">
           <h2 className="text-white font-bold text-lg mb-4">⚙️ Settings</h2>
@@ -171,7 +197,7 @@ export default function AniTuneSetup({ onStart, onExit, preparing, progress, err
 
         <button
           onClick={() => onStart({
-            players, sharedSongsOnly, includeOpenings, includeEndings, roundSize, clipSeconds,
+            players, mode, sharedSongsOnly, includeOpenings, includeEndings, roundSize, clipSeconds,
           })}
           disabled={!canStart}
           className="w-full py-5 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 disabled:opacity-30 disabled:cursor-not-allowed text-white font-black text-xl rounded-xl transition-all"

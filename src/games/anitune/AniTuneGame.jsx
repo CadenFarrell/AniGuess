@@ -54,6 +54,7 @@ export default function AniTuneGame({ onExit }) {
         round={game.round}
         questions={game.questions}
         clipSeconds={game.clipSeconds}
+        mode={game.mode}
         onFinish={(finalScores) => { setScores(finalScores); setView('results'); }}
         onExit={() => { setGame(null); setView('setup'); }}
       />

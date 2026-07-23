@@ -1,18 +1,24 @@
 @import "tailwindcss";
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* These live in @layer base so Tailwind's utility layer (loaded after base by
+   the import above) still wins. Unlayered, this universal padding/margin reset
+   would out-rank every spacing utility — cascade layers beat specificity — and
+   blank out all Tailwind padding and margins across the app. */
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
-body {
-  font-family: 'Segoe UI', sans-serif;
-  background: #0f0f1a;
-  color: #ffffff;
-  min-height: 100vh;
-}
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #0f0f1a;
+    color: #ffffff;
+    min-height: 100vh;
+  }
 
-input, select, textarea {
-  font-family: inherit;
+  input, select, textarea {
+    font-family: inherit;
+  }
 }

@@ -23,12 +23,22 @@ export default function ClipPlayer({
   seconds = 10,
   autoPlay = true,
   revealed = false,
+  paused = false,
   onPlaybackError,
+  onWindowEnded,
+  onUnplayable,
 }) {
   const audioRef = useRef(null);
   const fadeRef = useRef(null);
   const [state, setState] = useState('loading'); // loading | ready | playing | done | error
   const [elapsed, setElapsed] = useState(0);
+
+  // The load and playback effects below are set up once per clip, so they would
+  // capture stale callbacks from the render that started them.
+  const endedRef = useRef(onWindowEnded);
+  endedRef.current = onWindowEnded;
+  const unplayableRef = useRef(onUnplayable);
+  unplayableRef.current = onUnplayable;
 
   // Fresh element per clip. Reusing one and swapping .src leaves the old
   // buffered range attached and makes seeking unreliable.
@@ -59,6 +69,7 @@ export default function ClipPlayer({
         } else {
           setState('error');
           onPlaybackError?.(new Error('Clip stalled (CDN unavailable)'));
+          unplayableRef.current?.();
         }
       }, STALL_TIMEOUT_MS);
     };
@@ -80,6 +91,7 @@ export default function ClipPlayer({
       clearTimeout(stallTimer);
       setState('error');
       onPlaybackError?.(audio.error);
+      unplayableRef.current?.();
     };
 
     audio.addEventListener('loadedmetadata', onLoaded);
@@ -105,6 +117,17 @@ export default function ClipPlayer({
     if (revealed) clearInterval(fadeRef.current);
   }, [revealed]);
 
+  // Race mode holds the clip while a buzzed player answers, then resumes it for
+  // everyone still in. No timer bookkeeping is needed: the countdown below is
+  // measured off audio.currentTime, which simply stops advancing while paused,
+  // so an interrupted clip picks up exactly where it left off.
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || state !== 'playing') return;
+    if (paused) audio.pause();
+    else audio.play().catch(() => {});
+  }, [paused, state]);
+
   function startPlayback(audio = audioRef.current) {
     if (!audio) return;
     clearInterval(fadeRef.current);
@@ -129,6 +152,7 @@ export default function ClipPlayer({
         clearInterval(fadeRef.current);
         audioRef.current.pause();
         setState('done');
+        endedRef.current?.();
       } else if (remaining < FADE_MS / 1000) {
         audioRef.current.volume = Math.max(0, remaining / (FADE_MS / 1000));
       }

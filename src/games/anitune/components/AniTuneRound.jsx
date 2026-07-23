@@ -1,30 +1,41 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import ClipPlayer from './ClipPlayer';
-import { isCorrectTitleGuess, suggestTitles } from '../utils/titleMatch';
+import RaceRound from './RaceRound';
+import SimultaneousRound from './SimultaneousRound';
+import QuestionReveal from './QuestionReveal';
+import { useAniTuneRound } from '../hooks/useAniTuneRound';
+import { RACE } from '../rules';
 
+// Orchestrates one round: scoreboard, clip, and whichever mode's input area is
+// in play. All the game logic lives in ../rules.js via useAniTuneRound — this
+// component only decides what to render for the current phase.
 export default function AniTuneRound({
-  round, players, questions, clipSeconds, onFinish, onExit,
+  round, players, questions, clipSeconds, mode, onFinish, onExit,
 }) {
-  const [index, setIndex] = useState(0);
-  const [guess, setGuess] = useState('');
-  const [suggestions, setSuggestions] = useState([]);
-  const [activeIdx, setActiveIdx] = useState(-1);
-  const [outcome, setOutcome] = useState(null); // null | 'correct' | 'wrong' | 'skipped'
-  const [scores, setScores] = useState(() => Object.fromEntries(players.map((p) => [p.id, 0])));
+  const {
+    state, activeId, isLastQuestion,
+    buzz, resolveBuzz, giveUp, startGuessing, beginEntry, submitAnswer, advance,
+  } = useAniTuneRound(players, mode, round.length);
+
+  // Which question's clip has nothing left to give — either its window ran out
+  // or it never loaded at all. Stored as an index rather than a flag so it
+  // resets itself on the next question without an effect.
+  const [clipDoneIndex, setClipDoneIndex] = useState(-1);
   const preloadRef = useRef(null);
 
-  const question = round[index];
-  // Turn-based: questions rotate through the players, so everyone gets the
-  // same number of chances and scoring stays unambiguous on one device.
-  const player = players[index % players.length];
-  const revealed = outcome !== null;
+  const question = round[state.index];
+  const revealed = state.phase === 'revealed';
+  // The clip holds while a buzzed player answers and while the device is being
+  // handed over; the person actually typing may replay it.
+  const paused = state.phase === 'buzzed' || state.phase === 'handoff';
+  const clipDone = clipDoneIndex === state.index;
 
   // Warm the next clip — metadata alone took ~2s in testing, which would
   // otherwise be dead air between questions. Delayed rather than immediate:
   // the CDN 503s under concurrent requests, and the clip being played right
   // now must win that race.
   useEffect(() => {
-    const next = round[index + 1];
+    const next = round[state.index + 1];
     if (!next) return;
     const timer = setTimeout(() => {
       const audio = new Audio();
@@ -36,43 +47,16 @@ export default function AniTuneRound({
       clearTimeout(timer);
       if (preloadRef.current) { preloadRef.current.src = ''; preloadRef.current = null; }
     };
-  }, [index, round]);
-
-  const updateGuess = (value) => {
-    setGuess(value);
-    setSuggestions(suggestTitles(questions, value));
-    setActiveIdx(-1);
-  };
-
-  const pickSuggestion = (title) => {
-    setGuess(title);
-    setSuggestions([]);
-    setActiveIdx(-1);
-  };
-
-  const submit = () => {
-    if (!guess.trim() || revealed) return;
-    const correct = isCorrectTitleGuess(question, guess);
-    if (correct) setScores((s) => ({ ...s, [player.id]: s[player.id] + 1 }));
-    setOutcome(correct ? 'correct' : 'wrong');
-    setSuggestions([]);
-  };
+  }, [state.index, round]);
 
   const next = () => {
-    if (index + 1 >= round.length) {
-      onFinish(scores);
-      return;
-    }
-    setIndex(index + 1);
-    setGuess('');
-    setSuggestions([]);
-    setActiveIdx(-1);
-    setOutcome(null);
+    if (isLastQuestion) onFinish(state.scores);
+    else advance();
   };
 
   const ranked = useMemo(
-    () => [...players].sort((a, b) => scores[b.id] - scores[a.id]),
-    [players, scores]
+    () => [...players].sort((a, b) => (state.scores[b.id] || 0) - (state.scores[a.id] || 0)),
+    [players, state.scores]
   );
 
   if (!question) return null;
@@ -85,18 +69,18 @@ export default function AniTuneRound({
           {ranked.map((p) => (
             <span key={p.id}
               className={`px-3 py-1 rounded-lg text-sm font-bold ${
-                p.id === player.id ? 'bg-purple-600 text-white' : 'bg-white/10 text-white/60'
+                p.id === activeId ? 'bg-purple-600 text-white' : 'bg-white/10 text-white/60'
               }`}>
-              {p.name} {scores[p.id]}
+              {p.name} {state.scores[p.id] || 0}
             </span>
           ))}
         </div>
 
         <p className="text-white/40 text-center text-sm mb-1">
-          Question {index + 1} of {round.length}
+          Question {state.index + 1} of {round.length}
         </p>
         <h2 className="text-3xl font-black text-white text-center mb-6">
-          {player.name}&apos;s turn
+          {mode === RACE ? 'Buzz in 🔔' : 'Everyone guesses 🤫'}
         </h2>
 
         <ClipPlayer
@@ -104,88 +88,50 @@ export default function AniTuneRound({
           src={question.audioUrl}
           seconds={clipSeconds}
           revealed={revealed}
+          paused={paused}
+          onWindowEnded={() => setClipDoneIndex(state.index)}
+          // A clip the CDN never served would otherwise strand race mode: with
+          // nothing to listen to and no window to run out, the only way on
+          // would be for every player to deliberately buzz and miss.
+          onUnplayable={() => setClipDoneIndex(state.index)}
         />
 
-        {!revealed && (
-          <div className="mt-6">
-            <input
-              type="text"
-              value={guess}
-              onChange={(e) => updateGuess(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'ArrowDown') { e.preventDefault(); setActiveIdx((i) => Math.min(i + 1, suggestions.length - 1)); }
-                else if (e.key === 'ArrowUp') { e.preventDefault(); setActiveIdx((i) => Math.max(i - 1, -1)); }
-                else if (e.key === 'Enter') { if (activeIdx >= 0) pickSuggestion(suggestions[activeIdx].title); else submit(); }
-                else if (e.key === 'Escape') setSuggestions([]);
-              }}
-              placeholder="Which anime is this?"
-              autoFocus
-              className="w-full bg-white/10 border border-white/20 rounded-xl px-5 py-4 text-white text-lg placeholder-white/40 outline-none focus:border-pink-500 mb-3"
-            />
-            {/* In-flow, not absolute — an overlay here would swallow the first
-                click aimed at the Guess button below. */}
-            {suggestions.length > 0 && (
-              <div className="w-full bg-gray-900 border border-white/20 rounded-xl overflow-hidden mb-3">
-                {suggestions.map((s, i) => (
-                  <div key={s.title} onMouseDown={() => pickSuggestion(s.title)}
-                    className={`px-4 py-2 cursor-pointer ${i === activeIdx ? 'bg-pink-600/30' : 'hover:bg-white/10'}`}>
-                    <p className="text-white text-sm font-semibold">{s.title}</p>
-                    {s.alt && s.alt !== s.title && <p className="text-white/40 text-xs">{s.alt}</p>}
-                  </div>
-                ))}
-              </div>
-            )}
-            <div className="flex gap-3">
-              <button
-                onClick={() => { setOutcome('skipped'); setSuggestions([]); }}
-                className="px-5 py-4 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors"
-              >
-                Skip
-              </button>
-              <button
-                onClick={submit}
-                disabled={!guess.trim()}
-                className="flex-1 py-4 bg-gradient-to-r from-pink-600 to-purple-600 disabled:bg-white/10 disabled:text-white/30 text-white font-bold text-lg rounded-xl transition-colors"
-              >
-                Guess 🎯
-              </button>
-            </div>
-          </div>
+        {!revealed && mode === RACE && (
+          <RaceRound
+            players={players}
+            questions={questions}
+            lockedOut={state.lockedOut}
+            buzzedBy={state.buzzedBy}
+            clipDone={clipDone}
+            onBuzz={buzz}
+            onAnswer={(guess) => resolveBuzz(question, guess)}
+            onGiveUp={giveUp}
+          />
+        )}
+
+        {!revealed && mode !== RACE && (
+          <SimultaneousRound
+            players={players}
+            questions={questions}
+            phase={state.phase}
+            entryOrder={state.entryOrder}
+            entryIndex={state.entryIndex}
+            answers={state.answers}
+            onStartGuessing={startGuessing}
+            onReady={beginEntry}
+            onSubmit={(text) => submitAnswer(question, text)}
+          />
         )}
 
         {revealed && (
-          <div className="mt-6 text-center">
-            <div className="text-5xl mb-3">
-              {outcome === 'correct' ? '🎉' : outcome === 'skipped' ? '⏭️' : '❌'}
-            </div>
-            <p className={`text-2xl font-black mb-4 ${
-              outcome === 'correct' ? 'text-green-400' : 'text-white/60'
-            }`}>
-              {outcome === 'correct' ? `${player.name} got it!` : outcome === 'skipped' ? 'Skipped' : 'Not quite'}
-            </p>
-
-            <div className="bg-white/5 rounded-xl p-5 mb-5">
-              <p className="text-white text-2xl font-black">{question.animeTitle}</p>
-              {question.displayTitle !== question.animeTitle && (
-                <p className="text-white/40 text-sm mb-2">{question.displayTitle}</p>
-              )}
-              <p className="text-white/70 mt-2">
-                {question.type === 'OP' ? 'Opening' : 'Ending'}
-                {question.sequence ? ` ${question.sequence}` : ''}
-                {question.songTitle ? ` — ${question.songTitle}` : ''}
-              </p>
-              {outcome === 'wrong' && (
-                <p className="text-white/40 text-sm mt-3">You said &ldquo;{guess}&rdquo;</p>
-              )}
-            </div>
-
-            <button
-              onClick={next}
-              className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-lg rounded-xl transition-colors"
-            >
-              {index + 1 >= round.length ? 'See results →' : 'Next question →'}
-            </button>
-          </div>
+          <QuestionReveal
+            question={question}
+            mode={mode}
+            players={players}
+            answers={state.answers}
+            onNext={next}
+            nextLabel={isLastQuestion ? 'See results →' : 'Next question →'}
+          />
         )}
 
         <button onClick={onExit} className="w-full mt-6 text-white/40 hover:text-white transition-colors text-sm">
