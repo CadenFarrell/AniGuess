@@ -1,4 +1,4 @@
-import { normalizeTitle } from './ranking';
+import { normalizeTitle } from '../../../shared/utils/ranking';
 
 // Pure helpers for building the pool of characters that can be assigned to a
 // player. Shared by the local pass-and-play CharacterAssignment and the online

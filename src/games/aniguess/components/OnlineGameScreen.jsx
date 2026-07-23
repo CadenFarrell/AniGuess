@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import TurnTracker from './TurnTracker';
-import { normalizeTitle } from '../utils/ranking';
+import { normalizeTitle } from '../../../shared/utils/ranking';
 
 // The active guesser's device. Deliberately never receives the assigned
 // character — only raw question/guess text ever leaves this device, sent via

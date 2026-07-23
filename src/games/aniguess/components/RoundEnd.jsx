@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { computeRankedPlayers, getPositionEmoji } from '../utils/ranking';
+import { computeRankedPlayers, getPositionEmoji } from '../../../shared/utils/ranking';
 
 export default function RoundEnd({ players, lockedPositions, roundNumber, totalScores, onNewRound, onEndSession }) {
   const ranked = useMemo(

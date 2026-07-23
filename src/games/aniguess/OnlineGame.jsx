@@ -1,19 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
-import { useRoom } from '../hooks/useRoom';
-import { useWins } from '../hooks/useWins';
-import { isCorrectGuess } from '../utils/guessMatch';
-import RoomSetup from './RoomSetup';
-import OnlineLobby from './OnlineLobby';
-import OnlineCharacterAssignment from './OnlineCharacterAssignment';
-import CharacterReveal from './CharacterReveal';
-import OnlineGameScreen from './OnlineGameScreen';
-import OnlineAnswererView from './OnlineAnswererView';
-import CorrectGuessScreen from './CorrectGuessScreen';
-import RoundEnd from './RoundEnd';
-import Leaderboard from './Leaderboard';
-import WaitingScreen from './WaitingScreen';
+import { useRoom } from './hooks/useRoom';
+import { useWins } from '../../shared/hooks/useWins';
+import { isCorrectGuess } from './utils/guessMatch';
+import RoomSetup from './components/RoomSetup';
+import OnlineLobby from './components/OnlineLobby';
+import OnlineCharacterAssignment from './components/OnlineCharacterAssignment';
+import CharacterReveal from './components/CharacterReveal';
+import OnlineGameScreen from './components/OnlineGameScreen';
+import OnlineAnswererView from './components/OnlineAnswererView';
+import CorrectGuessScreen from './components/CorrectGuessScreen';
+import RoundEnd from './components/RoundEnd';
+import Leaderboard from './components/Leaderboard';
+import WaitingScreen from './components/WaitingScreen';
 
-export default function OnlineApp({ onBack }) {
+export default function OnlineGame({ onBack }) {
   const room = useRoom();
   const { recordWin } = useWins();
   const [revealCharacter, setRevealCharacter] = useState(null);

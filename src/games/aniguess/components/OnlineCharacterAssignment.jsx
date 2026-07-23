@@ -6,7 +6,7 @@ import { getAssignableAnimeList, pickRandomCharacter } from '../utils/characterP
 // shares ONE live proposal, persisted to the secret assignments/{playerId} slot
 // (readable/writable only by non-assignees, per database.rules.json) so the
 // assignee never sees it. Anyone can propose or change the pick; then EVERY
-// non-assignee must explicitly approve it. Once all have approved, OnlineApp
+// non-assignee must explicitly approve it. Once all have approved, OnlineGame
 // auto-locks it in. Changing the pick wipes approvals (proposeCharacter
 // overwrites the slot), forcing everyone to re-approve.
 export default function OnlineCharacterAssignment({

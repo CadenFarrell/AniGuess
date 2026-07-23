@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useProfile } from '../hooks/useProfile';
-import AniListImport from './AniListImport';
+import { useProfile } from '../../../shared/hooks/useProfile';
+import AniListImport from '../../../shared/components/AniListImport';
 
 export default function RoomSetup({ room, onBack }) {
   const { loadOrCreateProfile, saveProfile } = useProfile();

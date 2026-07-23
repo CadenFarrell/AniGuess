@@ -1,4 +1,4 @@
-import { getPositionEmoji } from '../utils/ranking';
+import { getPositionEmoji } from '../../../shared/utils/ranking';
 
 export default function CorrectGuessScreen({ lastLocked, lockedPositions, onContinue }) {
   return (

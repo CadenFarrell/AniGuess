@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import TurnTracker from './TurnTracker';
-import { normalizeTitle } from '../utils/ranking';
-import { useEscapeKey } from '../hooks/useEscapeKey';
+import { normalizeTitle } from '../../../shared/utils/ranking';
+import { useEscapeKey } from '../../../shared/hooks/useEscapeKey';
 import { isCorrectGuess as matchGuess } from '../utils/guessMatch';
 
 export default function GameScreen({

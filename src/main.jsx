@@ -1,13 +1,13 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import Root from './components/Root.jsx'
-import ErrorBoundary from './components/ErrorBoundary.jsx'
+import HubScreen from './hub/HubScreen.jsx'
+import ErrorBoundary from './shared/components/ErrorBoundary.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ErrorBoundary>
-      <Root />
+      <HubScreen />
     </ErrorBoundary>
   </StrictMode>,
 )

@@ -1,5 +1,5 @@
 // Pure, framework- and Node-free formatting/filtering logic for AniList character
-// data. Shared by generateProfiles.js (Node dev script) and src/services/anilist.js
+// data. Shared by generateProfiles.js (Node dev script) and src/shared/services/anilist.js
 // (browser import flow) so both paths produce identical character shapes.
 
 export const trimDesc = (desc = '') => {
@@ -25,7 +25,7 @@ export const trimDesc = (desc = '') => {
 
 // Filters AniList character edges down to MAIN + high-favourite SUPPORTING,
 // optionally caps the result (sorted by favourites) and maps into the shape
-// normalizeCharacter (src/utils/character.js) already expects.
+// normalizeCharacter (src/shared/utils/character.js) already expects.
 export function filterAndMapCharacterEdges(edges, {
   minSupportingFavourites = 100,
   mainOnly = false,

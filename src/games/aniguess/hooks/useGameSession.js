@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { storage } from '../services/storage';
+import { storage } from '../../../shared/services/storage';
 
 const SESSION_KEY = 'aniguess_session';
 

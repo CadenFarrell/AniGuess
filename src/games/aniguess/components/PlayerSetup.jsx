@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { useProfile } from '../hooks/useProfile';
-import { useWins } from '../hooks/useWins';
-import { useEscapeKey } from '../hooks/useEscapeKey';
-import { normalizeTitle } from '../utils/ranking';
-import AniListImport from './AniListImport';
+import { useProfile } from '../../../shared/hooks/useProfile';
+import { useWins } from '../../../shared/hooks/useWins';
+import { useEscapeKey } from '../../../shared/hooks/useEscapeKey';
+import { normalizeTitle } from '../../../shared/utils/ranking';
+import AniListImport from '../../../shared/components/AniListImport';
 import {
   DndContext,
   closestCenter,

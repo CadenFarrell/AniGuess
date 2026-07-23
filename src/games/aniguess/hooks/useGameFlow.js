@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useGameSession } from './useGameSession';
-import { useWins } from './useWins';
-import * as rules from '../game/rules';
+import { useWins } from '../../../shared/hooks/useWins';
+import * as rules from '../rules';
 
 // Owns all game-flow state (assignment, turns, scoring, session persistence).
-// `view`/`setView` stay owned by App.jsx, which remains the thin view-router;
+// `view`/`setView` stay owned by LocalGame.jsx, which remains the thin view-router;
 // handlers here call setView to navigate between screens. The actual turn/
-// scoring/assignment computations live in src/game/rules.js (pure, backend-
+// scoring/assignment computations live in src/games/aniguess/rules.js (pure, backend-
 // free) so the same logic can back an online (Firebase) equivalent hook
 // without duplicating it.
 export function useGameFlow({ view, setView }) {

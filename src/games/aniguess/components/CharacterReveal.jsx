@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { normalizeCharacter } from '../utils/character';
+import { normalizeCharacter } from '../../../shared/utils/character';
 
 export default function CharacterReveal({ character, guesserName, onStartQuestioning, isLastPlayer, online = false }) {
   const [imgError, setImgError] = useState(false);

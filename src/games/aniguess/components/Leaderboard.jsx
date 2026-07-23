@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { computeRankedPlayers, getPositionEmoji } from '../utils/ranking';
+import { computeRankedPlayers, getPositionEmoji } from '../../../shared/utils/ranking';
 
 export default function Leaderboard({ players, totalScores, roundNumber, onPlayAgain, onEditLists }) {
   const withPositions = useMemo(

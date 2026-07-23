@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import ListManager from './components/ListManager';
+import ListManager from '../../shared/components/ListManager';
 import PlayerSetup from './components/PlayerSetup';
 import CharacterAssignment from './components/CharacterAssignment';
 import CharacterReveal from './components/CharacterReveal';
@@ -9,7 +9,7 @@ import RoundEnd from './components/RoundEnd';
 import Leaderboard from './components/Leaderboard';
 import { useGameSession } from './hooks/useGameSession';
 import { useGameFlow } from './hooks/useGameFlow';
-import { useEscapeKey } from './hooks/useEscapeKey';
+import { useEscapeKey } from '../../shared/hooks/useEscapeKey';
 
 function App() {
   const [view, setView] = useState('setup');

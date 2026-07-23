@@ -3,7 +3,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { filterAndMapCharacterEdges } from './src/utils/anilistFormat.js';
+import { filterAndMapCharacterEdges } from './src/shared/utils/anilistFormat.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CACHE_DIR = path.join(__dirname, '.anilist-cache');

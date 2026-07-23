@@ -1,6 +1,6 @@
 // Shown on every device during 'game' phase except the current guesser's.
 // Resolves pending questions via a button click (guesses are auto-resolved
-// by OnlineApp, since there's nothing for a human to decide).
+// by OnlineGame, since there's nothing for a human to decide).
 export default function OnlineAnswererView({ guesser, pendingAction, onAnswer, resolving }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center">

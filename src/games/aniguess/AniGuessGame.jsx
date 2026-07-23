@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import App from '../App';
-import OnlineApp from './OnlineApp';
-import { firebaseEnabled } from '../services/firebase';
+import LocalGame from './LocalGame';
+import OnlineGame from './OnlineGame';
+import { firebaseEnabled } from '../../shared/services/firebase';
 
-export default function Root() {
+export default function AniGuessGame({ onExit }) {
   const [mode, setMode] = useState(null); // null | 'local' | 'online'
 
-  if (mode === 'local') return <App />;
-  if (mode === 'online') return <OnlineApp onBack={() => setMode(null)} />;
+  if (mode === 'local') return <LocalGame />;
+  if (mode === 'online') return <OnlineGame onBack={() => setMode(null)} />;
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
@@ -30,6 +30,12 @@ export default function Root() {
             className="w-full py-5 bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed text-white font-black text-xl rounded-xl transition-colors"
           >
             🌐 Play Online {!firebaseEnabled && '(not configured)'}
+          </button>
+          <button
+            onClick={onExit}
+            className="text-white/60 hover:text-white transition-colors text-lg mt-2"
+          >
+            ← Back to hub
           </button>
         </div>
       </div>

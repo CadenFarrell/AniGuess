@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ref, onValue, update, get, set, runTransaction } from 'firebase/database';
-import { getFirebaseDb, ensureSignedIn } from '../services/firebase';
-import * as rules from '../game/rules';
+import { getFirebaseDb, ensureSignedIn } from '../../../shared/services/firebase';
+import * as rules from '../rules';
 
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no ambiguous 0/O/1/I
 
@@ -15,7 +15,7 @@ function generateRoomCode() {
 // Database (update()/runTransaction()) instead of useState, and adds the
 // multiplayer-only concepts (myPlayerId, isMyTurn/isMyAssignmentTurn, and the
 // pendingAction redirect that keeps the guesser's own device from ever
-// receiving their assigned character). Reuses the same pure src/game/rules.js
+// receiving their assigned character). Reuses the same pure src/games/aniguess/rules.js
 // functions useGameFlow.js uses, so turn/scoring logic can't drift between
 // local and online mode.
 export function useRoom() {
@@ -39,7 +39,7 @@ export function useRoom() {
       // Realtime Database doesn't store empty objects/arrays — a {} or []
       // written to a path simply doesn't exist on read-back. Normalize here,
       // at the single point state enters the hook, so every internal use
-      // (including passing straight into src/game/rules.js) sees safe
+      // (including passing straight into src/games/aniguess/rules.js) sees safe
       // defaults rather than undefined.
       setState(val ? {
         ...val,
@@ -200,7 +200,7 @@ export function useRoom() {
 
   // The proposed character is already written — locking in just advances
   // everyone to the reveal step. Triggered automatically once every non-assignee
-  // has approved (see OnlineApp), not by a manual button.
+  // has approved (see OnlineGame), not by a manual button.
   const lockInAssignment = useCallback(() => patchState({ view: 'reveal' }), [patchState]);
 
   // Records (or clears) this device's approval of the current shared proposal.
