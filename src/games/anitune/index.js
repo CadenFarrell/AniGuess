@@ -5,6 +5,6 @@ export default {
   title: 'AniTune',
   blurb: 'Guess the anime from the sound of its opening or ending.',
   icon: '🎵',
-  available: false,
+  available: true,
   Component: AniTuneGame,
 };
