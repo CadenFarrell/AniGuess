@@ -83,8 +83,8 @@ export default function HubScreen() {
     <>
       <Backdrop />
       <Screen center>
-        <Wordmark subtitle="Pick a game" className="mb-10">
-          Anime Hub
+        <Wordmark subtitle="Insert coin" className="mb-10">
+          AniArcade
         </Wordmark>
         <div className="flex flex-col gap-5">
           {games.map((game) => (

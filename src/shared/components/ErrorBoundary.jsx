@@ -13,7 +13,7 @@ export default class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, info) {
-    console.error('AniGuess crashed:', error, info);
+    console.error('AniArcade crashed:', error, info);
   }
 
   handleReset = () => {
@@ -32,7 +32,7 @@ export default class ErrorBoundary extends Component {
             Something went wrong
           </h2>
           <p className="text-white/60 text-lg mb-8">
-            AniGuess hit an unexpected error. Resetting your in-progress game usually fixes it.
+            AniArcade hit an unexpected error. Resetting your in-progress game usually fixes it.
           </p>
           <Button variant="primary" size="lg" fullWidth onClick={this.handleReset}>
             🔄 Reset Game &amp; Reload
