@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { suggestTitles } from '../utils/titleMatch';
+import { Button, Input } from '../../../shared/ui';
 
 // The title entry field, shared by both modes. Owns its own draft text so the
 // round state only ever sees a submitted answer.
@@ -43,7 +44,7 @@ export default function GuessInput({
 
   return (
     <div>
-      <input
+      <Input
         type={masked ? 'password' : 'text'}
         value={guess}
         onChange={(e) => updateGuess(e.target.value)}
@@ -54,20 +55,26 @@ export default function GuessInput({
           else if (e.key === 'Escape') setSuggestions([]);
         }}
         placeholder={placeholder}
+        aria-label={placeholder}
         autoFocus
         autoComplete="off"
-        className="w-full bg-white/10 border border-white/20 rounded-xl px-5 py-4 text-white text-lg placeholder-white/40 outline-none focus:border-pink-500 mb-3"
+        className="mb-3 text-lg"
       />
 
       {/* In-flow, not absolute — an overlay here would swallow the first
           click aimed at the submit button below. */}
       {suggestions.length > 0 && (
-        <div className="w-full bg-gray-900 border border-white/20 rounded-xl overflow-hidden mb-3">
+        <div className="mb-3 w-full overflow-hidden rounded-pop-sm border-2 border-ink bg-surface-2">
           {suggestions.map((s, i) => (
-            <div key={s.title} onMouseDown={() => pickSuggestion(s.title)}
-              className={`px-4 py-2 cursor-pointer ${i === activeIdx ? 'bg-pink-600/30' : 'hover:bg-white/10'}`}>
-              <p className="text-white text-sm font-semibold">{s.title}</p>
-              {s.alt && s.alt !== s.title && <p className="text-white/40 text-xs">{s.alt}</p>}
+            <div
+              key={s.title}
+              onMouseDown={() => pickSuggestion(s.title)}
+              className={`cursor-pointer px-4 py-2 ${
+                i === activeIdx ? 'bg-pop-pink/30' : 'hover:bg-white/10'
+              }`}
+            >
+              <p className="text-base font-bold text-white">{s.title}</p>
+              {s.alt && s.alt !== s.title && <p className="text-sm text-white/40">{s.alt}</p>}
             </div>
           ))}
         </div>
@@ -75,20 +82,23 @@ export default function GuessInput({
 
       <div className="flex gap-3">
         {onSkip && (
-          <button
+          <Button
+            variant="neutral"
+            size="lg"
             onClick={() => { setSuggestions([]); onSkip(); }}
-            className="px-5 py-4 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors"
           >
             {skipLabel || 'Skip'}
-          </button>
+          </Button>
         )}
-        <button
+        <Button
+          variant="primary"
+          size="lg"
+          fullWidth
           onClick={submit}
           disabled={!guess.trim()}
-          className="flex-1 py-4 bg-gradient-to-r from-pink-600 to-purple-600 disabled:bg-white/10 disabled:text-white/30 text-white font-bold text-lg rounded-xl transition-colors"
         >
           {submitLabel}
-        </button>
+        </Button>
       </div>
     </div>
   );

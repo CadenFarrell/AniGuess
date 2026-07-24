@@ -1,4 +1,5 @@
 import { RACE } from '../rules';
+import { Button, Card, CardRow } from '../../../shared/ui';
 
 // The answer card plus who scored on it. Shared by both modes — only the
 // per-player breakdown differs, since a race has at most one winner while a
@@ -12,8 +13,12 @@ export default function QuestionReveal({
 
   return (
     <div className="mt-6 text-center">
-      <div className="text-5xl mb-3">{scorers.length ? '🎉' : '😶'}</div>
-      <p className={`text-2xl font-black mb-4 ${scorers.length ? 'text-green-400' : 'text-white/60'}`}>
+      <div className="mb-3 text-5xl">{scorers.length ? '🎉' : '😶'}</div>
+      <p
+        className={`mb-4 font-display text-2xl font-extrabold ${
+          scorers.length ? 'text-pop-lime' : 'text-white/60'
+        }`}
+      >
         {isRace
           ? (winner ? `${winner.name} got it!` : 'Nobody got it')
           : (scorers.length
@@ -21,43 +26,42 @@ export default function QuestionReveal({
             : 'Nobody got it')}
       </p>
 
-      <div className="bg-white/5 rounded-xl p-5 mb-5">
-        <p className="text-white text-2xl font-black">{question.animeTitle}</p>
+      <Card padding="lg" className="mb-5">
+        <p className="font-display text-2xl font-extrabold text-white">{question.animeTitle}</p>
         {question.displayTitle !== question.animeTitle && (
-          <p className="text-white/40 text-sm mb-2">{question.displayTitle}</p>
+          <p className="mb-2 text-sm text-white/40">{question.displayTitle}</p>
         )}
-        <p className="text-white/70 mt-2">
+        <p className="mt-2 text-white/70">
           {question.type === 'OP' ? 'Opening' : 'Ending'}
           {question.sequence ? ` ${question.sequence}` : ''}
           {question.songTitle ? ` — ${question.songTitle}` : ''}
         </p>
-      </div>
+      </Card>
 
       {/* Everyone's answer, so a near-miss is visible rather than just "wrong".
           Race only shows the players who actually buzzed. */}
-      <div className="bg-white/5 rounded-xl overflow-hidden mb-5">
+      <Card padding="sm" className="mb-5">
         {players
           .filter((p) => !isRace || answers[p.id])
           .map((p) => {
             const answer = answers[p.id];
             return (
-              <div key={p.id} className="flex items-center gap-3 px-4 py-3 border-b border-white/5 last:border-0 text-left">
-                <span className="text-lg w-6">{answer?.correct ? '✅' : '❌'}</span>
-                <span className="text-white font-bold flex-1">{p.name}</span>
-                <span className="text-white/40 text-sm truncate max-w-[55%]">
+              <CardRow key={p.id} className="text-left">
+                <span className="w-6 text-lg">{answer?.correct ? '✅' : '❌'}</span>
+                <span className="min-w-0 flex-1 truncate font-display font-extrabold text-white">
+                  {p.name}
+                </span>
+                <span className="max-w-[55%] truncate text-sm text-white/40">
                   {answer?.text?.trim() ? `“${answer.text}”` : 'passed'}
                 </span>
-              </div>
+              </CardRow>
             );
           })}
-      </div>
+      </Card>
 
-      <button
-        onClick={onNext}
-        className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-lg rounded-xl transition-colors"
-      >
+      <Button variant="secondary" size="lg" fullWidth onClick={onNext}>
         {nextLabel}
-      </button>
+      </Button>
     </div>
   );
 }

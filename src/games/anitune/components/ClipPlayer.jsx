@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Button } from '../../../shared/ui';
 
 // Plays a fixed-length snippet from a random offset.
 //
@@ -170,34 +171,31 @@ export default function ClipPlayer({
 
   return (
     <div className="w-full">
-      <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden mb-4">
+      <div className="mb-4 h-4 w-full overflow-hidden rounded-pop-sm border-2 border-ink bg-surface-2">
         <div
-          className="h-full bg-gradient-to-r from-pink-500 to-purple-500 transition-[width] duration-100"
+          className="h-full bg-pop-blue transition-[width] duration-100"
           style={{ width: `${revealed ? 100 : pct}%` }}
         />
       </div>
 
       {state === 'loading' && (
-        <p className="text-white/40 text-center text-lg py-4">Loading clip…</p>
+        <p className="py-4 text-center text-lg text-white/40">Loading clip…</p>
       )}
 
       {state === 'error' && (
-        <p className="text-red-400 text-center text-lg py-4">
+        <p className="py-4 text-center text-lg text-pop-red">
           Couldn&apos;t play this clip — skip to the next one.
         </p>
       )}
 
       {state === 'playing' && !revealed && (
-        <p className="text-white/60 text-center text-lg py-4">🎵 Listen…</p>
+        <p className="py-4 text-center text-lg text-white/60">🎵 Listen…</p>
       )}
 
       {(state === 'ready' || state === 'done') && (
-        <button
-          onClick={replay}
-          className="w-full py-4 bg-white/10 hover:bg-white/20 text-white font-bold text-lg rounded-xl transition-colors"
-        >
+        <Button variant="neutral" size="lg" fullWidth onClick={replay}>
           {state === 'done' ? '🔁 Replay clip' : '▶ Play clip'}
-        </button>
+        </Button>
       )}
     </div>
   );

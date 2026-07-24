@@ -5,12 +5,16 @@ import SimultaneousRound from './SimultaneousRound';
 import QuestionReveal from './QuestionReveal';
 import { useAniTuneRound } from '../hooks/useAniTuneRound';
 import { RACE } from '../rules';
+import { Backdrop, Badge, GhostButton, HubButton, Screen } from '../../../shared/ui';
 
 // Orchestrates one round: scoreboard, clip, and whichever mode's input area is
 // in play. All the game logic lives in ../rules.js via useAniTuneRound — this
 // component only decides what to render for the current phase.
+//
+// The two exits go to different places and are deliberately kept separate:
+// onBackToSetup re-deals with the same players, onQuitToHub leaves the game.
 export default function AniTuneRound({
-  round, players, questions, clipSeconds, mode, onFinish, onExit,
+  round, players, questions, clipSeconds, mode, onFinish, onBackToSetup, onQuitToHub,
 }) {
   const {
     state, activeId, isLastQuestion,
@@ -62,24 +66,28 @@ export default function AniTuneRound({
   if (!question) return null;
 
   return (
-    <div className="min-h-screen flex flex-col items-center px-6 py-8">
-      <div className="w-full max-w-2xl">
+    <>
+      <Backdrop />
+      {/* Guarded: unlike AniGuess there is no saved session to resume back
+          into, so leaving really does discard the round. */}
+      <HubButton
+        onClick={onQuitToHub}
+        confirm="Return to the hub? The scores so far will be lost."
+      />
+      <Screen width="md">
         {/* Scoreboard */}
-        <div className="flex gap-2 flex-wrap justify-center mb-6">
+        <div className="mb-6 flex flex-wrap justify-center gap-2">
           {ranked.map((p) => (
-            <span key={p.id}
-              className={`px-3 py-1 rounded-lg text-sm font-bold ${
-                p.id === activeId ? 'bg-purple-600 text-white' : 'bg-white/10 text-white/60'
-              }`}>
+            <Badge key={p.id} tone={p.id === activeId ? 'purple' : 'neutral'}>
               {p.name} {state.scores[p.id] || 0}
-            </span>
+            </Badge>
           ))}
         </div>
 
-        <p className="text-white/40 text-center text-sm mb-1">
+        <p className="mb-1 text-center text-base text-white/40">
           Question {state.index + 1} of {round.length}
         </p>
-        <h2 className="text-3xl font-black text-white text-center mb-6">
+        <h2 className="mb-6 text-center font-display text-3xl font-extrabold text-white">
           {mode === RACE ? 'Buzz in 🔔' : 'Everyone guesses 🤫'}
         </h2>
 
@@ -134,10 +142,10 @@ export default function AniTuneRound({
           />
         )}
 
-        <button onClick={onExit} className="w-full mt-6 text-white/40 hover:text-white transition-colors text-sm">
-          Quit game
-        </button>
-      </div>
-    </div>
+        <div className="mt-6 text-center">
+          <GhostButton onClick={onBackToSetup}>← Back to setup</GhostButton>
+        </div>
+      </Screen>
+    </>
   );
 }

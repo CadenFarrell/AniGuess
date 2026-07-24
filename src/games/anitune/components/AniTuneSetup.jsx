@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { useProfile } from '../../../shared/hooks/useProfile';
 import { getEligibleAnimeList } from '../utils/questionPool';
 import { RACE, SIMULTANEOUS } from '../rules';
+import {
+  Backdrop, Badge, Banner, Button, Card, CardRow, Checkbox, Field, GhostButton, Input, Screen, Wordmark,
+} from '../../../shared/ui';
 
 const MODES = [
   { id: RACE, icon: '🔔', label: 'Race', blurb: 'First correct answer takes the point. Miss and you’re out for that song.' },
@@ -41,175 +44,214 @@ export default function AniTuneSetup({ onStart, onExit, preparing, progress, err
     !preparing;
 
   return (
-    <div className="min-h-screen flex flex-col items-center px-6 py-10">
-      <div className="w-full max-w-md">
-        <h1 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 mb-1 text-center">
-          🎵 AniTune
-        </h1>
-        <p className="text-white/60 text-center mb-8">Name the anime from its opening or ending</p>
+    <>
+      <Backdrop />
+      <Screen width="md">
+        <Wordmark
+          tone="blue"
+          subtitle="Name the anime from its opening or ending"
+          className="mb-10"
+        >
+          AniTune
+        </Wordmark>
 
-        <div className="flex gap-2 mb-3">
-          <input
+        {/* Add Player */}
+        <div className="mb-5 flex gap-3">
+          <Input
             type="text"
             value={nameInput}
             onChange={(e) => setNameInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && addPlayer()}
             placeholder="Enter player name…"
+            aria-label="Player name"
             disabled={preparing}
-            className="flex-1 bg-white/10 border border-white/20 rounded-xl px-5 py-3 text-white placeholder-white/40 outline-none focus:border-pink-500"
+            className="flex-1 text-lg"
           />
-          <button
+          <Button
+            variant="secondary"
+            size="lg"
             onClick={addPlayer}
             disabled={!nameInput.trim() || preparing}
-            className="px-5 py-3 bg-purple-600 hover:bg-purple-500 disabled:opacity-30 text-white font-bold rounded-xl transition-colors"
           >
             Add
-          </button>
+          </Button>
         </div>
 
         {players.length === 0 && (
-          <p className="text-white/40 text-center text-sm mb-6">
+          <p className="mb-6 text-center text-base text-white/40">
             Add at least one player. Profiles and anime lists are shared with AniGuess.
           </p>
         )}
 
         {players.length > 0 && (
-          <div className="bg-white/5 rounded-xl overflow-hidden mb-6">
-            {players.map((p) => (
-              <div key={p.id} className="flex items-center gap-3 px-4 py-3 border-b border-white/5 last:border-0">
-                <span className="text-white font-bold flex-1">{p.name}</span>
-                <span className={(p.animeList || []).length ? 'text-green-400 text-sm' : 'text-red-400 text-sm'}>
-                  {(p.animeList || []).length} shows
-                </span>
-                <button
-                  onClick={() => setPlayers(players.filter((x) => x.id !== p.id))}
-                  disabled={preparing}
-                  className="text-red-400 hover:text-red-300 disabled:opacity-30 px-1"
-                  aria-label={`Remove ${p.name}`}
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
-          </div>
+          <Card padding="sm" className="mb-6">
+            {players.map((p) => {
+              const shows = (p.animeList || []).length;
+              return (
+                <CardRow key={p.id}>
+                  <span className="min-w-0 flex-1 truncate font-display text-lg font-extrabold text-white">
+                    {p.name}
+                  </span>
+                  <Badge tone={shows ? 'lime' : 'amber'}>
+                    {shows ? `${shows} shows` : '⚠️ No list'}
+                  </Badge>
+                  <button
+                    onClick={() => setPlayers(players.filter((x) => x.id !== p.id))}
+                    disabled={preparing}
+                    aria-label={`Remove ${p.name}`}
+                    className="focus-pop grid h-11 w-11 flex-shrink-0 place-items-center rounded-pop-sm
+                      text-lg font-black text-pop-red hover:text-white disabled:opacity-30"
+                  >
+                    ✕
+                  </button>
+                </CardRow>
+              );
+            })}
+          </Card>
         )}
 
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          {MODES.map((m) => (
-            <button
-              key={m.id}
-              onClick={() => setMode(m.id)}
-              disabled={preparing}
-              className={`text-left p-4 rounded-xl border transition-colors disabled:opacity-40 ${
-                mode === m.id
-                  ? 'bg-purple-600/20 border-purple-500'
-                  : 'bg-white/5 border-white/10 hover:border-white/25'
-              }`}
-            >
-              <span className="text-2xl">{m.icon}</span>
-              <p className="text-white font-bold mt-1">{m.label}</p>
-              <p className="text-white/40 text-xs mt-1">{m.blurb}</p>
-            </button>
-          ))}
+        {/* Mode picker. aria-pressed rather than a radio group because these are
+            two big tappable blocks, not a form control. */}
+        <div className="mb-6 grid gap-3 sm:grid-cols-2">
+          {MODES.map((m) => {
+            const selected = mode === m.id;
+            return (
+              <button
+                key={m.id}
+                onClick={() => setMode(m.id)}
+                disabled={preparing}
+                aria-pressed={selected}
+                className={`focus-pop rounded-pop border-2 p-4 text-left transition-colors disabled:opacity-40
+                  ${selected
+                    ? 'border-pop-blue bg-pop-blue/15'
+                    : 'border-white/15 bg-surface hover:border-white/30'}`}
+              >
+                <span className="text-2xl">{m.icon}</span>
+                <p className="mt-1 font-display text-lg font-extrabold text-white">{m.label}</p>
+                <p className="mt-1 text-sm text-white/50">{m.blurb}</p>
+              </button>
+            );
+          })}
         </div>
 
-        <div className="bg-white/5 rounded-xl p-5 mb-6">
-          <h2 className="text-white font-bold text-lg mb-4">⚙️ Settings</h2>
-
-          <label className="flex items-center gap-3 mb-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={sharedSongsOnly}
-              onChange={(e) => setSharedSongsOnly(e.target.checked)}
-              disabled={preparing}
-              className="w-5 h-5"
-            />
-            <span className="text-white">Shared songs only</span>
-          </label>
-          <p className="text-white/40 text-sm mb-4 ml-8">
+        <Card title="⚙️ Settings" padding="lg" className="mb-6">
+          <Checkbox
+            label="Shared songs only"
+            checked={sharedSongsOnly}
+            disabled={preparing}
+            onChange={(e) => setSharedSongsOnly(e.target.checked)}
+            className="mb-2"
+          />
+          {/* ml-10 lines the note up with the label, clearing the 7-unit box
+              plus its 3-unit gap. */}
+          <p className="mb-5 ml-10 text-base text-white/50">
             Only use shows <em>everyone</em> has on their list, so nobody is guessing blind.
           </p>
 
-          <div className="flex gap-4 mb-4">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={includeOpenings} disabled={preparing}
-                onChange={(e) => setIncludeOpenings(e.target.checked)} className="w-5 h-5" />
-              <span className="text-white">Openings</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={includeEndings} disabled={preparing}
-                onChange={(e) => setIncludeEndings(e.target.checked)} className="w-5 h-5" />
-              <span className="text-white">Endings</span>
-            </label>
+          <div className="mb-5 flex flex-wrap gap-x-8 gap-y-3">
+            <Checkbox
+              label="Openings"
+              checked={includeOpenings}
+              disabled={preparing}
+              onChange={(e) => setIncludeOpenings(e.target.checked)}
+            />
+            <Checkbox
+              label="Endings"
+              checked={includeEndings}
+              disabled={preparing}
+              onChange={(e) => setIncludeEndings(e.target.checked)}
+            />
           </div>
 
           <div className="flex gap-4">
-            <label className="flex-1">
-              <span className="text-white/60 text-sm block mb-1">Questions</span>
-              <input type="number" min="1" max="50" value={roundSize} disabled={preparing}
+            <Field label="Questions" htmlFor="anitune-round-size" className="flex-1">
+              <Input
+                id="anitune-round-size"
+                type="number"
+                min={1}
+                max={50}
+                value={roundSize}
+                disabled={preparing}
                 onChange={(e) => setRoundSize(Math.max(1, parseInt(e.target.value) || 1))}
-                className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white outline-none focus:border-pink-500" />
-            </label>
-            <label className="flex-1">
-              <span className="text-white/60 text-sm block mb-1">Clip length (s)</span>
-              <input type="number" min="3" max="30" value={clipSeconds} disabled={preparing}
+                className="text-lg"
+              />
+            </Field>
+            <Field label="Clip length (s)" htmlFor="anitune-clip-seconds" className="flex-1">
+              <Input
+                id="anitune-clip-seconds"
+                type="number"
+                min={3}
+                max={30}
+                value={clipSeconds}
+                disabled={preparing}
                 onChange={(e) => setClipSeconds(Math.max(3, parseInt(e.target.value) || 3))}
-                className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white outline-none focus:border-pink-500" />
-            </label>
+                className="text-lg"
+              />
+            </Field>
           </div>
-        </div>
+        </Card>
 
         {players.length > 0 && (
-          <p className="text-white/50 text-center text-sm mb-4">
+          <p className="mb-4 text-center text-base text-white/50">
             {eligible.length} show{eligible.length === 1 ? '' : 's'} in play
             {sharedSongsOnly && players.length > 1 && ' (shared by everyone)'}
           </p>
         )}
 
         {players.length > 1 && sharedSongsOnly && eligible.length === 0 && (
-          <p className="text-yellow-400 text-center text-sm mb-4">
-            No shows in common — turn off &ldquo;Shared songs only&rdquo; or import more lists.
-          </p>
+          <Banner tone="warning" className="mb-4">
+            ⚠️ No shows in common — turn off &ldquo;Shared songs only&rdquo; or import more lists.
+          </Banner>
         )}
 
         {!everyoneHasShows && players.length > 0 && (
-          <p className="text-yellow-400 text-center text-sm mb-4">
-            Everyone needs an anime list. Add one in AniGuess first.
-          </p>
+          <Banner tone="warning" className="mb-4">
+            ⚠️ Everyone needs an anime list. Add one in AniGuess first.
+          </Banner>
         )}
 
-        {error && <p className="text-red-400 text-center text-sm mb-4">{error}</p>}
+        {error && <Banner tone="danger" className="mb-4">{error}</Banner>}
 
         {preparing && progress && (
           <div className="mb-4">
-            <p className="text-white/60 text-center text-sm mb-2">
-              {progress.phase === 'resolving' ? 'Matching your shows…' : 'Loading themes…'} {progress.done}/{progress.total}
+            <p className="mb-2 text-center text-base text-white/60">
+              {progress.phase === 'resolving' ? 'Matching your shows…' : 'Loading themes…'}{' '}
+              {progress.done}/{progress.total}
             </p>
-            <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
-              <div className="h-full bg-purple-500 transition-[width]"
-                style={{ width: `${(progress.done / Math.max(progress.total, 1)) * 100}%` }} />
+            <div
+              className="h-4 w-full overflow-hidden rounded-pop-sm border-2 border-ink bg-surface-2"
+              role="progressbar"
+              aria-valuenow={progress.done}
+              aria-valuemin={0}
+              aria-valuemax={progress.total}
+            >
+              <div
+                className="h-full bg-pop-blue transition-[width]"
+                style={{ width: `${(progress.done / Math.max(progress.total, 1)) * 100}%` }}
+              />
             </div>
-            <p className="text-white/30 text-center text-xs mt-2">
+            <p className="mt-2 text-center text-sm text-white/30">
               First time takes a moment; after that it&apos;s cached.
             </p>
           </div>
         )}
 
-        <button
+        <Button
+          variant="primary"
+          size="xl"
+          fullWidth
           onClick={() => onStart({
             players, mode, sharedSongsOnly, includeOpenings, includeEndings, roundSize, clipSeconds,
           })}
           disabled={!canStart}
-          className="w-full py-5 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 disabled:opacity-30 disabled:cursor-not-allowed text-white font-black text-xl rounded-xl transition-all"
         >
           {preparing ? 'Preparing…' : '🎮 Start Game'}
-        </button>
+        </Button>
 
-        <button onClick={onExit} disabled={preparing}
-          className="w-full mt-3 text-white/60 hover:text-white disabled:opacity-30 transition-colors">
-          ← Back to hub
-        </button>
-      </div>
-    </div>
+        <div className="mt-4 text-center">
+          <GhostButton onClick={onExit} disabled={preparing}>← Back to hub</GhostButton>
+        </div>
+      </Screen>
+    </>
   );
 }
