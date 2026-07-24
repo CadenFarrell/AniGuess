@@ -21,7 +21,7 @@ import { normalizeTitle, extractAniListId, pickBestCandidate } from './matchAnim
 
 export { normalizeTitle, extractAniListId, scoreCandidate, pickBestCandidate } from './matchAnime';
 
-const CACHE_KEY = 'aniguess_animethemes_map';
+const CACHE_KEY = 'anitune_animethemes_map';
 
 function loadCache() {
   return storage.getItem(CACHE_KEY) || {};

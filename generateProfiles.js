@@ -209,7 +209,7 @@ async function buildAnimeEntry(key, { title, anilistId }) {
 
 function generateSeedScript(profiles) {
   return `/**
- * AniGuess Seed Script (auto-generated — do not edit by hand)
+ * AniArcade Seed Script (auto-generated — do not edit by hand)
  * Regenerate with: node generateProfiles.js
  *
  * HOW TO USE:
@@ -255,7 +255,7 @@ function generateSeedScript(profiles) {
   }
 
   localStorage.setItem(PROFILES_KEY, JSON.stringify(existing));
-  console.log('%c✅ AniGuess seed complete!', 'color:#a855f7;font-weight:bold;font-size:14px');
+  console.log('%c✅ AniArcade seed complete!', 'color:#a855f7;font-weight:bold;font-size:14px');
   console.log(\`   +\${addedAnime} anime entries, +\${addedChars} characters.\`);
   console.log('   Refresh the page to see the data.');
 })();
@@ -263,7 +263,7 @@ function generateSeedScript(profiles) {
 }
 
 async function main() {
-  console.log('🎌  AniGuess Profile Generator (AniList)\n');
+  console.log('🎌  AniArcade Profile Generator (AniList)\n');
 
   const allKeys = [...new Set(Object.values(PLAYERS).flat())];
   console.log(`Fetching ${allKeys.length} unique anime…\n`);

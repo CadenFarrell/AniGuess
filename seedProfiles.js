@@ -1,5 +1,5 @@
 /**
- * AniGuess Seed Script (auto-generated — do not edit by hand)
+ * AniArcade Seed Script (auto-generated — do not edit by hand)
  * Regenerate with: node generateProfiles.js
  *
  * HOW TO USE:
@@ -21799,7 +21799,7 @@
   }
 
   localStorage.setItem(PROFILES_KEY, JSON.stringify(existing));
-  console.log('%c✅ AniGuess seed complete!', 'color:#a855f7;font-weight:bold;font-size:14px');
+  console.log('%c✅ AniArcade seed complete!', 'color:#a855f7;font-weight:bold;font-size:14px');
   console.log(`   +${addedAnime} anime entries, +${addedChars} characters.`);
   console.log('   Refresh the page to see the data.');
 })();
