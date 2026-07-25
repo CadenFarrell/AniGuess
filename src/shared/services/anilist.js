@@ -1,4 +1,5 @@
 import { anilistRequest } from './anilistClient';
+import { SEASON_RELATIONS } from '../utils/franchise';
 
 const LIST_QUERY = `
 query ($userName: String, $type: MediaType, $statusIn: [MediaListStatus]) {
@@ -8,8 +9,16 @@ query ($userName: String, $type: MediaType, $statusIn: [MediaListStatus]) {
         status
         media {
           id
+          format
+          startDate { year month day }
           title { romaji english }
           coverImage { large }
+          relations {
+            edges {
+              relationType(version: 2)
+              node { id type }
+            }
+          }
         }
       }
     }
@@ -93,6 +102,19 @@ async function fetchCharacterPage(ids, page, { signal, batchSize, onBatch }) {
   return out;
 }
 
+// The ids of other ANIME this media is a season of / continues into. Ids that
+// aren't in the user's own list are kept deliberately: they bridge seasons the
+// user skipped (Attack on Titan S3 and S4 only connect through "S3 Part 2").
+function seasonRelatedIds(media) {
+  const ids = [];
+  for (const edge of media?.relations?.edges ?? []) {
+    if (edge?.node?.type === 'ANIME' && SEASON_RELATIONS.has(edge.relationType)) {
+      ids.push(edge.node.id);
+    }
+  }
+  return ids;
+}
+
 // Fetches a public AniList user's anime list. Throws a friendly error if the
 // username doesn't exist (AniList returns a GraphQL error, not a null result,
 // for an unknown user).
@@ -120,6 +142,9 @@ export async function fetchUserAnimeList(username, { statusIn = ['COMPLETED'] } 
         title: media.title?.english || media.title?.romaji || `Untitled #${media.id}`,
         coverImageUrl: media.coverImage?.large || '',
         status: entry.status,
+        format: media.format ?? null,
+        startDate: media.startDate ?? null,
+        relatedIds: seasonRelatedIds(media),
       });
     }
   }

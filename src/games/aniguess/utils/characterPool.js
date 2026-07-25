@@ -1,4 +1,5 @@
 import { normalizeTitle } from '../../../shared/utils/ranking';
+import { characterNameKey } from '../../../shared/utils/character';
 
 // Pure helpers for building the pool of characters that can be assigned to a
 // player. Shared by the local pass-and-play CharacterAssignment and the online
@@ -15,25 +16,40 @@ export function getAssignableAnimeList(guesser, allPlayers, sharedShowsOnly = tr
   ).filter((a) => a.characters.length > 0);
 }
 
-// Identity for a picked character. Not `id`: AniList characters and the ones
-// ListManager creates (Date.now()) don't share an id space, so an id can
-// collide across sources.
-const characterKey = (c) => `${c.series}::${c.name}`;
+// Identity for a picked character: characterNameKey, i.e. the name alone. See
+// its comment in shared/utils/character.js for why neither `id` nor
+// `series::name` works here.
+const characterKey = (c) => characterNameKey(c.name);
+
+// Collapses characters who appear under more than one title into one entry,
+// keeping the first (so the reveal still shows a series). Franchise grouping
+// handles the season case at import time, but shows it deliberately keeps
+// apart — spin-offs, recap movies, genuine crossovers — still repeat a cast,
+// and without this those characters get one extra roll of the dice each.
+function dedupeByName(pool) {
+  const seen = new Set();
+  return pool.filter((c) => {
+    const key = characterKey(c);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
 
 // Picks a random character from the given anime list, tagging it with its
 // series. twoStepRandom picks a show first (every show equally likely) then a
-// character within it; otherwise every character across all shows is equally
-// likely. `excluding` (a previously picked character) is left out so a re-roll
-// never hands back what's already on screen — unless it's the only option.
-// Returns null if there's nothing to pick from.
+// character within it; otherwise every distinct character across all shows is
+// equally likely. `excluding` (a previously picked character) is left out so a
+// re-roll never hands back what's already on screen — unless it's the only
+// option. Returns null if there's nothing to pick from.
 export function pickRandomCharacter(animeList, twoStepRandom = false, excluding = null) {
   if (!animeList || animeList.length === 0) return null;
   let pool;
   if (twoStepRandom) {
     const anime = animeList[Math.floor(Math.random() * animeList.length)];
-    pool = anime.characters.map((c) => ({ ...c, series: anime.title }));
+    pool = dedupeByName(anime.characters.map((c) => ({ ...c, series: anime.title })));
   } else {
-    pool = animeList.flatMap((a) => a.characters.map((c) => ({ ...c, series: a.title })));
+    pool = dedupeByName(animeList.flatMap((a) => a.characters.map((c) => ({ ...c, series: a.title }))));
   }
   if (excluding) {
     const remaining = pool.filter((c) => characterKey(c) !== characterKey(excluding));

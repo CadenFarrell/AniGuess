@@ -16,15 +16,21 @@ export default function OnlineLobby({ room }) {
   const players = room.gameSession?.players ?? [];
   const me = players.find((p) => p.id === room.myPlayerId) ?? null;
 
+  // Everything that gates Start counts only the players actually here. A ghost
+  // left behind by a closed tab has no characters, and counting them would
+  // block Start for everyone present with no way to clear it.
+  const active = room.activePlayers ?? players;
+  const statuses = room.playerStatuses ?? {};
+
   const charCount = (p) => p.animeList.reduce((s, a) => s + a.characters.length, 0);
-  const allHaveChars = players.every((p) => charCount(p) > 0);
+  const allHaveChars = active.every((p) => charCount(p) > 0);
   // Same guard local setup applies: with "shared shows only" on and no
   // overlapping titles there'd be nothing assignable once the game started.
-  const hasSharedAnime = players.length < 2 || players.some((p, i) =>
-    players.some((other, j) => i !== j &&
+  const hasSharedAnime = active.length < 2 || active.some((p, i) =>
+    active.some((other, j) => i !== j &&
       p.animeList.some((a) => other.animeList.some((o) => normalizeTitle(o.title) === normalizeTitle(a.title))))
   );
-  const canStart = players.length >= 2 && allHaveChars && (!sharedShowsOnly || hasSharedAnime);
+  const canStart = active.length >= 2 && allHaveChars && (!sharedShowsOnly || hasSharedAnime);
 
   const updatePoints = (i, val) => {
     const updated = [...pointsPerPosition];
@@ -34,7 +40,9 @@ export default function OnlineLobby({ room }) {
 
   const handleStart = () => {
     room.handleStartGame({
-      players,
+      // Deal in the players actually here — the turn rotation and the character
+      // pool are both built from this list.
+      players: active,
       settings: { timerEnabled: false, timerSeconds: 60, pointsPerPosition, sharedShowsOnly, twoStepRandom },
     });
   };
@@ -54,22 +62,28 @@ export default function OnlineLobby({ room }) {
           </span>
         </div>
 
-        <Card title={`Players (${players.length})`} padding="lg" className="mb-6">
+        <Card title={`Players (${active.length})`} padding="lg" className="mb-6">
           {players.map((p) => {
             const chars = charCount(p);
+            const status = statuses[p.id] ?? 'active';
+            const here = status === 'active' || status === 'dropping';
             return (
-              <CardRow key={p.id}>
+              <CardRow key={p.id} className={here ? '' : 'opacity-40'}>
                 <span className="text-white">
                   {p.name}{' '}
                   {p.id === room.myPlayerId && <span className="text-pop-purple">(you)</span>}
                 </span>
-                <Badge tone={chars > 0 ? 'lime' : 'amber'}>
-                  {chars > 0 ? `${chars} chars` : '⚠️ No chars'}
-                </Badge>
+                {status === 'dropping' && <Badge tone="amber">🔌 Reconnecting…</Badge>}
+                {!here && <Badge tone="red">Left</Badge>}
+                {status === 'active' && (
+                  <Badge tone={chars > 0 ? 'lime' : 'amber'}>
+                    {chars > 0 ? `${chars} chars` : '⚠️ No chars'}
+                  </Badge>
+                )}
               </CardRow>
             );
           })}
-          {players.length < 2 && (
+          {active.length < 2 && (
             <p className="mt-3 text-sm text-white/40">Waiting for more players to join…</p>
           )}
         </Card>
@@ -120,12 +134,12 @@ export default function OnlineLobby({ room }) {
           </p>
         </Card>
 
-        {players.length >= 2 && !allHaveChars && (
+        {active.length >= 2 && !allHaveChars && (
           <Banner tone="warning" className="mb-4">
             ⚠️ Every player needs at least one character before you can start.
           </Banner>
         )}
-        {players.length >= 2 && allHaveChars && sharedShowsOnly && !hasSharedAnime && (
+        {active.length >= 2 && allHaveChars && sharedShowsOnly && !hasSharedAnime && (
           <Banner tone="warning" className="mb-4">
             ⚠️ No anime titles overlap between players — turn off &quot;Shared shows only&quot; or
             import matching titles.

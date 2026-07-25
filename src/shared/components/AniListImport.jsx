@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { fetchUserAnimeList, fetchManyAnimeCharacters } from '../services/anilist';
-import { filterAndMapCharacterEdges } from '../utils/anilistFormat';
+import { filterAndMapCharacterEdges, mergeCharacterEdges } from '../utils/anilistFormat';
+import { groupIntoFranchises } from '../utils/franchise';
 import { mergeAnimeIntoProfile } from '../utils/profileMerge';
 import { Button, Card, Checkbox, Input, Label, Modal } from '../ui';
 
@@ -14,7 +15,9 @@ export default function AniListImport({ profile, onClose, onImported }) {
   const [minSupportingFavourites, setMinSupportingFavourites] = useState(100);
   const [mainOnly, setMainOnly] = useState(false);
 
-  const [animeOptions, setAnimeOptions] = useState([]); // { animeId, title, coverImageUrl, status }
+  // One row per show, not per season: each option is a franchise group
+  // { key, title, coverImageUrl, memberIds, members }. `selected` holds keys.
+  const [animeOptions, setAnimeOptions] = useState([]);
   const [selected, setSelected] = useState(new Set());
   const [search, setSearch] = useState('');
 
@@ -36,8 +39,9 @@ export default function AniListImport({ profile, onClose, onImported }) {
         setStep('error');
         return;
       }
-      setAnimeOptions(list);
-      setSelected(new Set(list.map((a) => a.id)));
+      const groups = groupIntoFranchises(list);
+      setAnimeOptions(groups);
+      setSelected(new Set(groups.map((g) => g.key)));
       setStep('list');
     } catch (err) {
       setErrorMessage(err.message);
@@ -57,25 +61,34 @@ export default function AniListImport({ profile, onClose, onImported }) {
   const filteredOptions = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return animeOptions;
-    return animeOptions.filter((a) => a.title.toLowerCase().includes(q));
+    // Match the shown title or any season's title, so typing "Season 2" still
+    // finds the group it was folded into.
+    return animeOptions.filter((g) =>
+      g.title.toLowerCase().includes(q) ||
+      g.members.some((m) => m.title.toLowerCase().includes(q))
+    );
   }, [animeOptions, search]);
 
   const startImport = async () => {
-    const toImport = animeOptions.filter((a) => selected.has(a.id));
-    if (toImport.length === 0) return;
+    const selectedGroups = animeOptions.filter((g) => selected.has(g.key));
+    if (selectedGroups.length === 0) return;
+
+    // Characters are still fetched per AniList media id — the progress bar
+    // counts those fetches, so its total is the flattened member count.
+    const memberIds = selectedGroups.flatMap((g) => g.memberIds);
 
     const controller = new AbortController();
     setAbortController(controller);
     setStep('importing');
-    setProgress({ index: 0, total: toImport.length });
+    setProgress({ index: 0, total: memberIds.length });
 
     let charactersById;
     try {
-      charactersById = await fetchManyAnimeCharacters(toImport.map((a) => a.id), {
+      charactersById = await fetchManyAnimeCharacters(memberIds, {
         signal: controller.signal,
         minSupportingFavourites,
         mainOnly,
-        onProgress: (resolved) => setProgress({ index: resolved, total: toImport.length }),
+        onProgress: (resolved) => setProgress({ index: resolved, total: memberIds.length }),
       });
     } catch (err) {
       if (err.name === 'AbortError') {
@@ -90,15 +103,19 @@ export default function AniListImport({ profile, onClose, onImported }) {
       return;
     }
 
-    const importedAnimeList = toImport.map((anime) => {
-      const { genres, edges } = charactersById.get(anime.id) ?? { genres: [], edges: [] };
+    const importedAnimeList = selectedGroups.map((group) => {
+      const memberResults = group.memberIds.map((id) => charactersById.get(id) ?? { genres: [], edges: [] });
+      // Merge every season's cast, then apply the favourites/main filters and
+      // the per-show cap once across the whole franchise.
+      const edges = mergeCharacterEdges(memberResults.map((r) => r.edges));
+      const genres = [...new Set(memberResults.flatMap((r) => r.genres))];
       const characters = filterAndMapCharacterEdges(edges, {
         minSupportingFavourites,
         mainOnly,
         maxCharacters: MAX_CHARACTERS_PER_SHOW,
         genres,
       });
-      return { animeId: anime.id, title: anime.title, characters };
+      return { animeId: group.key, memberIds: group.memberIds, title: group.title, characters };
     });
 
     const { profile: merged, addedAnime, addedChars } = mergeAnimeIntoProfile(profile, importedAnimeList);
@@ -209,7 +226,7 @@ export default function AniListImport({ profile, onClose, onImported }) {
           />
           <div className="mb-3 flex items-center gap-3">
             <button
-              onClick={() => setSelected(new Set(animeOptions.map((a) => a.id)))}
+              onClick={() => setSelected(new Set(animeOptions.map((g) => g.key)))}
               className="focus-pop rounded-pop-sm text-sm text-white/60 hover:text-white"
             >
               Select All
@@ -223,23 +240,26 @@ export default function AniListImport({ profile, onClose, onImported }) {
             <span className="ml-auto text-sm text-white/40">{selected.size} selected</span>
           </div>
           <div className="mb-4 max-h-72 space-y-2 overflow-y-auto">
-            {filteredOptions.map((anime) => (
+            {filteredOptions.map((group) => (
               <label
-                key={anime.id}
+                key={group.key}
                 className="flex cursor-pointer items-center gap-3 rounded-pop-sm border-2 border-white/10 bg-surface-2 p-3"
               >
                 <input
                   type="checkbox"
-                  checked={selected.has(anime.id)}
-                  onChange={() => toggleSelected(anime.id)}
+                  checked={selected.has(group.key)}
+                  onChange={() => toggleSelected(group.key)}
                   className="h-5 w-5 flex-shrink-0 accent-pop-lime"
                 />
-                {anime.coverImageUrl ? (
-                  <img src={anime.coverImageUrl} alt="" loading="lazy" className="h-14 w-10 flex-shrink-0 rounded object-cover" />
+                {group.coverImageUrl ? (
+                  <img src={group.coverImageUrl} alt="" loading="lazy" className="h-14 w-10 flex-shrink-0 rounded object-cover" />
                 ) : (
                   <div className="h-14 w-10 flex-shrink-0 rounded bg-white/10" />
                 )}
-                <span className="text-sm text-white">{anime.title}</span>
+                <span className="min-w-0 flex-1 text-sm text-white">{group.title}</span>
+                {group.memberIds.length > 1 && (
+                  <span className="flex-shrink-0 text-xs text-white/40">{group.memberIds.length} entries</span>
+                )}
               </label>
             ))}
           </div>

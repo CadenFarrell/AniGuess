@@ -2,7 +2,12 @@ import { useMemo } from 'react';
 import { computeRankedPlayers, getPositionEmoji } from '../../../shared/utils/ranking';
 import { Button, Card, CardRow, Screen, Wordmark } from '../../../shared/ui';
 
-export default function Leaderboard({ players, totalScores, roundNumber, onPlayAgain, onEditLists }) {
+// `departedIds` is online-only: anyone who left mid-session keeps the points
+// they earned and stays in the standings, dimmed and tagged, so the result
+// doesn't read as though they played it out.
+export default function Leaderboard({
+  players, totalScores, roundNumber, departedIds = [], onPlayAgain, onEditLists,
+}) {
   const withPositions = useMemo(
     () => computeRankedPlayers(players, totalScores),
     [players, totalScores]
@@ -64,18 +69,22 @@ export default function Leaderboard({ players, totalScores, roundNumber, onPlayA
 
       {/* Full Rankings */}
       <Card padding="lg" className="mb-8 text-left">
-        {withPositions.map((player) => (
-          <CardRow
-            key={player.id}
-            className={player.position === 1 ? 'text-pop-amber' : 'text-white'}
-          >
-            <span className="font-display text-lg font-extrabold">
-              {getPositionEmoji(player.position)} {player.name}
-              {isTied(player) && <span className="ml-2 text-sm text-pop-amber">🤝 Tied</span>}
-            </span>
-            <span className="font-display text-2xl font-extrabold">{player.total} pts</span>
-          </CardRow>
-        ))}
+        {withPositions.map((player) => {
+          const left = departedIds.includes(player.id);
+          return (
+            <CardRow
+              key={player.id}
+              className={`${player.position === 1 ? 'text-pop-amber' : 'text-white'} ${left ? 'opacity-50' : ''}`}
+            >
+              <span className="font-display text-lg font-extrabold">
+                {getPositionEmoji(player.position)} {player.name}
+                {isTied(player) && <span className="ml-2 text-sm text-pop-amber">🤝 Tied</span>}
+                {left && <span className="ml-2 text-sm font-bold text-white/50">left</span>}
+              </span>
+              <span className="font-display text-2xl font-extrabold">{player.total} pts</span>
+            </CardRow>
+          );
+        })}
       </Card>
 
       <div className="flex flex-col gap-4">

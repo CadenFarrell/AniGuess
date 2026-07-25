@@ -3,6 +3,7 @@ import TurnTracker from './TurnTracker';
 import LastOutcomeBanner from './LastOutcomeBanner';
 import QuestionLog from './QuestionLog';
 import PeekPanel from './PeekPanel';
+import WhoIsWhoPanel from './WhoIsWhoPanel';
 import { normalizeTitle } from '../../../shared/utils/ranking';
 import { rankSuggestions } from '../utils/guessSuggest';
 import { Avatar, Button, GhostButton, Input, Screen } from '../../../shared/ui';
@@ -14,6 +15,7 @@ import { Avatar, Button, GhostButton, Input, Screen } from '../../../shared/ui';
 export default function OnlineGameScreen({
   guesser,
   players,
+  whoIsWho = [],
   lockedPositions,
   questionLog,
   turnCount,
@@ -76,6 +78,8 @@ export default function OnlineGameScreen({
       </div>
 
       <PeekPanel peekList={peekList} hasPeeked={hasPeeked} onPeek={onPeek} />
+
+      <WhoIsWhoPanel entries={whoIsWho} />
 
       {waiting && (
         <p className="mb-5 text-center text-white/50">

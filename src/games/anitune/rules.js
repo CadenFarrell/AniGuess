@@ -59,6 +59,10 @@ export function buzz(state, playerId) {
 // A wrong buzz costs the question, not a point: the player is out until the
 // next clip and everyone else keeps racing. Once nobody is left the answer is
 // revealed rather than leaving the room stuck on a clip no one can answer.
+//
+// Online, `players` is the *active* roster — anyone who left is already out of
+// it, and lockedOut can still name them, so exhaustion is "everyone still here
+// is locked out" rather than a count comparison.
 export function resolveBuzz(state, question, guess, players) {
   if (state.phase !== 'buzzed' || !state.buzzedBy) return { patch: {} };
   const playerId = state.buzzedBy;
@@ -78,12 +82,29 @@ export function resolveBuzz(state, question, guess, players) {
   const lockedOut = [...state.lockedOut, playerId];
   return {
     patch: {
-      phase: lockedOut.length >= players.length ? 'revealed' : 'listening',
+      phase: everyoneLockedOut(players, lockedOut) ? 'revealed' : 'listening',
       buzzedBy: null,
       lockedOut,
       answers,
     },
   };
+}
+
+// Nobody left who is allowed to buzz.
+export function everyoneLockedOut(players, lockedOut) {
+  return players.length > 0 && players.every((p) => lockedOut.includes(p.id));
+}
+
+// The buzzer walked away mid-answer. Only they can resolve their own buzz, so
+// the room would otherwise sit on a paused clip forever — hand the question
+// back and lock them out, both so the clip resumes for everyone else and so a
+// reconnect can't let them buzz the same question twice.
+export function releaseBuzz(state, playerId) {
+  if (state.phase !== 'buzzed' || state.buzzedBy !== playerId) return { patch: {} };
+  const lockedOut = state.lockedOut.includes(playerId)
+    ? state.lockedOut
+    : [...state.lockedOut, playerId];
+  return { patch: { phase: 'listening', buzzedBy: null, lockedOut } };
 }
 
 // "Nobody got it" — the room concedes the question without anyone buzzing.
@@ -126,6 +147,47 @@ export function submitAnswer(state, question, text) {
     if (answer.correct) scores[id] = (scores[id] || 0) + 1;
   }
   return { patch: { answers, entryIndex, phase: 'revealed', scores } };
+}
+
+// --- Simultaneous, online --------------------------------------------------
+
+// Online everyone-guesses has no device to pass, so the local handoff/entry
+// rotation (entryOrder/entryIndex) doesn't apply — every player types on their
+// own device at the same time. This records one player's answer and, once every
+// player is in, reveals and scores in one step. The verdict is graded here but
+// each device hides the others' answers until phase is 'revealed'.
+//
+// `allPlayerIds` is the *active* roster, not everyone who ever joined — a
+// player who left can never submit, so counting them would hold the reveal
+// open forever.
+export function submitOnlineAnswer(state, question, playerId, text, allPlayerIds) {
+  if (state.phase === 'revealed' || state.answers[playerId]) return { patch: {} };
+  const answers = {
+    ...state.answers,
+    [playerId]: { text, correct: isCorrectTitleGuess(question, text) },
+  };
+
+  if (!allPlayerIds.every((id) => answers[id])) {
+    return { patch: { answers } };
+  }
+
+  const scores = { ...state.scores };
+  for (const [id, answer] of Object.entries(answers)) {
+    if (answer.correct) scores[id] = (scores[id] || 0) + 1;
+  }
+  return { patch: { answers, phase: 'revealed', scores } };
+}
+
+// Force the reveal with only the answers submitted so far — the escape hatch
+// when someone has wandered off, so the room isn't stuck waiting forever. Scores
+// whatever is in, exactly as the final submit would have.
+export function revealNow(state) {
+  if (state.phase === 'revealed') return { patch: {} };
+  const scores = { ...state.scores };
+  for (const [id, answer] of Object.entries(state.answers)) {
+    if (answer.correct) scores[id] = (scores[id] || 0) + 1;
+  }
+  return { patch: { phase: 'revealed', scores } };
 }
 
 // --- Advancement -----------------------------------------------------------

@@ -1,5 +1,6 @@
 import LastOutcomeBanner from './LastOutcomeBanner';
 import QuestionLog from './QuestionLog';
+import WhoIsWhoPanel from './WhoIsWhoPanel';
 import { Avatar, Button, Card, Screen } from '../../../shared/ui';
 
 // Shown on every device during 'game' phase except the current guesser's.
@@ -10,7 +11,7 @@ import { Avatar, Button, Card, Screen } from '../../../shared/ui';
 // the guesser's assigned character (safe here — database.rules.json denies only
 // the guesser's own device that read) and everything already asked this round.
 export default function OnlineAnswererView({
-  guesser, guesserCharacter, questionLog = [], turnCount = 0,
+  guesser, guesserCharacter, whoIsWho = [], questionLog = [], turnCount = 0,
   pendingAction, lastOutcome, onAnswer, resolving,
 }) {
   const live = pendingAction && !pendingAction.resolved;
@@ -48,6 +49,10 @@ export default function OnlineAnswererView({
           <p className="text-base text-white/40">Loading their character…</p>
         )}
       </Card>
+
+      {/* The pinned card above covers the player being answered right now; this
+          is for the ones whose turn will come back around. */}
+      <WhoIsWhoPanel entries={whoIsWho} className="mb-6" />
 
       {!live && (
         <div className="py-8 text-center">

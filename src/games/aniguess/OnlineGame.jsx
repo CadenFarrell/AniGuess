@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useRoom } from './hooks/useRoom';
 import { useWins } from '../../shared/hooks/useWins';
 import { isCorrectGuess } from './utils/guessMatch';
+import { buildWhoIsWho } from './utils/whoIsWho';
+import { roundComplete } from './rules';
 import RoomSetup from './components/RoomSetup';
 import OnlineLobby from './components/OnlineLobby';
 import OnlineCharacterAssignment from './components/OnlineCharacterAssignment';
@@ -18,7 +20,7 @@ export default function OnlineGame({ onBack, onExit }) {
   const room = useRoom();
   const { recordWin } = useWins();
   const [revealCharacter, setRevealCharacter] = useState(null);
-  const [guesserCharacter, setGuesserCharacter] = useState(null);
+  const [whoIsWho, setWhoIsWho] = useState([]);
   const [resolving, setResolving] = useState(false);
 
   // Fetch the character to reveal — only devices that AREN'T the assignee are
@@ -36,21 +38,53 @@ export default function OnlineGame({ onBack, onExit }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room.view, room.assignmentPlayer?.id, room.isMyAssignmentTurn]);
 
-  // Answering devices need the guesser's character in front of them for the
-  // whole turn — remote players can't lean over and check a shared screen the
-  // way local pass-and-play allows, and a round can run for many turns.
+  // Every other player's character, fetched once when the round's game phase
+  // starts. Remote players can't lean over and check a shared screen the way
+  // local pass-and-play allows, and a round can run for many turns — so both
+  // the pinned "whose turn it is" card and the Who-is-who recap read from here.
+  // This device's own player is deliberately absent: database.rules.json denies
+  // that read outright.
+  // Assignments are fixed for the life of a round, so this doesn't need to
+  // re-run per turn. gameSession gets a fresh object identity on every snapshot,
+  // hence the player count rather than the array as a dep.
   useEffect(() => {
-    if (room.view !== 'game' || room.isMyTurn || !room.currentGuesser) {
-      setGuesserCharacter(null);
+    if (room.view !== 'game' || !room.gameSession) {
+      setWhoIsWho([]);
       return;
     }
     let cancelled = false;
-    room.readAssignment(room.currentGuesser.id).then((c) => {
-      if (!cancelled) setGuesserCharacter(c);
+    const players = room.gameSession.players;
+    Promise.all(
+      players
+        .filter((p) => p.id !== room.myPlayerId)
+        .map((p) => room.readAssignment(p.id).then((character) => [p.id, character]))
+    ).then((pairs) => {
+      if (cancelled) return;
+      const byId = Object.fromEntries(pairs);
+      // No lockedPositions: that only drives the local look-away gate, and this
+      // list is rendered ungated.
+      setWhoIsWho(buildWhoIsWho({
+        players,
+        characterFor: (id) => byId[id],
+        excludePlayerId: room.myPlayerId,
+      }));
     });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [room.view, room.currentGuesser?.id, room.isMyTurn, room.roundNumber]);
+  }, [room.view, room.roundNumber, room.myPlayerId, room.gameSession?.players?.length]);
+
+  // When it's my turn I'm excluded from the list, so this correctly stays
+  // null — OnlineGameScreen must never receive its own player's character.
+  const guesserCharacter = whoIsWho.find((e) => e.playerId === room.currentGuesser?.id)?.character ?? null;
+
+  // Assignment progress counts the players still here, and "last" means nobody
+  // active is left to assign — not merely the end of the original array.
+  const assignmentNumber = Math.max(
+    1, room.activePlayers.findIndex((p) => p.id === room.assignmentPlayer?.id) + 1
+  );
+  const isLastAssignment = !(room.gameSession?.players ?? [])
+    .slice((room.assignmentIndex ?? 0) + 1)
+    .some((p) => room.activeIds.includes(p.id));
 
   // Auto-resolve a pending GUESS — no human decision needed, any non-guesser
   // device races to claim it via the transaction-guarded resolvePendingAction;
@@ -102,15 +136,19 @@ export default function OnlineGame({ onBack, onExit }) {
     if (room.view !== 'assignment' || room.isMyAssignmentTurn || !room.gameSession) return;
     const prop = room.currentProposal;
     if (!prop?.character) return;
-    const needed = room.gameSession.players.length - 1;
-    const approved = prop.approvals ? Object.values(prop.approvals).filter(Boolean).length : 0;
-    const key = `${room.roundNumber}:${room.assignmentIndex}`;
+    // Count only the players still here. A departed player can never approve,
+    // and their stale approval shouldn't stand in for someone who's present —
+    // so both sides of this comparison are filtered to the active roster.
+    const needed = room.activePlayers.filter((p) => p.id !== room.assignmentPlayer?.id).length;
+    const approved = Object.entries(prop.approvals ?? {})
+      .filter(([id, ok]) => ok && room.activeIds.includes(id)).length;
+    const key = `${room.roundNumber}:${room.assignmentIndex}:${room.activeIds.join(',')}`;
     if (approved >= needed && lockedForRef.current !== key) {
       lockedForRef.current = key;
       room.lockInAssignment();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [room.view, room.isMyAssignmentTurn, room.currentProposal, room.assignmentIndex, room.roundNumber]);
+  }, [room.view, room.isMyAssignmentTurn, room.currentProposal, room.assignmentIndex, room.roundNumber, room.activeIds]);
 
   if (!room.roomCode) {
     // Not in a room yet, so leaving costs nothing — no confirm.
@@ -170,13 +208,21 @@ export default function OnlineGame({ onBack, onExit }) {
           Leave
         </button>
       </div>
-      {room.syncError && (
-        <div className="fixed top-3 left-1/2 z-40 w-[calc(100%-1.5rem)] max-w-md -translate-x-1/2">
+      <div className="fixed top-3 left-1/2 z-40 flex w-[calc(100%-1.5rem)] max-w-md
+        -translate-x-1/2 flex-col gap-2">
+        {room.syncError && (
           <Banner tone="danger" onDismiss={room.dismissSyncError} className="bg-canvas/95 backdrop-blur-sm">
             ⚠️ {room.syncError}
           </Banner>
-        </div>
-      )}
+        )}
+        {/* Says out loud why the room has paused, and for how much longer, so a
+            dropped player doesn't just look like a frozen game. */}
+        {room.dropping.map(({ player, remainingMs }) => (
+          <Banner key={player.id} tone="warning" className="bg-canvas/95 backdrop-blur-sm">
+            🔌 {player.name} disconnected — waiting {Math.ceil(remainingMs / 1000)}s…
+          </Banner>
+        ))}
+      </div>
       {children}
     </div>
   );
@@ -202,15 +248,17 @@ export default function OnlineGame({ onBack, onExit }) {
     return shell(
       <OnlineCharacterAssignment
         guesser={room.assignmentPlayer}
-        allPlayers={room.gameSession.players}
+        // The character pool comes from the players still here — "shared shows
+        // only" shouldn't be narrowed by someone who has left.
+        allPlayers={room.activePlayers}
         sharedShowsOnly={room.gameSession.settings.sharedShowsOnly}
         twoStepRandom={room.gameSession.settings.twoStepRandom}
         currentProposal={room.currentProposal}
         myPlayerId={room.myPlayerId}
         onPropose={room.proposeCharacter}
         onToggleApproval={room.setMyApproval}
-        assignmentNumber={room.assignmentIndex + 1}
-        totalPlayers={room.gameSession.players.length}
+        assignmentNumber={assignmentNumber}
+        totalPlayers={room.activePlayers.length}
       />
     );
   }
@@ -233,7 +281,7 @@ export default function OnlineGame({ onBack, onExit }) {
         character={revealCharacter}
         guesserName={room.assignmentPlayer.name}
         onStartQuestioning={room.handleRevealDone}
-        isLastPlayer={room.assignmentIndex === room.gameSession.players.length - 1}
+        isLastPlayer={isLastAssignment}
         online
       />
     );
@@ -245,6 +293,7 @@ export default function OnlineGame({ onBack, onExit }) {
         <OnlineGameScreen
           guesser={room.currentGuesser}
           players={room.gameSession.players}
+          whoIsWho={whoIsWho}
           lockedPositions={room.lockedPositions}
           questionLog={room.questionLogs[room.currentGuesser.id] || []}
           turnCount={room.turnCounts[room.currentGuesser.id] || 0}
@@ -262,6 +311,7 @@ export default function OnlineGame({ onBack, onExit }) {
       <OnlineAnswererView
         guesser={room.currentGuesser}
         guesserCharacter={guesserCharacter}
+        whoIsWho={whoIsWho}
         questionLog={room.questionLogs[room.currentGuesser?.id] || []}
         turnCount={room.turnCounts[room.currentGuesser?.id] || 0}
         pendingAction={room.pendingAction}
@@ -278,7 +328,10 @@ export default function OnlineGame({ onBack, onExit }) {
         lastLocked={room.lastLocked}
         lockedPositions={room.lockedPositions}
         onContinue={() => {
-          if (room.lockedPositions.length >= room.gameSession.players.length) {
+          // Everyone still here has been placed. Counting lockedPositions
+          // against the full roster would hold the round open for a player who
+          // left and will never be locked.
+          if (roundComplete(room.lockedPositions, room.activePlayers)) {
             room.finishRound(room.lockedPositions);
           } else {
             room.setView('game');
@@ -295,6 +348,7 @@ export default function OnlineGame({ onBack, onExit }) {
         lockedPositions={room.lockedPositions}
         roundNumber={room.roundNumber}
         totalScores={room.totalScores}
+        departedIds={room.departedIds}
         onNewRound={room.handleNewRound}
         onEndSession={() => room.handleEndSession(recordWin)}
       />
@@ -307,6 +361,7 @@ export default function OnlineGame({ onBack, onExit }) {
         players={room.gameSession.players}
         totalScores={room.totalScores}
         roundNumber={room.roundNumber}
+        departedIds={room.departedIds}
         onPlayAgain={() => { room.leaveRoom(); onBack(); }}
         onEditLists={() => { room.leaveRoom(); onBack(); }}
       />

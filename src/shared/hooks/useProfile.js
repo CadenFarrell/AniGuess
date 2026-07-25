@@ -1,16 +1,22 @@
 import { useCallback } from 'react';
 import { storage } from '../services/storage';
 import { normalizeCharacter } from '../utils/character';
+import { dedupeProfileAnimeList } from '../utils/profileMerge';
 
 const PROFILES_KEY = 'aniguess_profiles';
 
+// Runs on every read, so profiles saved before franchise grouping existed get
+// their duplicate entries collapsed without a migration flag — and the repair
+// persists on its own the next time saveProfile writes the profile back.
 function normalizeProfile(profile) {
   return {
     ...profile,
-    animeList: profile.animeList.map((anime) => ({
-      ...anime,
-      characters: anime.characters.map(normalizeCharacter),
-    })),
+    animeList: dedupeProfileAnimeList(
+      profile.animeList.map((anime) => ({
+        ...anime,
+        characters: anime.characters.map(normalizeCharacter),
+      }))
+    ),
   };
 }
 

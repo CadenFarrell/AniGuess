@@ -2,7 +2,9 @@ import { useMemo } from 'react';
 import { computeRankedPlayers, getPositionEmoji } from '../../../shared/utils/ranking';
 import { Button, Card, CardRow, Screen, Wordmark } from '../../../shared/ui';
 
-export default function RoundEnd({ players, lockedPositions, roundNumber, totalScores, onNewRound, onEndSession }) {
+export default function RoundEnd({
+  players, lockedPositions, roundNumber, totalScores, departedIds = [], onNewRound, onEndSession,
+}) {
   const ranked = useMemo(
     () => computeRankedPlayers(players, totalScores),
     [players, totalScores]
@@ -44,9 +46,13 @@ export default function RoundEnd({ players, lockedPositions, roundNumber, totalS
       <Card title="Total Scores" padding="lg" className="mb-8">
         {ranked.map((p) => {
           const isLeading = p.total > 0 && p.total === ranked[0].total;
+          const left = departedIds.includes(p.id);
           return (
-            <CardRow key={p.id}>
-              <span className="text-lg text-white">{isLeading ? '👑 ' : ''}{p.name}</span>
+            <CardRow key={p.id} className={left ? 'opacity-50' : ''}>
+              <span className="text-lg text-white">
+                {isLeading ? '👑 ' : ''}{p.name}
+                {left && <span className="ml-2 text-sm text-white/50">left</span>}
+              </span>
               <span className="font-display text-xl font-extrabold text-pop-purple">
                 {p.total} pts
               </span>

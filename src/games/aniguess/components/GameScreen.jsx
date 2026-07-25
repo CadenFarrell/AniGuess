@@ -2,15 +2,18 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import TurnTracker from './TurnTracker';
 import QuestionLog from './QuestionLog';
 import PeekPanel from './PeekPanel';
+import WhoIsWhoPanel from './WhoIsWhoPanel';
 import { normalizeTitle } from '../../../shared/utils/ranking';
 import { isCorrectGuess as matchGuess } from '../utils/guessMatch';
 import { rankSuggestions } from '../utils/guessSuggest';
+import { buildWhoIsWho } from '../utils/whoIsWho';
 import { Avatar, Button, GhostButton, Input, Modal, Screen } from '../../../shared/ui';
 
 export default function GameScreen({
   guesser,
   character,
   players,
+  assignments = [],
   lockedPositions,
   questionLog,
   turnCount,
@@ -48,6 +51,18 @@ export default function GameScreen({
       ? guesser.animeList.filter(anime => players.some(p => p.id !== guesser.id && p.animeList.some(a => normalizeTitle(a.title) === normalizeTitle(anime.title))))
       : guesser.animeList,
     [sharedShowsOnly, guesser, players]
+  );
+
+  // Every player, including the current guesser — on one shared device their
+  // character is the one the rest of the table most needs reminding of, and
+  // WhoIsWhoPanel's per-player look-away gate is what keeps it from them.
+  const whoIsWho = useMemo(
+    () => buildWhoIsWho({
+      players,
+      characterFor: (id) => assignments.find((a) => a.playerId === id)?.character,
+      lockedPositions,
+    }),
+    [players, assignments, lockedPositions]
   );
 
   // Reset state when guesser changes (setState during render — React recommended pattern)
@@ -172,6 +187,8 @@ export default function GameScreen({
       )}
 
       <PeekPanel peekList={peekList} hasPeeked={hasPeeked} onPeek={onPeek} />
+
+      <WhoIsWhoPanel entries={whoIsWho} gated />
 
       {/* Action Area */}
       {mode === 'choose' && !waitingForAnswer && (

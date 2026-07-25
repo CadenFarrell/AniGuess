@@ -1,10 +1,13 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { ref, onValue, update, get, set, runTransaction } from 'firebase/database';
 import { getFirebaseDb, ensureSignedIn } from '../../../shared/services/firebase';
 import { storage } from '../../../shared/services/storage';
+import { usePresence } from '../../../shared/hooks/usePresence';
+import { GRACE_MS, rosterSnapshot } from '../../../shared/utils/presence';
 import * as rules from '../rules';
 
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no ambiguous 0/O/1/I
+const EMPTY_PLAYERS = []; // stable identity so the roster memo doesn't churn
 // Which room this device is in, so a refresh / accidental tab close drops the
 // player straight back into the game instead of the join screen. Firebase
 // persists the anonymous uid itself, so the membership rules still pass.
@@ -95,6 +98,9 @@ export function useRoom() {
           totalScores: val.totalScores ?? {},
           turnState: val.turnState ?? { pendingAction: null },
           lastOutcome: val.lastOutcome ?? null,
+          // Same quirk: a room where nobody has written presence yet reads back
+          // with no node at all.
+          presence: val.presence ?? {},
           // Same quirk one level down: a player who joins with an empty list
           // has no animeList on read-back, and every consumer calls
           // .reduce/.some on it unguarded. Likewise a title with no characters.
@@ -119,6 +125,59 @@ export function useRoom() {
     );
     return () => unsubscribe();
   }, [roomCode, exitRoom]);
+
+  // --- Who is still here -----------------------------------------------------
+
+  // Publishes this device's presence and, crucially, arranges for Firebase to
+  // mark it offline server-side when the tab closes or the network drops. Every
+  // turn in this game belongs to exactly one device, so a player who vanishes
+  // stops the room dead unless the rotation can see they've gone.
+  const markLeft = usePresence(
+    roomCode && myPlayerId ? `rooms/${roomCode}/state/presence/${myPlayerId}` : null
+  );
+
+  // Presence timestamps are stamped with the server's clock, so the grace
+  // window has to be measured against it rather than against this device's.
+  const [serverOffset, setServerOffset] = useState(0);
+  useEffect(() => {
+    const db = getFirebaseDb();
+    const unsub = onValue(ref(db, '.info/serverTimeOffset'), (snap) => {
+      setServerOffset(snap.val() || 0);
+    });
+    return () => unsub();
+  }, []);
+
+  const presence = state?.presence ?? null;
+  const players = state?.gameSession?.players ?? EMPTY_PLAYERS;
+
+  const [now, setNow] = useState(() => Date.now());
+  const roster = useMemo(
+    () => rosterSnapshot(players, presence ?? {}, now + serverOffset),
+    [players, presence, now, serverOffset]
+  );
+  const rosterRef = useRef(roster);
+  useEffect(() => { rosterRef.current = roster; }, [roster]);
+
+  // A grace window expires without any database write, so it needs a clock —
+  // but only while someone is mid-drop, so an idle room isn't re-rendering once
+  // a second for the whole game. The stored `now` may be stale when the timer
+  // starts, which only ever makes a player look *less* gone than they are; the
+  // first tick corrects it, and graceRemainingMs clamps the countdown meanwhile.
+  const someoneDropping = roster.dropping.length > 0;
+  useEffect(() => {
+    if (!someoneDropping) return undefined;
+    const tick = () => setNow(Date.now());
+    const id = setInterval(tick, 1000);
+    // Hidden tabs have their timers throttled hard (Chrome drops to roughly one
+    // wake-up a minute after a few minutes backgrounded), so someone coming back
+    // from another app would otherwise stare at a frozen countdown until the
+    // next throttled tick. Re-read the clock the instant they return.
+    document.addEventListener('visibilitychange', tick);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener('visibilitychange', tick);
+    };
+  }, [someoneDropping]);
 
   // During the assignment phase, non-assignee devices subscribe to the current
   // assignee's live proposal (stored in the secret assignments/{playerId} slot,
@@ -266,7 +325,13 @@ export function useRoom() {
     setMyPlayerId(playerId);
   }, [uid, rememberRoom, bestEffort]);
 
-  const leaveRoom = useCallback(() => exitRoom(), [exitRoom]);
+  // Tell the room on the way out — but never let a slow network trap someone in
+  // a room they've asked to leave, so the local exit doesn't wait on the write.
+  const leaveRoom = useCallback(() => {
+    const written = markLeft();
+    exitRoom();
+    return written;
+  }, [markLeft, exitRoom]);
 
   // Republishes this device's profile into the room — used when a player
   // imports their AniList from the lobby after already joining. Transactional
@@ -360,7 +425,7 @@ export function useRoom() {
   }, [state, roomCode, myPlayerId, guard]);
 
   const handleRevealDone = useCallback(() => {
-    const { patch, next } = rules.revealDone(state);
+    const { patch, next } = rules.revealDone(state, rosterRef.current.departedIds);
     return patchState({ ...patch, view: next });
   }, [state, patchState]);
 
@@ -380,19 +445,21 @@ export function useRoom() {
     };
   }, [state]);
 
+  // The turn rotation skips anyone who has left — nobody can act on their
+  // behalf, so landing on them would stall the room.
   const handleTurnComplete = useCallback((logEntry) => {
-    const { patch } = rules.turnComplete(state, logEntry);
+    const { patch } = rules.turnComplete(state, logEntry, rosterRef.current.departedIds);
     return patchState({ ...patch, lastOutcome: outcomeFor(logEntry) });
   }, [state, patchState, outcomeFor]);
 
   const handleCorrectGuess = useCallback((logEntry) => {
-    const { patch } = rules.correctGuess(state, logEntry);
+    const { patch } = rules.correctGuess(state, logEntry, rosterRef.current.departedIds);
     // The celebration screen says everything — no banner needed after it.
     return patchState({ ...patch, lastOutcome: null, view: 'correctGuess' });
   }, [state, patchState]);
 
   const handleWrongGuess = useCallback((logEntry) => {
-    const { patch } = rules.wrongGuess(state, logEntry);
+    const { patch } = rules.wrongGuess(state, logEntry, rosterRef.current.departedIds);
     return patchState({ ...patch, lastOutcome: outcomeFor(logEntry) });
   }, [state, patchState, outcomeFor]);
 
@@ -406,7 +473,7 @@ export function useRoom() {
   }, [state, patchState]);
 
   const handleNewRound = useCallback(() => {
-    const { patch, next } = rules.newRound(state);
+    const { patch, next } = rules.newRound(state, rosterRef.current.departedIds);
     return patchState({ ...patch, lastOutcome: null, view: next });
   }, [state, patchState]);
 
@@ -453,6 +520,109 @@ export function useRoom() {
   const isMyAssignmentTurn = myPlayerId != null && assignmentPlayer?.id === myPlayerId;
   const isMyTurn = myPlayerId != null && currentGuesser?.id === myPlayerId;
 
+  // --- Departure reconciliation ----------------------------------------------
+  //
+  // Effects that notice a player is gone and unstick whatever they were
+  // blocking. Any device may run them: the state each one writes is derived
+  // from shared state plus the shared roster, so two devices racing compute the
+  // identical patch. The one-shot keys stop a single device retrying every
+  // render, and re-arm when the roster or the phase moves on.
+  const stateRef = useRef(state);
+  useEffect(() => { stateRef.current = state; }, [state]);
+
+  const reconciledRef = useRef({});
+  const once = useCallback((key, run) => {
+    if (reconciledRef.current[key]) return;
+    reconciledRef.current[key] = true;
+    // A dropped connection is exactly when these run, so a failed write has to
+    // re-arm rather than latch. Returning false asks for the same.
+    Promise.resolve()
+      .then(run)
+      .then((ok) => { if (ok === false) delete reconciledRef.current[key]; })
+      .catch(() => { delete reconciledRef.current[key]; });
+  }, []);
+
+  // Every guard below is scoped to one phase, so a phase change re-arms them
+  // all. Without this a one-shot that has already fired stays latched for the
+  // life of the room — and the next time the room genuinely needed it, nothing
+  // would happen.
+  useEffect(() => { reconciledRef.current = {}; }, [roomCode, state?.view]);
+
+  // Fewer than two players left is no longer a game. Ends the session on the
+  // leaderboard, banking the in-progress round so the standings reflect where
+  // it actually got to. The transaction on `view` elects a single device to do
+  // the banking, so the points can't be applied twice.
+  const endSession = useCallback(async () => {
+    const db = getFirebaseDb();
+    const res = await runTransaction(ref(db, `rooms/${roomCode}/state/view`), (cur) =>
+      (cur === 'leaderboard' ? undefined : 'leaderboard')
+    ).catch(() => null);
+    if (!res) return false; // transient failure — try again on a later render
+    if (!res.committed) return true; // another device already ended it
+
+    const snapshot = stateRef.current;
+    const locked = snapshot?.lockedPositions ?? [];
+    if (locked.length) {
+      await patchState({
+        totalScores: rules.applyRoundScores(snapshot.totalScores ?? {}, locked),
+        lockedPositions: [],
+      });
+    }
+    return true;
+  }, [roomCode, patchState]);
+
+  useEffect(() => {
+    if (!roomCode || !state || !myPlayerId) return;
+    const { active, activeIds, departedIds } = roster;
+    const view = state.view;
+    if (!view || view === 'setup' || view === 'leaderboard') return;
+
+    if (active.length < 2) {
+      once(`end:${view}`, () => endSession());
+      return;
+    }
+
+    // Choosing a character for someone who isn't there to guess it is wasted
+    // effort, and the assignee's own device is the only one that can move the
+    // reveal along on their behalf.
+    if (view === 'assignment' || view === 'reveal') {
+      const assignee = state.gameSession?.players?.[state.assignmentIndex];
+      if (assignee && departedIds.includes(assignee.id)) {
+        once(`assign:${state.roundNumber}:${state.assignmentIndex}`, () => {
+          const { patch, next } = rules.skipDepartedAssignment(state, departedIds);
+          if (!next) return;
+          return patchState({ ...patch, view: next });
+        });
+      }
+      return;
+    }
+
+    if (view === 'game') {
+      // Only the guesser's own device can ask or guess, so their turn has to
+      // pass on without them.
+      const guesser = state.gameSession?.players?.[state.currentPlayerIndex];
+      if (guesser && departedIds.includes(guesser.id)) {
+        once(`turn:${state.roundNumber}:${state.currentPlayerIndex}:${activeIds.join(',')}`, () => {
+          const { patch } = rules.skipDepartedTurn(state, departedIds);
+          if (!Object.keys(patch).length) return;
+          return patchState(patch);
+        });
+        return;
+      }
+
+      // A question left hanging by someone who has since gone can never be
+      // answered to them; clear it so the room isn't stuck on "waiting".
+      const pending = state.turnState?.pendingAction;
+      if (pending && !pending.resolved && departedIds.includes(pending.askedBy)) {
+        once(`pending:${state.roundNumber}:${pending.askedBy}:${pending.text}`,
+          () => clearPendingAction());
+      }
+    }
+  }, [
+    roomCode, state, myPlayerId, roster,
+    once, patchState, clearPendingAction, endSession,
+  ]);
+
   return {
     uid, roomCode, myPlayerId, error, syncError, dismissError, dismissSyncError,
     createRoom, joinRoom, leaveRoom, updateMyProfile, setView,
@@ -471,6 +641,14 @@ export function useRoom() {
     currentProposal,
     currentGuesser, assignmentPlayer, hasPeeked, lastLocked,
     isMyAssignmentTurn, isMyTurn,
+    // The roster minus anyone who left or timed out. Components should count
+    // these, not gameSession.players, for anything the room has to wait on.
+    activePlayers: roster.active,
+    activeIds: roster.activeIds,
+    departedIds: roster.departedIds,
+    playerStatuses: roster.statuses,
+    dropping: roster.dropping,
+    graceMs: GRACE_MS,
     handleStartGame, proposeCharacter, lockInAssignment, setMyApproval, handleRevealDone,
     handleTurnComplete, handleCorrectGuess, handleWrongGuess,
     finishRound, handlePeek, handleNewRound, handleEndSession,

@@ -1,88 +1,41 @@
 import { useState } from 'react';
-import AniTuneSetup from './components/AniTuneSetup';
-import AniTuneRound from './components/AniTuneRound';
-import AniTuneResults from './components/AniTuneResults';
-import { prepareQuestions } from './services/buildQuestions';
+import LocalGame from './LocalGame';
+import OnlineGame from './OnlineGame';
+import { firebaseEnabled } from '../../shared/services/firebase';
+import { Backdrop, Button, GhostButton, Screen, Wordmark } from '../../shared/ui';
 
 export default function AniTuneGame({ onExit }) {
-  const [view, setView] = useState('setup'); // setup | round | results
-  const [preparing, setPreparing] = useState(false);
-  const [progress, setProgress] = useState(null);
-  const [error, setError] = useState(null);
-  const [game, setGame] = useState(null); // { players, round, questions, clipSeconds, settings }
-  const [scores, setScores] = useState({});
+  const [mode, setMode] = useState(null); // null | 'local' | 'online'
 
-  async function start(settings) {
-    setPreparing(true);
-    setError(null);
-    setProgress({ phase: 'resolving', done: 0, total: settings.players.length });
-
-    try {
-      const { round, questions, unresolved, themeless } = await prepareQuestions(settings.players, {
-        sharedSongsOnly: settings.sharedSongsOnly,
-        includeOpenings: settings.includeOpenings,
-        includeEndings: settings.includeEndings,
-        roundSize: settings.roundSize,
-        onProgress: setProgress,
-      });
-
-      if (!round.length) {
-        const skipped = unresolved.length + themeless.length;
-        setError(
-          skipped
-            ? `No playable songs found. ${skipped} show${skipped === 1 ? '' : 's'} had no themes on AnimeThemes.`
-            : 'No playable songs found for these settings.'
-        );
-        return;
-      }
-
-      setGame({ ...settings, round, questions });
-      setScores(Object.fromEntries(settings.players.map((p) => [p.id, 0])));
-      setView('round');
-    } catch (err) {
-      setError(err.message || 'Something went wrong preparing the game.');
-    } finally {
-      setPreparing(false);
-      setProgress(null);
-    }
-  }
-
-  if (view === 'round' && game) {
-    return (
-      <AniTuneRound
-        players={game.players}
-        round={game.round}
-        questions={game.questions}
-        clipSeconds={game.clipSeconds}
-        mode={game.mode}
-        onFinish={(finalScores) => { setScores(finalScores); setView('results'); }}
-        onBackToSetup={() => { setGame(null); setView('setup'); }}
-        onQuitToHub={onExit}
-      />
-    );
-  }
-
-  if (view === 'results' && game) {
-    return (
-      <AniTuneResults
-        players={game.players}
-        scores={scores}
-        roundSize={game.round.length}
-        // Re-deal from the same question pool rather than re-fetching; the
-        // caches make a full rebuild cheap, but this keeps it instant.
-        onPlayAgain={() => start(game)}
-        onExit={onExit}
-      />
-    );
-  }
+  if (mode === 'local') return <LocalGame onExit={onExit} />;
+  if (mode === 'online') return <OnlineGame onBack={() => setMode(null)} onExit={onExit} />;
 
   return (
-    <AniTuneSetup
-      onStart={start}
-      onExit={onExit}
-      preparing={preparing}
-      progress={progress}
-      error={error}
-    />
+    <>
+      <Backdrop />
+      <Screen center>
+        <Wordmark tone="blue" subtitle="Name the anime from its opening or ending" className="mb-10">
+          AniTune
+        </Wordmark>
+        <div className="flex flex-col gap-4">
+          <Button variant="primary" size="xl" fullWidth onClick={() => setMode('local')}>
+            📱 Play on this device
+          </Button>
+          <Button
+            variant="secondary"
+            size="xl"
+            fullWidth
+            onClick={() => setMode('online')}
+            disabled={!firebaseEnabled}
+            title={!firebaseEnabled ? 'Online play requires Firebase configuration (see .env.local.example)' : ''}
+          >
+            🌐 Play Online {!firebaseEnabled && '(not configured)'}
+          </Button>
+          <div className="mt-2 text-center">
+            <GhostButton onClick={onExit}>← Back to hub</GhostButton>
+          </div>
+        </div>
+      </Screen>
+    </>
   );
 }

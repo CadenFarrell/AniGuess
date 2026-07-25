@@ -69,6 +69,31 @@ export function preferEnglishName(name) {
   return pickEnglishAlternative(name?.alternative) ?? full;
 }
 
+// Combines the character edges of several seasons of one show into a single
+// deduped edge list, keyed by AniList character id. A character who is MAIN in
+// any season is treated as MAIN overall (a season-2 supporting role shouldn't
+// demote a lead), and the highest favourites count across seasons is kept so
+// the SUPPORTING favourites cutoff and the maxCharacters sort stay stable.
+// Later duplicates otherwise defer to the first edge seen.
+export function mergeCharacterEdges(edgeGroups) {
+  const byId = new Map();
+  for (const edges of edgeGroups ?? []) {
+    for (const edge of edges ?? []) {
+      const id = edge?.node?.id;
+      if (id == null) continue;
+      const existing = byId.get(id);
+      if (!existing) {
+        byId.set(id, { ...edge, node: { ...edge.node } });
+        continue;
+      }
+      if (edge.role === 'MAIN') existing.role = 'MAIN';
+      const favourites = edge.node.favourites ?? 0;
+      if (favourites > (existing.node.favourites ?? 0)) existing.node.favourites = favourites;
+    }
+  }
+  return [...byId.values()];
+}
+
 // Filters AniList character edges down to MAIN + high-favourite SUPPORTING,
 // optionally caps the result (sorted by favourites) and maps into the shape
 // normalizeCharacter (src/shared/utils/character.js) already expects.

@@ -20,7 +20,7 @@ function App({ onExit }) {
 
   const {
     gameSession, setGameSession,
-    assignmentIndex,
+    assignmentIndex, assignments,
     lockedPositions, questionLogs, turnCounts,
     roundNumber, totalScores,
     showResumePrompt, handleResumeSession, handleDiscardSession,
@@ -141,6 +141,7 @@ function App({ onExit }) {
           guesser={currentGuesser}
           character={currentAssignment.character}
           players={gameSession.players}
+          assignments={assignments}
           lockedPositions={lockedPositions}
           questionLog={questionLogs[currentGuesser.id] || []}
           turnCount={turnCounts[currentGuesser.id] || 0}
