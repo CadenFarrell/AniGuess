@@ -3,7 +3,12 @@ import { computeRankedPlayers, getPositionEmoji } from '../../../shared/utils/ra
 import { Button, Card, CardRow, Screen, Wordmark } from '../../../shared/ui';
 
 export default function RoundEnd({
-  players, lockedPositions, roundNumber, totalScores, departedIds = [], onNewRound, onEndSession,
+  players, lockedPositions, roundNumber, totalScores, departedIds = [],
+  // Local pass-and-play has one device and one set of controls, so it has no
+  // host concept at all — default to "you're in charge" and LocalGame keeps
+  // working untouched. Only the online round end passes these.
+  isHost = true, hostName = '',
+  onNewRound, onEndSession,
 }) {
   const ranked = useMemo(
     () => computeRankedPlayers(players, totalScores),
@@ -61,14 +66,26 @@ export default function RoundEnd({
         })}
       </Card>
 
-      <div className="flex flex-col gap-4">
-        <Button variant="success" size="xl" fullWidth onClick={onNewRound}>
-          🔄 New Round
-        </Button>
-        <Button variant="primary" size="xl" fullWidth onClick={onEndSession}>
-          🏆 End &amp; See Leaderboard
-        </Button>
-      </div>
+      {isHost ? (
+        <div className="flex flex-col gap-4">
+          <Button variant="success" size="xl" fullWidth onClick={onNewRound}>
+            🔄 New Round
+          </Button>
+          <Button variant="primary" size="xl" fullWidth onClick={onEndSession}>
+            🏆 End &amp; See Leaderboard
+          </Button>
+        </div>
+      ) : (
+        // Two crowns on one screen: the 👑 in Total Scores above marks whoever
+        // is leading, this one marks the host. They're usually different people,
+        // so the sentence has to carry the meaning — never the glyph alone.
+        // aria-live because for a non-host this line is the only thing that
+        // changes when the host moves the room on, and it stands in for a
+        // control that would otherwise have taken focus.
+        <p className="text-center text-lg text-white/50" aria-live="polite">
+          👑 Waiting for {hostName || 'the host'} to start the next round…
+        </p>
+      )}
     </Screen>
   );
 }

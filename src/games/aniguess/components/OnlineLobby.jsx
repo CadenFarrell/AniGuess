@@ -70,6 +70,7 @@ export default function OnlineLobby({ room }) {
             return (
               <CardRow key={p.id} className={here ? '' : 'opacity-40'}>
                 <span className="text-white">
+                  {p.id === room.hostId && <span title="Host">👑 </span>}
                   {p.name}{' '}
                   {p.id === room.myPlayerId && <span className="text-pop-purple">(you)</span>}
                 </span>
@@ -99,6 +100,24 @@ export default function OnlineLobby({ room }) {
           🔗 Import my list from AniList
         </Button>
 
+        {/* Only the host picks the settings and starts the game. Everyone else
+            gets a read-only wait: the settings were per-device before, which
+            read as a free-for-all — whoever hit Start first silently imposed
+            their point values on the whole table. */}
+        {!room.isHost && (
+          <Card padding="lg" className="mb-6 text-center">
+            <div className="mb-2 text-4xl">👑</div>
+            <p className="font-display text-lg font-extrabold text-white">
+              {room.hostName ? `${room.hostName} is the host` : 'Waiting for the host'}
+            </p>
+            <p className="mt-1 text-white/50">
+              The host picks the settings, then starts the game. Import your list above so
+              you&apos;re ready.
+            </p>
+          </Card>
+        )}
+
+        {room.isHost && (<>
         <Card title="⚙️ Settings" padding="lg" className="mb-6">
           <Checkbox
             label="Shared shows only"
@@ -130,7 +149,7 @@ export default function OnlineLobby({ room }) {
             ))}
           </div>
           <p className="mt-4 text-sm text-white/30">
-            Whoever presses Start applies their settings to everyone.
+            You&apos;re the host — your settings apply to everyone.
           </p>
         </Card>
 
@@ -155,6 +174,7 @@ export default function OnlineLobby({ room }) {
         >
           🎮 Start Game
         </Button>
+        </>)}
 
         {showImport && me && (
           <AniListImport

@@ -3,7 +3,7 @@ import { ref, onValue, update, get, set, runTransaction } from 'firebase/databas
 import { getFirebaseDb, ensureSignedIn } from '../../../shared/services/firebase';
 import { storage } from '../../../shared/services/storage';
 import { usePresence } from '../../../shared/hooks/usePresence';
-import { GRACE_MS, rosterSnapshot } from '../../../shared/utils/presence';
+import { GRACE_MS, rosterSnapshot, nextHostId } from '../../../shared/utils/presence';
 import * as rules from '../rules';
 
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no ambiguous 0/O/1/I
@@ -91,6 +91,11 @@ export function useRoom() {
         // defaults rather than undefined.
         setState({
           ...val,
+          // Rooms created before the host role existed have no hostId node at
+          // all. Make the absence explicit rather than undefined, so the
+          // fallback below is the single place that decides what "no crown"
+          // means — and so the migration transaction has one value to CAS on.
+          hostId: val.hostId ?? null,
           lockedPositions: val.lockedPositions ?? [],
           peekedPlayers: val.peekedPlayers ?? [],
           questionLogs: val.questionLogs ?? {},
@@ -149,6 +154,27 @@ export function useRoom() {
 
   const presence = state?.presence ?? null;
   const players = state?.gameSession?.players ?? EMPTY_PLAYERS;
+
+  // --- Who is in charge ------------------------------------------------------
+  //
+  // The host owns the settings, the Start button, and the round-end decision.
+  // Declared up here rather than down with currentGuesser/isMyTurn because the
+  // handlers below guard on it, and a binding declared after them would only
+  // ever be read through a stale closure.
+  //
+  // Rooms created before the host role existed carry no hostId, and without a
+  // fallback their lobby would be unstartable by anyone, forever. Fall back to
+  // players[0] — the creator, since joinRoom only ever appends. Deliberately
+  // *not* derived from the roster: presence status is time-based, so two
+  // devices a few hundred ms apart could disagree about who the heir is and
+  // both render a Start button. players[0] is a pure function of shared state,
+  // so it cannot diverge. The reconciliation effect below backfills a real
+  // hostId, which is what makes the crown sticky once it has moved.
+  const hostId = state?.hostId ?? players[0]?.id ?? null;
+  const isHost = myPlayerId != null && hostId === myPlayerId;
+  // Both the lobby and the round-end screen name the host, so resolve it once
+  // here instead of repeating the lookup in each component.
+  const hostName = players.find((p) => p.id === hostId)?.name ?? '';
 
   const [now, setNow] = useState(() => Date.now());
   const roster = useMemo(
@@ -256,6 +282,13 @@ export function useRoom() {
       [`rooms/${code}/claims/${playerId}`]: myUid,
       [`rooms/${code}/state`]: {
         view: 'setup',
+        // The creator is the host: the only player who picks the settings,
+        // starts the game, and decides at round end whether to keep playing.
+        // Stored in shared state rather than derived per-device so everyone
+        // defers to the same person — and stored as the *profile* id, because
+        // that is what presence, claims and the turn rotation are all keyed by.
+        // The Firebase uid never appears inside state/.
+        hostId: localProfile.id,
         gameSession: { players: [localProfile], settings: null },
         assignmentIndex: 0,
         currentPlayerIndex: 0,
@@ -376,6 +409,10 @@ export function useRoom() {
   }, [roomCode]);
 
   const handleStartGame = useCallback((session) => {
+    // Guarded so only the host can start, even though the UI already hides the
+    // control from everyone else — two devices starting at once would each deal
+    // a different character pool from their own view of who is still here.
+    if (!isHost) return Promise.resolve();
     const initial = rules.startGame(session);
     const db = getFirebaseDb();
     // Close the room to newcomers in the same breath as starting.
@@ -393,7 +430,7 @@ export function useRoom() {
         lastOutcome: null,
         view: 'assignment',
       }));
-  }, [patchState, roomCode, bestEffort]);
+  }, [patchState, roomCode, bestEffort, isHost]);
 
   // Online "collective pick": every non-assignee shares ONE live proposal,
   // written to the secret assignments/{playerId} slot so the assignee can't see
@@ -463,25 +500,73 @@ export function useRoom() {
     return patchState({ ...patch, lastOutcome: outcomeFor(logEntry) });
   }, [state, patchState, outcomeFor]);
 
+  // Two different things want to fold lockedPositions into totalScores: a round
+  // ending normally (finishRound) and a room emptying out mid-round (the
+  // endSession hatch). Either can get there first, every device renders the
+  // Continue button that triggers the former, and applyRoundScores is not
+  // idempotent — so they have to be mutually exclusive, not merely ordered.
+  //
+  // Whoever commits this transaction owns the banking for that round; everyone
+  // else skips it. Keyed by round number rather than a boolean so the next
+  // round re-arms itself and nothing ever has to clear the marker.
+  // Deliberately does NOT swallow a failed transaction: "somebody else is
+  // banking this round" and "the write didn't happen" need different responses
+  // from the callers, and conflating them silently loses a round's points.
+  const claimRoundBanking = useCallback(async (roundNumber) => {
+    if (roundNumber == null) return false;
+    const db = getFirebaseDb();
+    const res = await runTransaction(ref(db, `rooms/${roomCode}/state/bankedRound`), (cur) =>
+      (cur === roundNumber ? undefined : roundNumber)
+    );
+    return res.committed;
+  }, [roomCode]);
+
   const finishRound = useCallback((locked) => {
-    return patchState({ totalScores: rules.applyRoundScores(state.totalScores, locked), view: 'roundEnd' });
-  }, [state, patchState]);
+    // Guarding the whole sequence, not each write: if the claim throws we must
+    // not move the room on, or the round would end with its points unbanked and
+    // no way back to re-apply them.
+    return guard((async () => {
+      // Bank before moving the room on. Taking the claim first means a room
+      // that empties out in this exact instant still lands on the right totals
+      // — endSession finds the claim gone and leaves them alone.
+      if (await claimRoundBanking(state.roundNumber)) {
+        await patchState({ totalScores: rules.applyRoundScores(state.totalScores, locked) });
+      }
+      // Never drag the room back off the leaderboard: endSession may have ended
+      // the session while we were banking, and once it has, its view wins. The
+      // plain patch this replaced would have overwritten it and stranded
+      // everyone on the round-end screen of a session that was already over.
+      const db = getFirebaseDb();
+      await runTransaction(ref(db, `rooms/${roomCode}/state/view`), (cur) =>
+        (cur === 'leaderboard' ? undefined : 'roundEnd')
+      );
+    })());
+  }, [state, patchState, roomCode, guard, claimRoundBanking]);
 
   const handlePeek = useCallback(() => {
     const player = state.gameSession.players[state.currentPlayerIndex];
     return patchState({ peekedPlayers: [...state.peekedPlayers, player.id] });
   }, [state, patchState]);
 
+  // Host-only, and self-guarded for the same reason as handleStartGame: two
+  // devices dealing a new round at once would each compute a different starting
+  // index from their own view of who is still here, and the later write would
+  // silently win.
   const handleNewRound = useCallback(() => {
+    if (!isHost) return Promise.resolve();
     const { patch, next } = rules.newRound(state, rosterRef.current.departedIds);
     return patchState({ ...patch, lastOutcome: null, view: next });
-  }, [state, patchState]);
+  }, [state, patchState, isHost]);
 
+  // Host-only: ending the session is irreversible for everyone in the room.
+  // (Note this banks the win in *this* device's localStorage, so it's the host's
+  // stats that record it — already true before, when it was whoever clicked.)
   const handleEndSession = useCallback((recordWin) => {
+    if (!isHost) return Promise.resolve();
     const { winners } = rules.computeSessionEnd(state.totalScores, state.gameSession.players);
     winners.forEach((name) => recordWin(name));
     return patchState({ view: 'leaderboard' });
-  }, [state, patchState]);
+  }, [state, patchState, isHost]);
 
   // The guesser's device only ever writes raw text here — it never reads its
   // own assignment. Any other device resolves it (see resolvePendingAction).
@@ -545,36 +630,91 @@ export function useRoom() {
   // Every guard below is scoped to one phase, so a phase change re-arms them
   // all. Without this a one-shot that has already fired stays latched for the
   // life of the room — and the next time the room genuinely needed it, nothing
-  // would happen.
+  // would happen. The host-migration key is the one exception: it encodes the
+  // outgoing host instead, because a lobby can need to migrate twice without
+  // the view ever changing.
   useEffect(() => { reconciledRef.current = {}; }, [roomCode, state?.view]);
 
   // Fewer than two players left is no longer a game. Ends the session on the
   // leaderboard, banking the in-progress round so the standings reflect where
-  // it actually got to. The transaction on `view` elects a single device to do
-  // the banking, so the points can't be applied twice.
+  // it actually got to. claimRoundBanking is what stops the points being
+  // applied twice — by a second device running this, or by a finishRound racing
+  // it from the other direction.
   const endSession = useCallback(async () => {
-    const db = getFirebaseDb();
-    const res = await runTransaction(ref(db, `rooms/${roomCode}/state/view`), (cur) =>
-      (cur === 'leaderboard' ? undefined : 'leaderboard')
-    ).catch(() => null);
-    if (!res) return false; // transient failure — try again on a later render
-    if (!res.committed) return true; // another device already ended it
-
     const snapshot = stateRef.current;
     const locked = snapshot?.lockedPositions ?? [];
-    if (locked.length) {
+
+    // Bank BEFORE flipping the view, so a failed claim can re-arm and retry
+    // from a clean slate — once the room reads 'leaderboard' the transaction
+    // below aborts forever, and a retry could never bank the round at all.
+    //
+    // Claiming rather than assuming this round is unbanked: a room sitting on
+    // the round-end screen has already had its points applied by finishRound,
+    // and host-gated round ends made that the common case, since the room now
+    // waits there for the host rather than for whoever clicks first. Losing the
+    // claim means someone else has it covered, so leave the totals alone.
+    let claimed = false;
+    try {
+      claimed = locked.length > 0 && await claimRoundBanking(snapshot?.roundNumber);
+    } catch {
+      return false; // transient — the view is untouched, so a retry is clean
+    }
+    if (claimed) {
       await patchState({
         totalScores: rules.applyRoundScores(snapshot.totalScores ?? {}, locked),
         lockedPositions: [],
       });
     }
+
+    const db = getFirebaseDb();
+    const res = await runTransaction(ref(db, `rooms/${roomCode}/state/view`), (cur) =>
+      (cur === 'leaderboard' ? undefined : 'leaderboard')
+    ).catch(() => null);
+    if (!res) return false; // transient failure — try again on a later render
     return true;
-  }, [roomCode, patchState]);
+  }, [roomCode, patchState, claimRoundBanking]);
 
   useEffect(() => {
     if (!roomCode || !state || !myPlayerId) return;
-    const { active, activeIds, departedIds } = roster;
+    const { active, activeIds, departedIds, statuses } = roster;
     const view = state.view;
+
+    // The crown has to move before anything else: the host is the only one who
+    // can start the game or move past a round end, so a room whose host has
+    // gone is wedged until it does. Deliberately ABOVE the phase filter below —
+    // the 'setup' lobby needs this most of all, being the one phase a room can
+    // sit in indefinitely.
+    //
+    // Compares the *stored* hostId, never the derived one: in a legacy room the
+    // derived value is players[0], and a transaction testing against that would
+    // abort forever against the null actually in the tree.
+    const storedHostId = state.hostId ?? null;
+    const needsHost = storedHostId === null
+      // No crown was ever written (the room predates the host role). Claim one,
+      // or its lobby stays unstartable for everyone.
+      ? players.length > 0
+      // Only migrate a host who is genuinely in the roster and genuinely gone.
+      // activeIds still counts a player mid-drop, so this waits out the grace
+      // window rather than moving the crown over a wifi blip.
+      : players.some((p) => p.id === storedHostId) && !activeIds.includes(storedHostId);
+
+    if (needsHost) {
+      const heir = nextHostId(players, statuses);
+      if (heir && heir !== storedHostId) {
+        // Keyed on the outgoing host so a second departure re-arms it — the
+        // one-shot reset below is keyed on `view`, which never changes while a
+        // room sits in the lobby. Every device races here; the compare-and-set
+        // picks exactly one winner, so a slower device can't clobber a crown
+        // that has already legitimately moved on.
+        once(`host:${storedHostId ?? 'unset'}`, () => {
+          const db = getFirebaseDb();
+          return runTransaction(ref(db, `rooms/${roomCode}/state/hostId`), (cur) =>
+            ((cur ?? null) === storedHostId ? heir : undefined)
+          ).catch(() => {});
+        });
+      }
+    }
+
     if (!view || view === 'setup' || view === 'leaderboard') return;
 
     if (active.length < 2) {
@@ -619,7 +759,7 @@ export function useRoom() {
       }
     }
   }, [
-    roomCode, state, myPlayerId, roster,
+    roomCode, state, myPlayerId, players, roster,
     once, patchState, clearPendingAction, endSession,
   ]);
 
@@ -627,6 +767,7 @@ export function useRoom() {
     uid, roomCode, myPlayerId, error, syncError, dismissError, dismissSyncError,
     createRoom, joinRoom, leaveRoom, updateMyProfile, setView,
     view: state?.view,
+    hostId, isHost, hostName,
     gameSession: state?.gameSession,
     assignmentIndex: state?.assignmentIndex,
     currentPlayerIndex: state?.currentPlayerIndex,

@@ -349,6 +349,8 @@ export default function OnlineGame({ onBack, onExit }) {
         roundNumber={room.roundNumber}
         totalScores={room.totalScores}
         departedIds={room.departedIds}
+        isHost={room.isHost}
+        hostName={room.hostName}
         onNewRound={room.handleNewRound}
         onEndSession={() => room.handleEndSession(recordWin)}
       />
