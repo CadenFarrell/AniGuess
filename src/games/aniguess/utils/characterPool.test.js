@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { pickRandomCharacter, getAssignableAnimeList } from './characterPool';
+import { pickRandomCharacter, getAssignableAnimeList, filterAnimeList } from './characterPool';
 
 const char = (name) => ({ id: `anilist_${name}`, name, role: 'Main', genres: [] });
 const anime = (title, names) => ({ id: title, title, characters: names.map(char) });
@@ -113,5 +113,65 @@ describe('getAssignableAnimeList', () => {
     const result = getAssignableAnimeList(withEmpty, null, false);
 
     expect(result.map((a) => a.title)).toEqual(['Shared']);
+  });
+});
+
+describe('filterAnimeList', () => {
+  const list = [
+    anime('Jujutsu Kaisen', ['Yuji Itadori', 'Megumi Fushiguro']),
+    anime('Attack on Titan', ['Eren', 'Mikasa']),
+  ];
+
+  it('returns the list untouched when the query is empty or blank', () => {
+    expect(filterAnimeList(list, '')).toBe(list);
+    expect(filterAnimeList(list, '   ')).toBe(list);
+  });
+
+  it('keeps a title match with its whole cast', () => {
+    // Typing a show name means "let me browse that show", not "show me the
+    // characters whose names happen to contain these letters".
+    const result = filterAnimeList(list, 'jujutsu');
+
+    expect(result.map((a) => a.title)).toEqual(['Jujutsu Kaisen']);
+    expect(result[0].characters.map((c) => c.name)).toEqual(['Yuji Itadori', 'Megumi Fushiguro']);
+  });
+
+  it('narrows a show to only the matching characters on a name match', () => {
+    const result = filterAnimeList(list, 'mikasa');
+
+    expect(result.map((a) => a.title)).toEqual(['Attack on Titan']);
+    expect(result[0].characters.map((c) => c.name)).toEqual(['Mikasa']);
+  });
+
+  it('matches mid-word, not just prefixes', () => {
+    const result = filterAnimeList(list, 'titan');
+
+    expect(result.map((a) => a.title)).toEqual(['Attack on Titan']);
+  });
+
+  it('folds diacritics in both titles and character names', () => {
+    // Nobody types ō / ū, and the same name arrives spelled either way from
+    // different seasons — same fold guessSuggest.js uses for the guess box.
+    const accented = [anime('Jūjutsu Kaisen', ['Gojō Satoru']), anime('Other', ['Nobody'])];
+
+    expect(filterAnimeList(accented, 'jujutsu').map((a) => a.title)).toEqual(['Jūjutsu Kaisen']);
+    expect(filterAnimeList(accented, 'gojo')[0].characters.map((c) => c.name)).toEqual(['Gojō Satoru']);
+  });
+
+  it('ignores case and surrounding whitespace', () => {
+    expect(filterAnimeList(list, '  EREN ').map((a) => a.title)).toEqual(['Attack on Titan']);
+  });
+
+  it('keeps every show a query reaches', () => {
+    const result = filterAnimeList(
+      [anime('Jujutsu Kaisen', ['Yuji']), anime('Jujutsu Kaisen 0', ['Yuta'])],
+      'jujutsu'
+    );
+
+    expect(result.map((a) => a.title)).toEqual(['Jujutsu Kaisen', 'Jujutsu Kaisen 0']);
+  });
+
+  it('returns nothing when the query matches neither a title nor a name', () => {
+    expect(filterAnimeList(list, 'zzzz')).toEqual([]);
   });
 });

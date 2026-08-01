@@ -21,6 +21,30 @@ export function getAssignableAnimeList(guesser, allPlayers, sharedShowsOnly = tr
 // `series::name` works here.
 const characterKey = (c) => characterNameKey(c.name);
 
+// Search filter for the hand-picking browser. Matches on show title OR
+// character name, because a player either has a show in mind or a person.
+//
+// characterNameKey, not ranking.js's normalizeTitle: that one only lowercases,
+// so it would miss the ō / ū / ā spellings romanized titles and names are full
+// of. guessSuggest.js already folds its query the same way, so typing "jujutsu"
+// reaches "Jūjutsu" here exactly as it does in the guess box.
+//
+// A TITLE match keeps the show's whole cast — someone who typed a show name
+// wants to browse it, not a subset. Only a name-only match narrows the cast.
+// Deliberately does NOT dedupe a character across shows the way dedupeByName
+// does for random picks: there the duplicate is an extra roll of the dice, here
+// it is just the same person correctly listed under both shows you own.
+export function filterAnimeList(animeList, query) {
+  const q = characterNameKey(query);
+  if (!q) return animeList;
+
+  return (animeList || []).flatMap((anime) => {
+    if (characterNameKey(anime.title).includes(q)) return [anime];
+    const characters = anime.characters.filter((c) => characterNameKey(c.name).includes(q));
+    return characters.length > 0 ? [{ ...anime, characters }] : [];
+  });
+}
+
 // Collapses characters who appear under more than one title into one entry,
 // keeping the first (so the reveal still shows a series). Franchise grouping
 // handles the season case at import time, but shows it deliberately keeps

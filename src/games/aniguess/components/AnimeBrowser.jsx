@@ -1,9 +1,11 @@
-import { useState } from 'react';
-import { Avatar, Button, GhostButton } from '../../../shared/ui';
+import { useMemo, useState } from 'react';
+import { filterAnimeList } from '../utils/characterPool';
+import { Avatar, Button, GhostButton, Input } from '../../../shared/ui';
 
 // Expandable anime list for hand-picking a character. Local assignment and
 // online assignment had near-identical copies of this — the only real
-// difference was the action button's label ("Pick" vs "Propose").
+// difference was the action button's label ("Pick" vs "Propose"), so the
+// search box below lands in both flows without either caller changing.
 export default function AnimeBrowser({
   animeList,
   guesserName,
@@ -14,6 +16,10 @@ export default function AnimeBrowser({
   emptyMessage,
 }) {
   const [expandedAnime, setExpandedAnime] = useState(null);
+  const [query, setQuery] = useState('');
+
+  const searching = query.trim().length > 0;
+  const shown = useMemo(() => filterAnimeList(animeList, query), [animeList, query]);
 
   return (
     <>
@@ -27,23 +33,56 @@ export default function AnimeBrowser({
         )}
       </div>
 
+      {/* Nothing to search when the pool is empty, and emptyMessage below
+          already explains why it is. */}
+      {animeList.length > 0 && (
+        <Input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search shows or characters…"
+          aria-label="Search shows or characters"
+          className="mb-5"
+        />
+      )}
+
       {animeList.length === 0 && (
         <p className="py-10 text-center text-lg text-white/50">{emptyMessage}</p>
       )}
 
-      {animeList.map((anime) => (
-        <div key={anime.id} className="mb-4">
-          <button
-            onClick={() => setExpandedAnime(expandedAnime === anime.id ? null : anime.id)}
-            className="btn-pop focus-pop w-full border-white/15 bg-surface px-5 py-4 text-left text-lg text-white"
-          >
-            {expandedAnime === anime.id ? '▼' : '▶'} {anime.title}
-            <span className="ml-2 font-sans font-normal text-white/40">
-              ({anime.characters.length})
-            </span>
-          </button>
+      {/* Distinct from emptyMessage: that one is about having no shared shows
+          at all and carries setup advice that would be wrong here. */}
+      {animeList.length > 0 && shown.length === 0 && (
+        <p className="py-10 text-center text-lg text-white/50">
+          No shows or characters match “{query.trim()}”.
+        </p>
+      )}
 
-          {expandedAnime === anime.id && (
+      {shown.map((anime) => (
+        <div key={anime.id} className="mb-4">
+          {/* While searching every result is already open, so the header drops
+              the chevron and stops being a button rather than sitting there as
+              a control that visibly does nothing. */}
+          {searching ? (
+            <div className="w-full rounded-pop-sm border-2 border-white/15 bg-surface px-5 py-4 text-left text-lg text-white">
+              {anime.title}
+              <span className="ml-2 font-sans font-normal text-white/40">
+                ({anime.characters.length})
+              </span>
+            </div>
+          ) : (
+            <button
+              onClick={() => setExpandedAnime(expandedAnime === anime.id ? null : anime.id)}
+              className="btn-pop focus-pop w-full border-white/15 bg-surface px-5 py-4 text-left text-lg text-white"
+            >
+              {expandedAnime === anime.id ? '▼' : '▶'} {anime.title}
+              <span className="ml-2 font-sans font-normal text-white/40">
+                ({anime.characters.length})
+              </span>
+            </button>
+          )}
+
+          {(searching || expandedAnime === anime.id) && (
             <div className="mt-3 space-y-3 pl-2">
               {anime.characters.map((char) => (
                 <div key={char.id} className="card-pop flex items-center gap-4 p-4">
