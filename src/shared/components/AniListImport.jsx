@@ -9,7 +9,11 @@ const MAX_CHARACTERS_PER_SHOW = 60;
 
 export default function AniListImport({ profile, onClose, onImported }) {
   const [step, setStep] = useState('username'); // username | list | importing | done | error
-  const [username, setUsername] = useState('');
+  // Prefilled from the profile so a re-import is one tap. Re-importing is the
+  // common case, not the rare one: the page cache in anilist.js is in-memory
+  // only, so every refresh means paying the full ~2.2s-per-request throttle
+  // again, and nobody wants to also retype their username to do it.
+  const [username, setUsername] = useState(profile?.anilistUsername ?? '');
   const [includeCurrent, setIncludeCurrent] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [minSupportingFavourites, setMinSupportingFavourites] = useState(100);
@@ -119,7 +123,9 @@ export default function AniListImport({ profile, onClose, onImported }) {
     });
 
     const { profile: merged, addedAnime, addedChars } = mergeAnimeIntoProfile(profile, importedAnimeList);
-    setMergedProfile(merged);
+    // Remembered only on a successful import, so a typo'd username never sticks
+    // and comes back prefilled next time.
+    setMergedProfile({ ...merged, anilistUsername: username.trim() });
     setStats({ addedAnime, addedChars });
     setStep('done');
     setAbortController(null);
