@@ -29,6 +29,30 @@ export function countCharacters(profile) {
   );
 }
 
+// Cheap change-detector for "does the room's copy of me still match my profile?".
+//
+// Online, the profile store is the source of truth and the room copy is derived,
+// so a lobby has to notice a local edit and republish it. Object identity is no
+// use — the provider hands out a fresh map on every save, including saves to
+// *other* profiles — and a deep compare is real work, because an imported
+// animeList runs to hundreds of KB.
+//
+// Every AniList import moves at least one of these numbers, which is the case
+// that matters. The gap: a ListManager edit that renames a character without
+// changing any count reads as unchanged and won't republish. That is exactly the
+// staleness online play already had, so it costs nothing new — but it is the
+// reason this is a fingerprint and not an equality check.
+export function profileFingerprint(profile) {
+  if (!profile) return '';
+  return [
+    profile.id ?? '',
+    profile.name ?? '',
+    countShows(profile),
+    countCharacters(profile),
+    (profile.anilistImportedIds ?? []).length,
+  ].join('|');
+}
+
 // One row per profile, ordered most-useful-first: whoever is active, then most
 // recently played, then everyone else alphabetically. The name tiebreak matters
 // — without it two profiles that have never been used (lastUsedAt 0) would sort

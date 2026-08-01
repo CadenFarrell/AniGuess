@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useProfileStore } from '../../../shared/context/profileContext';
 import AniListImport from '../../../shared/components/AniListImport';
+import { profileFingerprint } from '../../../shared/utils/profileStats';
 import { getEligibleAnimeList } from '../utils/questionPool';
 import { RACE, SIMULTANEOUS } from '../rules';
 import {
@@ -17,14 +18,15 @@ const MODES = [
 // shared-songs, OP/ED, round size, clip length — lifted from AniTuneSetup. Whoever
 // presses Start prepares the round and their settings apply to everyone.
 export default function OnlineLobby({ room }) {
-  const { saveProfile } = useProfileStore();
+  const { activeProfile, saveProfile } = useProfileStore();
   const [mode, setMode] = useState(RACE);
   const [sharedSongsOnly, setSharedSongsOnly] = useState(true);
   const [includeOpenings, setIncludeOpenings] = useState(true);
   const [includeEndings, setIncludeEndings] = useState(true);
   const [roundSize, setRoundSize] = useState(10);
   const [clipSeconds, setClipSeconds] = useState(10);
-  const [showImport, setShowImport] = useState(false);
+  // null | 'pick' | 'refresh' — see ListManager, which uses the same shape.
+  const [importMode, setImportMode] = useState(null);
 
   const players = room.players ?? [];
   const me = players.find((p) => p.id === room.myPlayerId) ?? null;
@@ -35,6 +37,19 @@ export default function OnlineLobby({ room }) {
   // block Start for everyone present with no way to clear it.
   const active = room.activePlayers ?? players;
   const statuses = room.playerStatuses ?? {};
+
+  // Republish the profile into the room whenever it changes locally. See the
+  // long note on the same effect in src/games/aniguess/components/OnlineLobby.jsx:
+  // saveProfile only writes localStorage, and updateMyProfile is the one channel
+  // from the store into Firebase.
+  const lastPushedRef = useRef(null);
+  useEffect(() => {
+    if (!me || !activeProfile || activeProfile.id !== room.myPlayerId) return;
+    const mine = profileFingerprint(activeProfile);
+    if (mine === profileFingerprint(me) || mine === lastPushedRef.current) return;
+    lastPushedRef.current = mine;
+    room.updateMyProfile(activeProfile);
+  }, [activeProfile, me, room]);
 
   const showCount = (p) => (p.animeList || []).length;
   const everyoneHasShows = active.every((p) => showCount(p) > 0);
@@ -93,16 +108,30 @@ export default function OnlineLobby({ room }) {
           )}
         </Card>
 
-        <Button
-          variant="neutral"
-          size="md"
-          fullWidth
-          className="mb-6"
-          onClick={() => setShowImport(true)}
-          disabled={!me}
-        >
-          🔗 Import my list from AniList
-        </Button>
+        {/* Kept here even though the hub can import too: the lobby is where you
+            find out you have a problem — the ⚠️ No list badge and the start
+            gates both render on this screen. */}
+        <div className="mb-6 flex gap-3">
+          <Button
+            variant="neutral"
+            size="md"
+            fullWidth
+            onClick={() => setImportMode('pick')}
+            disabled={!activeProfile}
+          >
+            🔗 Import my list from AniList
+          </Button>
+          {activeProfile?.anilistUsername && (
+            <Button
+              variant="neutral"
+              size="md"
+              className="flex-shrink-0 whitespace-nowrap"
+              onClick={() => setImportMode('refresh')}
+            >
+              🔄 Refresh
+            </Button>
+          )}
+        </div>
 
         {/* Only the host picks the mode and settings and starts the game.
             Everyone else gets a read-only wait so nobody fights over the
@@ -225,14 +254,17 @@ export default function OnlineLobby({ room }) {
         </Button>
         </>)}
 
-        {showImport && me && (
+        {/* Imports into the profile, never into `me` — the room copy is a
+            join-time snapshot that has been through RTDB. The effect above
+            republishes it. */}
+        {importMode && activeProfile && (
           <AniListImport
-            profile={me}
-            onClose={() => setShowImport(false)}
+            profile={activeProfile}
+            autoRefresh={importMode === 'refresh'}
+            onClose={() => setImportMode(null)}
             onImported={(merged) => {
               saveProfile(merged);
-              room.updateMyProfile(merged);
-              setShowImport(false);
+              setImportMode(null);
             }}
           />
         )}

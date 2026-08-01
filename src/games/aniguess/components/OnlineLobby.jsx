@@ -1,17 +1,20 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useProfileStore } from '../../../shared/context/profileContext';
 import AniListImport from '../../../shared/components/AniListImport';
 import { normalizeTitle } from '../../../shared/utils/ranking';
+import { profileFingerprint } from '../../../shared/utils/profileStats';
 import {
   Backdrop, Badge, Banner, Button, Card, CardRow, Checkbox, Input, Screen, Wordmark,
 } from '../../../shared/ui';
 
 export default function OnlineLobby({ room }) {
-  const { saveProfile } = useProfileStore();
+  const { activeProfile, saveProfile } = useProfileStore();
   const [sharedShowsOnly, setSharedShowsOnly] = useState(true);
   const [twoStepRandom, setTwoStepRandom] = useState(false);
   const [pointsPerPosition, setPointsPerPosition] = useState([3, 2, 1, 0]);
-  const [showImport, setShowImport] = useState(false);
+  // null | 'pick' | 'refresh' — same shape ListManager uses, so the one-tap
+  // refresh path behaves identically wherever you reach it from.
+  const [importMode, setImportMode] = useState(null);
 
   const players = room.gameSession?.players ?? [];
   const me = players.find((p) => p.id === room.myPlayerId) ?? null;
@@ -21,6 +24,33 @@ export default function OnlineLobby({ room }) {
   // block Start for everyone present with no way to clear it.
   const active = room.activePlayers ?? players;
   const statuses = room.playerStatuses ?? {};
+
+  // The profile store is the source of truth; the room's copy of you is derived
+  // from it, and `updateMyProfile` is the ONLY channel between the two —
+  // saveProfile writes localStorage and nothing else. Without this effect an
+  // import done anywhere but the button below (the hub's ListManager, another
+  // tab) never reaches Firebase, and rejoining to refresh stops working the
+  // moment the host starts and `open` flips false.
+  //
+  // Scoped by rendering: this screen only exists pre-start, so there is no
+  // separate "is the room still open" check to keep in sync.
+  //
+  // Comparing the two fingerprints rather than tracking "did I push yet" makes
+  // this self-correcting and silent on join, when the copies already agree. The
+  // ref is still needed on top: `room` is a fresh object every render, so
+  // without it the effect would re-fire and re-write for the whole round trip
+  // between the transaction and the snapshot coming back.
+  const lastPushedRef = useRef(null);
+  useEffect(() => {
+    // Only your own seat. Switching to a different profile mid-room must not
+    // republish over the seat you claimed — claims/{playerId} is per-seat, and
+    // the roster would silently change name and list under everyone else.
+    if (!me || !activeProfile || activeProfile.id !== room.myPlayerId) return;
+    const mine = profileFingerprint(activeProfile);
+    if (mine === profileFingerprint(me) || mine === lastPushedRef.current) return;
+    lastPushedRef.current = mine;
+    room.updateMyProfile(activeProfile);
+  }, [activeProfile, me, room]);
 
   const charCount = (p) => p.animeList.reduce((s, a) => s + a.characters.length, 0);
   const allHaveChars = active.every((p) => charCount(p) > 0);
@@ -89,16 +119,30 @@ export default function OnlineLobby({ room }) {
           )}
         </Card>
 
-        <Button
-          variant="neutral"
-          size="md"
-          fullWidth
-          className="mb-6"
-          onClick={() => setShowImport(true)}
-          disabled={!me}
-        >
-          🔗 Import my list from AniList
-        </Button>
+        {/* Kept here even though the hub can import too: the lobby is where you
+            find out you have a problem — the ⚠️ No chars badge and the "every
+            player needs a character" banner both render on this screen. */}
+        <div className="mb-6 flex gap-3">
+          <Button
+            variant="neutral"
+            size="md"
+            fullWidth
+            onClick={() => setImportMode('pick')}
+            disabled={!activeProfile}
+          >
+            🔗 Import my list from AniList
+          </Button>
+          {activeProfile?.anilistUsername && (
+            <Button
+              variant="neutral"
+              size="md"
+              className="flex-shrink-0 whitespace-nowrap"
+              onClick={() => setImportMode('refresh')}
+            >
+              🔄 Refresh
+            </Button>
+          )}
+        </div>
 
         {/* Only the host picks the settings and starts the game. Everyone else
             gets a read-only wait: the settings were per-device before, which
@@ -176,14 +220,19 @@ export default function OnlineLobby({ room }) {
         </Button>
         </>)}
 
-        {showImport && me && (
+        {/* Imports into the profile, never into `me`: the room copy is a
+            join-time snapshot that has been through RTDB, and merging out of it
+            would roll back any hub-side edit made since and drop the
+            anilistImportedIds/anilistImportSettings the checklist reads. The
+            effect above republishes it. */}
+        {importMode && activeProfile && (
           <AniListImport
-            profile={me}
-            onClose={() => setShowImport(false)}
+            profile={activeProfile}
+            autoRefresh={importMode === 'refresh'}
+            onClose={() => setImportMode(null)}
             onImported={(merged) => {
               saveProfile(merged);
-              room.updateMyProfile(merged);
-              setShowImport(false);
+              setImportMode(null);
             }}
           />
         )}

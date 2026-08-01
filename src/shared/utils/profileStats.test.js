@@ -5,6 +5,7 @@ import {
   countCharacters,
   summarizeProfiles,
   resolveActiveProfileId,
+  profileFingerprint,
 } from './profileStats';
 
 const profile = (id, name, animeList = [], extra = {}) => ({ id, name, animeList, ...extra });
@@ -45,6 +46,47 @@ describe('countShows / countCharacters', () => {
     expect(countShows({})).toBe(0);
     expect(countCharacters({})).toBe(0);
     expect(countCharacters({ animeList: [{ title: 'x' }] })).toBe(0);
+  });
+});
+
+describe('profileFingerprint', () => {
+  it('is stable across a fresh object with the same content', () => {
+    // The provider hands out a new map (and new profile objects) on every save,
+    // including saves to other profiles — the fingerprint must not see those.
+    const a = profile('caden', 'Caden', [show('Naruto', 3)]);
+    const b = profile('caden', 'Caden', [show('Naruto', 3)]);
+    expect(profileFingerprint(a)).toBe(profileFingerprint(b));
+  });
+
+  it('changes when an import adds a show', () => {
+    const before = profile('caden', 'Caden', [show('Naruto', 3)]);
+    const after = profile('caden', 'Caden', [show('Naruto', 3), show('Bleach', 2)]);
+    expect(profileFingerprint(after)).not.toBe(profileFingerprint(before));
+  });
+
+  it('changes when a re-import only adds characters to an existing show', () => {
+    const before = profile('caden', 'Caden', [show('Naruto', 3)]);
+    const after = profile('caden', 'Caden', [show('Naruto', 8)]);
+    expect(profileFingerprint(after)).not.toBe(profileFingerprint(before));
+  });
+
+  it('changes when a re-import adds no characters but records new source ids', () => {
+    // A newly aired season whose whole cast is filtered out still moves
+    // anilistImportedIds, and the room copy should carry that forward.
+    const before = profile('caden', 'Caden', [show('Naruto', 3)], { anilistImportedIds: [1] });
+    const after = profile('caden', 'Caden', [show('Naruto', 3)], { anilistImportedIds: [1, 2] });
+    expect(profileFingerprint(after)).not.toBe(profileFingerprint(before));
+  });
+
+  it('separates two different profiles that happen to hold the same list', () => {
+    const mine = profile('caden', 'Caden', [show('Naruto', 3)]);
+    const theirs = profile('alex', 'Alex', [show('Naruto', 3)]);
+    expect(profileFingerprint(mine)).not.toBe(profileFingerprint(theirs));
+  });
+
+  it('survives null and a half-shaped profile rather than throwing', () => {
+    expect(profileFingerprint(null)).toBe('');
+    expect(() => profileFingerprint({})).not.toThrow();
   });
 });
 
