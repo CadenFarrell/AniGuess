@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useProfile } from '../../../shared/hooks/useProfile';
+import { useProfileStore } from '../../../shared/context/profileContext';
 import { useWins } from '../../../shared/hooks/useWins';
 import { normalizeTitle } from '../../../shared/utils/ranking';
-import AniListImport from '../../../shared/components/AniListImport';
+import ProfilePicker from '../../../shared/components/ProfilePicker';
 import {
   Backdrop, Badge, Banner, Button, Card, CardRow, Checkbox, Input, Modal, Screen, Wordmark,
 } from '../../../shared/ui';
@@ -21,7 +21,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-function SortablePlayer({ player, onRemove, onGoToList }) {
+function SortablePlayer({ player, isYou, onRemove, onGoToList }) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: player.id });
 
@@ -46,6 +46,7 @@ function SortablePlayer({ player, onRemove, onGoToList }) {
       <span className="min-w-0 flex-1 truncate font-display font-extrabold text-lg text-white">
         {player.name}
       </span>
+      {isYou && <Badge tone="purple">You</Badge>}
       <Badge tone={totalCharacters > 0 ? 'lime' : 'amber'}>
         {totalCharacters > 0 ? `${totalCharacters} chars` : '⚠️ No chars'}
       </Badge>
@@ -64,10 +65,9 @@ function SortablePlayer({ player, onRemove, onGoToList }) {
 }
 
 export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayersChange }) {
-  const { loadOrCreateProfile, saveProfile } = useProfile();
+  const { activeId } = useProfileStore();
   const { getWins, resetWins } = useWins();
-  const [nameInput, setNameInput] = useState('');
-  const [importTarget, setImportTarget] = useState(null);
+  const [showPicker, setShowPicker] = useState(false);
   const [showWins, setShowWins] = useState(false);
   const [twoStepRandom, setTwoStepRandom] = useState(false);
   const [timerEnabled, setTimerEnabled] = useState(false);
@@ -77,41 +77,7 @@ export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayer
 
   const sensors = useSensors(useSensor(PointerSensor));
 
-  const addPlayer = () => {
-    const trimmed = nameInput.trim();
-    if (!trimmed) return;
-    const { profile } = loadOrCreateProfile(trimmed);
-    if (players.some((p) => p.id === profile.id)) {
-      alert(`${profile.name} is already in the game!`);
-      setNameInput('');
-      return;
-    }
-    onPlayersChange([...players, profile]);
-    setNameInput('');
-  };
-
   const removePlayer = (id) => onPlayersChange(players.filter((p) => p.id !== id));
-
-  const startImport = () => {
-    const trimmed = nameInput.trim();
-    if (!trimmed) {
-      alert('Enter a player name first, then Import.');
-      return;
-    }
-    const { profile } = loadOrCreateProfile(trimmed);
-    if (players.some((p) => p.id === profile.id)) {
-      alert(`${profile.name} is already in the game!`);
-      return;
-    }
-    setImportTarget(profile);
-  };
-
-  const handleImported = (mergedProfile) => {
-    saveProfile(mergedProfile);
-    onPlayersChange([...players, mergedProfile]);
-    setNameInput('');
-    setImportTarget(null);
-  };
 
   const handleDragEnd = ({ active, over }) => {
     if (active.id !== over?.id) {
@@ -191,36 +157,27 @@ export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayer
           </Modal>
         )}
 
-        {/* Add Player */}
-        <div className="mb-5 flex gap-3">
-          <Input
-            type="text"
-            value={nameInput}
-            onChange={(e) => setNameInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && nameInput.trim() && addPlayer()}
-            placeholder="Enter player name..."
-            aria-label="Player name"
-            className="flex-1 text-lg"
-          />
-          <Button variant="secondary" size="lg" onClick={addPlayer} disabled={!nameInput.trim()}>
-            Add
-          </Button>
-          <Button
-            variant="neutral"
-            size="lg"
-            className="whitespace-nowrap"
-            onClick={startImport}
-            disabled={!nameInput.trim()}
-          >
-            🔗 Import
-          </Button>
-        </div>
+        {/* Add Player. A picker, not a name box: everyone on this couch is
+            already saved on the device, and retyping their name was one typo
+            away from seating a brand-new empty profile that looked like theirs.
+            Importing a list is per-row (✏️ Edit List) — it has to work for
+            someone already seated, which a name box never could. */}
+        <Button
+          variant="secondary"
+          size="lg"
+          fullWidth
+          className="mb-5"
+          onClick={() => setShowPicker(true)}
+        >
+          ➕ Add player
+        </Button>
 
-        {importTarget && (
-          <AniListImport
-            profile={importTarget}
-            onClose={() => setImportTarget(null)}
-            onImported={handleImported}
+        {showPicker && (
+          <ProfilePicker
+            mode="add"
+            excludeIds={players.map((p) => p.id)}
+            onPick={(profile) => onPlayersChange([...players, profile])}
+            onClose={() => setShowPicker(false)}
           />
         )}
 
@@ -228,7 +185,13 @@ export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayer
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={players.map((p) => p.id)} strategy={verticalListSortingStrategy}>
             {players.map((p) => (
-              <SortablePlayer key={p.id} player={p} onRemove={removePlayer} onGoToList={onGoToList} />
+              <SortablePlayer
+                key={p.id}
+                player={p}
+                isYou={p.id === activeId}
+                onRemove={removePlayer}
+                onGoToList={onGoToList}
+              />
             ))}
           </SortableContext>
         </DndContext>

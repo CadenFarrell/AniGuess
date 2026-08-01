@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { useProfile } from '../../../shared/hooks/useProfile';
+import { useProfileStore } from '../../../shared/context/profileContext';
+import AniListImport from '../../../shared/components/AniListImport';
+import ProfilePicker from '../../../shared/components/ProfilePicker';
 import { getEligibleAnimeList } from '../utils/questionPool';
 import { RACE, SIMULTANEOUS } from '../rules';
 import {
@@ -12,9 +14,14 @@ const MODES = [
 ];
 
 export default function AniTuneSetup({ onStart, onExit, preparing, progress, error }) {
-  const { loadOrCreateProfile } = useProfile();
-  const [players, setPlayers] = useState([]);
-  const [nameInput, setNameInput] = useState('');
+  const { activeId, activeProfile, saveProfile } = useProfileStore();
+  // Your main profile is already seated; the picker adds the rest of the couch.
+  const [players, setPlayers] = useState(() => activeProfile ? [activeProfile] : []);
+  const [showPicker, setShowPicker] = useState(false);
+  // Which player's list we're importing into. Until now this screen had no
+  // import path at all — it told you to go and do it in AniGuess, which is a
+  // dead end for anyone who only wants to play AniTune.
+  const [importTarget, setImportTarget] = useState(null);
   const [mode, setMode] = useState(RACE);
   const [sharedSongsOnly, setSharedSongsOnly] = useState(true);
   const [includeOpenings, setIncludeOpenings] = useState(true);
@@ -22,16 +29,12 @@ export default function AniTuneSetup({ onStart, onExit, preparing, progress, err
   const [roundSize, setRoundSize] = useState(10);
   const [clipSeconds, setClipSeconds] = useState(10);
 
-  const addPlayer = () => {
-    const trimmed = nameInput.trim();
-    if (!trimmed) return;
-    const { profile } = loadOrCreateProfile(trimmed);
-    if (players.some((p) => p.id === profile.id)) {
-      setNameInput('');
-      return;
-    }
-    setPlayers([...players, profile]);
-    setNameInput('');
+  // Persist to the shared profile store *and* to this screen's roster, so the
+  // "N shows in play" line and the Start gate update without a remount.
+  const handleImported = (merged) => {
+    saveProfile(merged);
+    setPlayers((prev) => prev.map((p) => (p.id === merged.id ? merged : p)));
+    setImportTarget(null);
   };
 
   const eligible = getEligibleAnimeList(players, { sharedSongsOnly });
@@ -55,31 +58,32 @@ export default function AniTuneSetup({ onStart, onExit, preparing, progress, err
           AniTune
         </Wordmark>
 
-        {/* Add Player */}
-        <div className="mb-5 flex gap-3">
-          <Input
-            type="text"
-            value={nameInput}
-            onChange={(e) => setNameInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && addPlayer()}
-            placeholder="Enter player name…"
-            aria-label="Player name"
-            disabled={preparing}
-            className="flex-1 text-lg"
+        {/* Add Player. Same picker AniGuess uses — a saved profile, not a
+            retyped name, so nobody gets seated as a fresh empty duplicate. */}
+        <Button
+          variant="secondary"
+          size="lg"
+          fullWidth
+          className="mb-5"
+          disabled={preparing}
+          onClick={() => setShowPicker(true)}
+        >
+          ➕ Add player
+        </Button>
+
+        {showPicker && (
+          <ProfilePicker
+            mode="add"
+            excludeIds={players.map((p) => p.id)}
+            onPick={(profile) => setPlayers((prev) => [...prev, profile])}
+            onClose={() => setShowPicker(false)}
           />
-          <Button
-            variant="secondary"
-            size="lg"
-            onClick={addPlayer}
-            disabled={!nameInput.trim() || preparing}
-          >
-            Add
-          </Button>
-        </div>
+        )}
 
         {players.length === 0 && (
           <p className="mb-6 text-center text-base text-white/40">
-            Add at least one player. Profiles and anime lists are shared with AniGuess.
+            Nobody seated yet — set your main profile with the 👤 button at the hub,
+            or add a player above. Profiles and anime lists are shared with AniGuess.
           </p>
         )}
 
@@ -92,9 +96,20 @@ export default function AniTuneSetup({ onStart, onExit, preparing, progress, err
                   <span className="min-w-0 flex-1 truncate font-display text-lg font-extrabold text-white">
                     {p.name}
                   </span>
+                  {p.id === activeId && <Badge tone="purple">You</Badge>}
                   <Badge tone={shows ? 'lime' : 'amber'}>
                     {shows ? `${shows} shows` : '⚠️ No list'}
                   </Badge>
+                  <Button
+                    variant="neutral"
+                    size="sm"
+                    className="flex-shrink-0"
+                    aria-label={`Import ${p.name}'s list from AniList`}
+                    disabled={preparing}
+                    onClick={() => setImportTarget(p)}
+                  >
+                    🔗
+                  </Button>
                   <button
                     onClick={() => setPlayers(players.filter((x) => x.id !== p.id))}
                     disabled={preparing}
@@ -206,8 +221,16 @@ export default function AniTuneSetup({ onStart, onExit, preparing, progress, err
 
         {!everyoneHasShows && players.length > 0 && (
           <Banner tone="warning" className="mb-4">
-            ⚠️ Everyone needs an anime list. Add one in AniGuess first.
+            ⚠️ Everyone needs an anime list — tap 🔗 next to a player to import theirs.
           </Banner>
+        )}
+
+        {importTarget && (
+          <AniListImport
+            profile={importTarget}
+            onClose={() => setImportTarget(null)}
+            onImported={handleImported}
+          />
         )}
 
         {error && <Banner tone="danger" className="mb-4">{error}</Banner>}

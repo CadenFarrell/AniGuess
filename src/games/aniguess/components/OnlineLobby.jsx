@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useProfile } from '../../../shared/hooks/useProfile';
+import { useProfileStore } from '../../../shared/context/profileContext';
 import AniListImport from '../../../shared/components/AniListImport';
 import { normalizeTitle } from '../../../shared/utils/ranking';
 import {
@@ -7,7 +7,7 @@ import {
 } from '../../../shared/ui';
 
 export default function OnlineLobby({ room }) {
-  const { saveProfile } = useProfile();
+  const { saveProfile } = useProfileStore();
   const [sharedShowsOnly, setSharedShowsOnly] = useState(true);
   const [twoStepRandom, setTwoStepRandom] = useState(false);
   const [pointsPerPosition, setPointsPerPosition] = useState([3, 2, 1, 0]);

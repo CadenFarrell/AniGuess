@@ -1,25 +1,23 @@
 import { useState } from 'react';
-import { useProfile } from '../../../shared/hooks/useProfile';
+import { useProfileStore } from '../../../shared/context/profileContext';
 import AniListImport from '../../../shared/components/AniListImport';
+import OnlineIdentityCard from '../../../shared/components/OnlineIdentityCard';
+import ProfilePicker from '../../../shared/components/ProfilePicker';
+import { countCharacters } from '../../../shared/utils/profileStats';
 import {
-  Backdrop, Badge, Banner, Button, Card, Input, Label, Screen, Wordmark,
+  Backdrop, Badge, Banner, Button, Card, Input, Screen, Wordmark,
 } from '../../../shared/ui';
 
 export default function RoomSetup({ room, onBack }) {
-  const { loadOrCreateProfile, saveProfile } = useProfile();
-  const [nameInput, setNameInput] = useState('');
+  // No name box any more — the hub already asked. This screen only ever wanted
+  // to know "who am I", and typing that answer fresh each time is what quietly
+  // created empty duplicate profiles.
+  const { activeProfile: profile, saveProfile, selectProfile } = useProfileStore();
   const [codeInput, setCodeInput] = useState('');
-  const [profile, setProfile] = useState(null);
   const [showImport, setShowImport] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-
-  const confirmName = () => {
-    const trimmed = nameInput.trim();
-    if (!trimmed) return;
-    const { profile: p } = loadOrCreateProfile(trimmed);
-    setProfile(p);
-  };
 
   const handleCreate = async () => {
     setBusy(true);
@@ -63,56 +61,26 @@ export default function RoomSetup({ room, onBack }) {
         )}
 
         {!profile && (
-          <div>
-            <Label htmlFor="room-name">Your name</Label>
-            <Input
-              id="room-name"
-              type="text"
-              value={nameInput}
-              onChange={(e) => setNameInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && nameInput.trim() && confirmName()}
-              placeholder="Enter your name..."
-              autoFocus
-              className="mb-4 text-lg"
-            />
-            <Button
-              variant="primary"
-              size="lg"
-              fullWidth
-              onClick={confirmName}
-              disabled={!nameInput.trim()}
-            >
-              Continue
+          <Card className="mb-6 text-center">
+            <p className="mb-4 text-white/60">
+              Set your main profile before joining a room — it&apos;s the name and anime
+              list you bring to every online game.
+            </p>
+            <Button variant="primary" size="lg" fullWidth onClick={() => setShowPicker(true)}>
+              👤 Choose profile
             </Button>
-          </div>
+          </Card>
         )}
 
         {profile && (
           <div>
-            <Card className="mb-6 flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="font-display font-extrabold text-white truncate">{profile.name}</p>
-                <p className="text-white/40 text-sm">
-                  {profile.animeList.reduce((s, a) => s + a.characters.length, 0)} characters
-                </p>
-                {/* Player ids come from the name, so a room rejects a second
-                    person using the same one — make switching easy. */}
-                <button
-                  onClick={() => { setProfile(null); setError(''); }}
-                  className="focus-pop mt-1 rounded-pop-sm text-sm text-pop-purple hover:text-white"
-                >
-                  change name
-                </button>
-              </div>
-              <Button
-                variant="neutral"
-                size="sm"
-                className="flex-shrink-0"
-                onClick={() => setShowImport(true)}
-              >
-                🔗 Import from AniList
-              </Button>
-            </Card>
+            <OnlineIdentityCard
+              profile={profile}
+              stat={`${countCharacters(profile)} characters`}
+              tone="purple"
+              onSwitch={() => { setShowPicker(true); setError(''); }}
+              onImport={() => setShowImport(true)}
+            />
 
             {error && <Banner tone="danger" className="mb-4">{error}</Banner>}
 
@@ -157,13 +125,24 @@ export default function RoomSetup({ room, onBack }) {
           </p>
         )}
 
-        {showImport && (
+        {showPicker && (
+          <ProfilePicker
+            onClose={() => setShowPicker(false)}
+            // No ListManager route from inside a game — the import dialog is
+            // the one that matters here, and it is already wired up below.
+            // Select first: the row you tapped ✏️ on is not necessarily the
+            // active one, and importing into someone else's profile is worse
+            // than useless.
+            onEditList={(id) => { selectProfile(id); setShowPicker(false); setShowImport(true); }}
+          />
+        )}
+
+        {showImport && profile && (
           <AniListImport
             profile={profile}
             onClose={() => setShowImport(false)}
             onImported={(merged) => {
               saveProfile(merged);
-              setProfile(merged);
               setShowImport(false);
             }}
           />

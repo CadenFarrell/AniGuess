@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useProfileStore } from '../../shared/context/profileContext';
 import ListManager from '../../shared/components/ListManager';
 import PlayerSetup from './components/PlayerSetup';
 import CharacterAssignment from './components/CharacterAssignment';
@@ -15,7 +16,12 @@ function App({ onExit }) {
   const [view, setView] = useState('setup');
   const [listManagerProfile, setListManagerProfile] = useState(null);
   const [listManagerOrigin, setListManagerOrigin] = useState('setup');
-  const [setupPlayers, setSetupPlayers] = useState([]);
+  // The hub's profile joins the game already seated — this is pass-and-play, so
+  // the name box below stays for everyone else on the couch. Reading it in the
+  // initializer is safe: ProfileProvider resolves the active profile from
+  // localStorage synchronously, so it is present on the very first render.
+  const { activeProfile } = useProfileStore();
+  const [setupPlayers, setSetupPlayers] = useState(() => activeProfile ? [activeProfile] : []);
   const { clearSession } = useGameSession();
 
   const {
@@ -186,7 +192,14 @@ function App({ onExit }) {
           players={gameSession.players}
           totalScores={totalScores}
           roundNumber={roundNumber}
-          onPlayAgain={() => { clearSession(); setGameSession(null); setSetupPlayers([]); setView('setup'); }}
+          onPlayAgain={() => {
+            clearSession();
+            setGameSession(null);
+            // Back to the same starting state as a fresh visit, not to an empty
+            // roster — otherwise "Play Again" quietly un-seats you.
+            setSetupPlayers(activeProfile ? [activeProfile] : []);
+            setView('setup');
+          }}
           onEditLists={() => {
             setListManagerProfile(gameSession.players[0]);
             setView('listManager');

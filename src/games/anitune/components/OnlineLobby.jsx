@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useProfile } from '../../../shared/hooks/useProfile';
+import { useProfileStore } from '../../../shared/context/profileContext';
 import AniListImport from '../../../shared/components/AniListImport';
 import { getEligibleAnimeList } from '../utils/questionPool';
 import { RACE, SIMULTANEOUS } from '../rules';
@@ -17,7 +17,7 @@ const MODES = [
 // shared-songs, OP/ED, round size, clip length — lifted from AniTuneSetup. Whoever
 // presses Start prepares the round and their settings apply to everyone.
 export default function OnlineLobby({ room }) {
-  const { saveProfile } = useProfile();
+  const { saveProfile } = useProfileStore();
   const [mode, setMode] = useState(RACE);
   const [sharedSongsOnly, setSharedSongsOnly] = useState(true);
   const [includeOpenings, setIncludeOpenings] = useState(true);
