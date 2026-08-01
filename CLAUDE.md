@@ -126,11 +126,37 @@ are dedicated escape hatches (`skipDepartedTurn`, `releaseBuzz`, `revealNow`,
 ### Profiles and identity
 
 Player profiles (name + anime list + characters) live in localStorage under
-`aniguess_profiles` and are shared by every game (`useProfile.js`). The key name is
+`aniguess_profiles` and are shared by every game. The key name is
 historical — it predates the hub and is **not** AniGuess-specific. Leave it alone:
 renaming it to something tidier would orphan every profile players have already saved.
 Every read runs `normalizeProfile`, so older saved shapes are repaired without a
-migration flag.
+migration flag — and it guards missing `animeList`/`characters`, because the picker
+renders *every* saved profile, so a half-shaped one now takes the hub down on mount
+rather than merely being invisible.
+
+Two layers, and components must use the outer one:
+
+- `shared/hooks/useProfile.js` is **storage only** — stateless, every call re-reads
+  localStorage. It also owns `aniarcade_active_profile`, the pointer to your main
+  profile (a current-name key, unlike `PROFILES_KEY` above, because it is new).
+- `shared/context/ProfileProvider.jsx` holds the one copy of the profile map for the
+  whole app; consumers import `useProfileStore` from `context/profileContext.js`.
+  **Call `useProfile()` directly and your write reaches localStorage but re-renders
+  nothing else** — no other screen holding that profile, and not the hub's profile
+  pill. That was harmless when each screen asked for a name and used only its own
+  answer; it is a silent data-loss bug now that one profile is shared everywhere. The
+  `profilesRef` inside the provider is load-bearing for the same reason: two writes in
+  one event handler both close over the same render's map, so without it the second
+  persists over the first.
+
+The user picks their profile once, in the hub (`ProfileButton` → `ProfilePicker`), and
+every game inherits it: seated automatically in local setup, and *the* identity online.
+`ProfilePicker` has two modes over one list — `'main'` writes the active id, `'add'`
+hands a profile to a local roster and must never touch it (hence `createProfile` vs
+`ensureProfile`). Do not add a "type your name" box back to a screen: profile ids are
+folded names (`profileIdFromName` in `shared/utils/profileStats.js`), so a typo mints a
+new empty profile indistinguishable from a lost AniList import. That bug is the reason
+the picker exists.
 
 Identity is deliberately not id-based, and the reasons are non-obvious:
 
