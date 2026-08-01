@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { useProfile } from '../hooks/useProfile';
+import { useProfileStore } from '../context/profileContext';
 import { normalizeTitle } from '../utils/ranking';
 import AniListImport from './AniListImport';
 import { Button, Field, Input, Select } from '../ui';
 
 export default function ListManager({ profile, onProfileUpdated }) {
-  const { saveProfile } = useProfile();
+  // Through the store, not useProfile directly: an edit here has to reach the
+  // hub's profile chip and any game holding the same profile, which a bare
+  // localStorage write does not do.
+  const { saveProfile } = useProfileStore();
   const hasProfile = Boolean(profile);
   const [newAnimeTitle, setNewAnimeTitle] = useState('');
   const [expandedAnime, setExpandedAnime] = useState(null);

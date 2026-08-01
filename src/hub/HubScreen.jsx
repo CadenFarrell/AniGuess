@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { games } from './registry';
-import { Backdrop, Badge, Screen, Wordmark } from '../shared/ui';
+import ListManager from '../shared/components/ListManager';
+import ProfileButton from '../shared/components/ProfileButton';
+import ProfilePicker from '../shared/components/ProfilePicker';
+import { useProfileStore } from '../shared/context/profileContext';
+import { Backdrop, Badge, GhostButton, Screen, Wordmark } from '../shared/ui';
 
 // Tile fill plus the border the card adopts on hover, so each game "lights up"
 // in its own colour rather than every card sharing one highlight.
@@ -71,27 +75,74 @@ function GameCard({ game, onPick }) {
 // Top-level menu. Picks a game from the registry and hands it the whole screen;
 // each game gets an onExit callback to come back here.
 export default function HubScreen() {
-  const [activeId, setActiveId] = useState(null);
+  // gameId, not activeId — `activeId` in a profile-aware file means the main
+  // profile everywhere else, and two different "active"s in one component is
+  // how you end up passing the wrong one.
+  const [gameId, setGameId] = useState(null);
+  const [showPicker, setShowPicker] = useState(false);
+  // Which profile's anime list is open, or null for the menu. ListManager is a
+  // full-height page rather than a dialog, so it gets its own hub view instead
+  // of living inside ProfilePicker.
+  const [editingListId, setEditingListId] = useState(null);
+  const { profiles, activeProfile, saveProfile } = useProfileStore();
 
-  const active = games.find((g) => g.id === activeId);
+  const active = games.find((g) => g.id === gameId);
   if (active) {
     const Game = active.Component;
-    return <Game onExit={() => setActiveId(null)} />;
+    return <Game onExit={() => setGameId(null)} />;
+  }
+
+  if (editingListId) {
+    return (
+      <>
+        <Backdrop />
+        {/* mt-16 clears nothing here (the hub has no fixed HubButton), but the
+            same in-flow back row as AniGuess's list view keeps the two screens
+            reading identically. */}
+        <div className="mx-5 mb-0 pt-6 sm:mx-6">
+          <GhostButton onClick={() => setEditingListId(null)}>← Back to hub</GhostButton>
+        </div>
+        <ListManager
+          key={editingListId}
+          profile={profiles[editingListId] ?? null}
+          onProfileUpdated={saveProfile}
+        />
+      </>
+    );
   }
 
   return (
     <>
       <Backdrop />
-      <Screen center>
-        <Wordmark subtitle="Insert coin" className="mb-10">
+      <ProfileButton profile={activeProfile} onOpen={() => setShowPicker(true)} />
+      {/* pt clears the fixed profile pill on short viewports, where a centred
+          column can otherwise sit right under it. */}
+      <Screen center className="pt-16">
+        <Wordmark subtitle="Insert coin" className="mb-4">
           AniArcade
         </Wordmark>
-        <div className="flex flex-col gap-5">
+
+        {/* The only thing left of the old full-width profile card. It points at
+            the corner once and then never appears again. */}
+        {!activeProfile && (
+          <p className="mb-6 text-center text-sm text-white/40">
+            No profile yet — tap 👤 up top to set one up.
+          </p>
+        )}
+
+        <div className={`flex flex-col gap-5 ${activeProfile ? 'mt-6' : ''}`}>
           {games.map((game) => (
-            <GameCard key={game.id} game={game} onPick={setActiveId} />
+            <GameCard key={game.id} game={game} onPick={setGameId} />
           ))}
         </div>
       </Screen>
+
+      {showPicker && (
+        <ProfilePicker
+          onClose={() => setShowPicker(false)}
+          onEditList={(id) => { setShowPicker(false); setEditingListId(id); }}
+        />
+      )}
     </>
   );
 }
