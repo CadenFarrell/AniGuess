@@ -1,9 +1,16 @@
 import { describe, it, expect } from 'vitest';
-import { mergeAnimeIntoProfile, dedupeProfileAnimeList } from './profileMerge';
+import {
+  mergeAnimeIntoProfile,
+  dedupeProfileAnimeList,
+  classifyImportGroups,
+  mergeImportedAnilistIds,
+} from './profileMerge';
 
 const char = (name) => ({ id: `anilist_${name}`, name, role: 'Main', genres: [] });
 const entry = (id, title, names) => ({ id, title, characters: names.map(char) });
 const profileWith = (animeList) => ({ id: 'p1', name: 'Player', animeList });
+// A checklist row as groupIntoFranchises produces it: `key`, not `animeId`.
+const group = (key, title, memberIds = [key]) => ({ key, title, memberIds });
 
 describe('mergeAnimeIntoProfile', () => {
   it('folds old per-season entries into one canonical entry', () => {
@@ -308,5 +315,120 @@ describe('dedupeProfileAnimeList', () => {
 
   it('survives an entry with no characters array', () => {
     expect(dedupeProfileAnimeList([{ id: 'a', title: 'Show' }])[0].characters).toEqual([]);
+  });
+});
+
+describe('classifyImportGroups', () => {
+  it('treats everything as new for an empty profile', () => {
+    const { counts, suggested } = classifyImportGroups(profileWith([]), [
+      group(1, 'A'),
+      group(2, 'B'),
+    ]);
+
+    expect(counts).toEqual({ new: 2, partial: 0, known: 0 });
+    expect([...suggested]).toEqual([1, 2]);
+  });
+
+  it('marks a fully covered franchise as known so it is not re-fetched', () => {
+    // The point of the feature: only one entry survives the merge, but the
+    // recorded ids still prove both seasons were paid for.
+    const profile = {
+      ...profileWith([entry('anilist_anime_1', 'Show', ['A'])]),
+      anilistImportedIds: [1, 2],
+    };
+
+    const { byKey, suggested, counts } = classifyImportGroups(profile, [group(1, 'Show', [1, 2])]);
+
+    expect(byKey.get(1)).toBe('known');
+    expect(suggested.size).toBe(0);
+    expect(counts.known).toBe(1);
+  });
+
+  it('marks a franchise that gained a season as partial and suggests it', () => {
+    const profile = {
+      ...profileWith([entry('anilist_anime_1', 'Show', ['A'])]),
+      anilistImportedIds: [1, 2],
+    };
+
+    const { byKey, counts, suggested } = classifyImportGroups(profile, [group(1, 'Show', [1, 2, 3])]);
+
+    expect(byKey.get(1)).toBe('partial');
+    expect(counts.partial).toBe(1);
+    expect(suggested.has(1)).toBe(true);
+  });
+
+  it('does not guess partial on a profile imported before ids were recorded', () => {
+    // Inferring coverage from the surviving entry id would flag every
+    // multi-season group as partial and re-fetch the whole list — the exact
+    // cost this is meant to remove.
+    const profile = profileWith([entry('anilist_anime_1', 'Show', ['A'])]);
+
+    const { byKey, hasCoverage } = classifyImportGroups(profile, [group(1, 'Show', [1, 2, 3])]);
+
+    expect(hasCoverage).toBe(false);
+    expect(byKey.get(1)).toBe('known');
+  });
+
+  it('matches a hand-added season entry by title key when no id lines up', () => {
+    const profile = profileWith([entry('1730000000000', 'Attack on Titan Season 2', ['Eren'])]);
+
+    const { byKey } = classifyImportGroups(profile, [group(16498, 'Attack on Titan', [16498, 20958])]);
+
+    expect(byKey.get(16498)).toBe('known');
+  });
+
+  it('calls a hand-shortened seeded title new, and lets the merge fix it', () => {
+    // franchiseTitleKey does not strip subtitles, so 'Demon Slayer' and 'Demon
+    // Slayer: Kimetsu no Yaiba' cannot be linked before the fetch. That costs
+    // one import; mergeAnimeIntoProfile's cast heuristic then folds them and
+    // rewrites the id, so it is known forever after. Asserted so nobody "fixes"
+    // this into a fuzzy title match and starts merging unrelated shows.
+    const profile = profileWith([entry('caden_anime_0', 'Demon Slayer', ['Tanjiro', 'Nezuko'])]);
+
+    const { byKey } = classifyImportGroups(profile, [group(101922, 'Demon Slayer: Kimetsu no Yaiba')]);
+
+    expect(byKey.get(101922)).toBe('new');
+  });
+
+  it('lets one profile entry mark several groups as known', () => {
+    const profile = profileWith([entry('anilist_anime_1', 'Show', ['A'])]);
+
+    const { counts } = classifyImportGroups(profile, [group(1, 'Show'), group(9, 'Show')]);
+
+    expect(counts.known).toBe(2);
+  });
+
+  it('tolerates a bare or missing profile', () => {
+    expect(classifyImportGroups(profileWith([]), []).counts).toEqual({ new: 0, partial: 0, known: 0 });
+    expect(classifyImportGroups(undefined, [group(1, 'A')]).byKey.get(1)).toBe('new');
+    expect(classifyImportGroups({ id: 'p1', name: 'P' }, [group(1, 'A')]).counts.new).toBe(1);
+  });
+
+  it('sees a group as known immediately after importing it', () => {
+    // The end-to-end guarantee the feature rests on: merge and classify must
+    // agree, or a re-import re-fetches exactly what it just fetched.
+    const imported = { animeId: 1, memberIds: [1, 2], title: 'Show', characters: [char('A')] };
+    const { profile: merged } = mergeAnimeIntoProfile(profileWith([]), [imported]);
+
+    const after = { ...merged, anilistImportedIds: mergeImportedAnilistIds(undefined, [1, 2]) };
+
+    expect(classifyImportGroups(after, [group(1, 'Show', [1, 2])]).suggested.size).toBe(0);
+  });
+});
+
+describe('mergeImportedAnilistIds', () => {
+  it('unions, dedupes and sorts', () => {
+    expect(mergeImportedAnilistIds([3, 1], [2, 1])).toEqual([1, 2, 3]);
+  });
+
+  it('tolerates a profile that has never recorded ids', () => {
+    expect(mergeImportedAnilistIds(undefined, [2, 1])).toEqual([1, 2]);
+    expect(mergeImportedAnilistIds([1], undefined)).toEqual([1]);
+  });
+
+  it('is stable when the same import runs twice', () => {
+    const once = mergeImportedAnilistIds(undefined, [5, 3]);
+
+    expect(mergeImportedAnilistIds(once, [5, 3])).toEqual(once);
   });
 });

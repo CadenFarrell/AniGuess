@@ -15,7 +15,9 @@ export default function ListManager({ profile, onProfileUpdated }) {
   const [addingCharacterTo, setAddingCharacterTo] = useState(null);
   const [editingCharacter, setEditingCharacter] = useState(null);
   const [characterForm, setCharacterForm] = useState(emptyCharacterForm());
-  const [showImport, setShowImport] = useState(false);
+  // 'pick' opens the checklist; 'refresh' skips straight to importing whatever
+  // is new. null means closed.
+  const [importMode, setImportMode] = useState(null);
 
   function emptyCharacterForm() {
     return { name: '', imageUrl: '', gender: 'Male', role: 'Protagonist', hairColor: '', ability: '', genre: 'Action' };
@@ -116,18 +118,26 @@ export default function ListManager({ profile, onProfileUpdated }) {
         <Button variant="secondary" onClick={addAnime} disabled={!newAnimeTitle.trim()} className="whitespace-nowrap">
           + Add
         </Button>
-        <Button variant="neutral" onClick={() => setShowImport(true)} className="whitespace-nowrap">
+        <Button variant="neutral" onClick={() => setImportMode('pick')} className="whitespace-nowrap">
           🔗 Import
         </Button>
+        {/* Only once there is an account to refresh from. This is the screen
+            dedicated to managing a list, so the one-tap path belongs here. */}
+        {profile.anilistUsername && (
+          <Button variant="neutral" onClick={() => setImportMode('refresh')} className="whitespace-nowrap">
+            🔄 Refresh
+          </Button>
+        )}
       </div>
 
-      {showImport && (
+      {importMode && (
         <AniListImport
           profile={profile}
-          onClose={() => setShowImport(false)}
+          autoRefresh={importMode === 'refresh'}
+          onClose={() => setImportMode(null)}
           onImported={(mergedProfile) => {
             saveUpdatedProfile(mergedProfile);
-            setShowImport(false);
+            setImportMode(null);
           }}
         />
       )}

@@ -39,6 +39,32 @@ function addCharacterIfNew(entry, char) {
   return 1;
 }
 
+// Normalizes the two shapes that describe the same thing. A franchise group from
+// groupIntoFranchises carries `key`; an imported entry built by AniListImport
+// carries `animeId`. Same integer, different name, so callers don't reshape.
+function groupIdentity(group) {
+  const animeId = group.animeId ?? group.key;
+  const memberIds = group.memberIds ?? [animeId];
+  return {
+    animeId,
+    memberIds,
+    canonicalId: `anilist_anime_${animeId}`,
+    memberEntryIds: new Set(memberIds.map((id) => `anilist_anime_${id}`)),
+    titleKey: franchiseTitleKey(group.title),
+  };
+}
+
+// Everything about "is this profile entry part of this group" that is knowable
+// WITHOUT the characters: an exact id hit on any member, or the title keying to
+// the same show. mergeAnimeIntoProfile ORs isSameShowByCast on top of this; the
+// import checklist can only ever use this half, because deciding the cast test
+// needs the very fetch it is trying to avoid. One definition, so the checklist
+// can never disagree with what the merge will actually do.
+function matchesGroupIdentity(entry, identity) {
+  return identity.memberEntryIds.has(entry.id)
+    || franchiseTitleKey(entry.title) === identity.titleKey;
+}
+
 // Merges freshly-imported anime/characters into an existing profile. Imported
 // entries are franchise groups: { animeId (canonical AniList id), memberIds,
 // title, characters }.
@@ -57,20 +83,15 @@ export function mergeAnimeIntoProfile(profile, importedAnimeList) {
   let addedChars = 0;
 
   for (const imported of importedAnimeList) {
-    const memberIds = imported.memberIds ?? [imported.animeId];
-    const memberEntryIds = new Set(memberIds.map((id) => `anilist_anime_${id}`));
-    const canonicalId = `anilist_anime_${imported.animeId}`;
-
-    const importedKey = franchiseTitleKey(imported.title);
+    const identity = groupIdentity(imported);
     const matches = animeList.filter(
-      (a) => memberEntryIds.has(a.id)
-        || franchiseTitleKey(a.title) === importedKey
+      (a) => matchesGroupIdentity(a, identity)
         || isSameShowByCast(a.characters, imported.characters)
     );
 
     if (matches.length === 0) {
       animeList.push({
-        id: canonicalId,
+        id: identity.canonicalId,
         title: imported.title,
         characters: imported.characters,
       });
@@ -85,7 +106,7 @@ export function mergeAnimeIntoProfile(profile, importedAnimeList) {
     // The title only changes if the imported one is better, so a list that says
     // "Demon Slayer" isn't rewritten to "Demon Slayer: Kimetsu no Yaiba".
     const [base, ...rest] = matches;
-    base.id = canonicalId;
+    base.id = identity.canonicalId;
     if (isBetterTitle(imported, base)) base.title = imported.title;
     for (const dupe of rest) {
       for (const char of dupe.characters) addCharacterIfNew(base, char);
@@ -99,6 +120,82 @@ export function mergeAnimeIntoProfile(profile, importedAnimeList) {
   }
 
   return { profile: { ...profile, animeList }, addedAnime, addedChars };
+}
+
+/**
+ * Splits the franchise groups on the import checklist into what a re-import
+ * would actually buy you, using only what is knowable BEFORE any character
+ * fetch: the recorded set of already-fetched AniList ids, plus id/title
+ * identity. Selecting only these turns a re-import from "re-fetch all 200
+ * shows at ~30 req/min" into "fetch the delta".
+ *
+ * Three states, because "already in my profile" and "nothing left to fetch"
+ * stop being the same question once a franchise gains a season:
+ *   'new'     — nothing in the profile looks like this show.
+ *   'partial' — some members were fetched before, some weren't: a new season
+ *               aired. Worth fetching, so it is suggested.
+ *   'known'   — every member already paid for.
+ *
+ * That distinction is the whole reason `anilistImportedIds` is recorded on the
+ * profile rather than inferred: mergeAnimeIntoProfile collapses a franchise's
+ * seasons into ONE entry carrying the canonical id, so the surviving entry
+ * cannot say which seasons were fetched. Classifying on identity alone would
+ * swallow a newly aired season into a 'known' group and never fetch its cast —
+ * a regression against today, where selecting everything always picks it up.
+ *
+ * Returns { byKey, suggested, counts, hasCoverage }. Counts are counts of
+ * GROUPS and always sum to groups.length.
+ */
+export function classifyImportGroups(profile, groups) {
+  const animeList = profile?.animeList ?? [];
+  // Absent (not empty) means this profile predates the field, which is a
+  // different situation from "has imported nothing" — see the fallback below.
+  const recorded = profile?.anilistImportedIds;
+  const hasCoverage = Array.isArray(recorded);
+  const covered = new Set(recorded ?? []);
+
+  const byKey = new Map();
+  const suggested = new Set();
+  const counts = { new: 0, partial: 0, known: 0 };
+
+  for (const group of groups ?? []) {
+    const identity = groupIdentity(group);
+    // `.some`, not a consuming match: one profile entry can legitimately be the
+    // identity match for several groups (two franchises whose canonical titles
+    // key the same), and each is independently known. Nothing is used up.
+    const identityMatch = animeList.some((a) => matchesGroupIdentity(a, identity));
+    const fetched = hasCoverage
+      ? identity.memberIds.filter((id) => covered.has(id)).length
+      : 0;
+
+    let state;
+    if (hasCoverage && fetched > 0) {
+      state = fetched === identity.memberIds.length ? 'known' : 'partial';
+    } else {
+      // Either no coverage was ever recorded, or it records none of these
+      // members. A hand-added or seeded entry can still be this show under a
+      // different id and title, so trust identity rather than re-paying for a
+      // cast the user already has. On a pre-coverage profile this also keeps
+      // the FIRST re-import after this shipped cheap, which is the point; the
+      // cost is that a season which aired before it reads as 'known' until the
+      // user hits Select All. One import later the coverage set is exact.
+      state = identityMatch ? 'known' : 'new';
+    }
+
+    byKey.set(group.key, state);
+    counts[state]++;
+    if (state !== 'known') suggested.add(group.key);
+  }
+
+  return { byKey, suggested, counts, hasCoverage };
+}
+
+// The ids whose characters we have now paid for, folded into whatever was
+// recorded before. Sorted so a profile written twice with the same data is
+// identical, which keeps the Firebase profile writes in useRoom /
+// useAniTuneRoom from churning and makes the tests trivial to assert.
+export function mergeImportedAnilistIds(existing, memberIds) {
+  return [...new Set([...(existing ?? []), ...(memberIds ?? [])])].sort((a, b) => a - b);
 }
 
 // Repairs an animeList that already carries duplicates: collapses every entry
