@@ -149,6 +149,16 @@ Two layers, and components must use the outer one:
   one event handler both close over the same render's map, so without it the second
   persists over the first.
 
+Online adds a third step, and it is easy to miss: the room stores a *copy* of the whole
+profile (the player record in `state/` **is** the profile, lists and all), written at
+exactly three moments — `createRoom`, `joinRoom`, and `updateMyProfile`. `saveProfile`
+reaches localStorage and the provider and stops there. So the store is the source of truth
+and the room copy is derived, and each `OnlineLobby` runs an effect that republishes via
+`updateMyProfile` when `profileFingerprint` (`shared/utils/profileStats.js`) says the two
+have diverged. Import into `activeProfile`, never into the room copy: that copy is a
+join-time snapshot that has been through RTDB, so merging out of it rolls back later edits
+and drops the empty-array fields the import checklist reads.
+
 The user picks their profile once, in the hub (`ProfileButton` → `ProfilePicker`), and
 every game inherits it: seated automatically in local setup, and *the* identity online.
 `ProfilePicker` has two modes over one list — `'main'` writes the active id, `'add'`
