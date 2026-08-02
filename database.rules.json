@@ -28,6 +28,12 @@
             ".write": "auth != null && root.child('rooms/'+$code+'/memberUids/'+auth.uid).val() !== $playerId"
           }
         },
+        "secrets": {
+          "$playerId": {
+            ".read": "auth != null && root.child('rooms/'+$code+'/memberUids/'+auth.uid).val() === $playerId",
+            ".write": "auth != null && root.child('rooms/'+$code+'/memberUids/'+auth.uid).exists()"
+          }
+        },
         "state": {
           ".read": "auth != null && root.child('rooms/'+$code+'/memberUids/'+auth.uid).exists()",
           ".write": "auth != null && root.child('rooms/'+$code+'/memberUids/'+auth.uid).exists()"

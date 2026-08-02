@@ -93,6 +93,20 @@ own device — that rule, not any client-side check, is the mechanism by which a
 cannot see their own character. Anything a player must not learn belongs in a sibling node
 gated the same way, never inside `state/`, which every member reads in full.
 
+There are two such nodes, and they are mirror images — pick by who must not see the value:
+
+| node | read | write | for |
+| --- | --- | --- | --- |
+| `assignments/{playerId}` | everyone **except** the owner | everyone except the owner | a value about you that you alone must not learn |
+| `secrets/{playerId}` | the owner **only** | any member | a value only you may learn |
+
+`secrets/` currently has no reader. It is deployed ahead of the games that need it
+(Imposter's per-player role, Wavelength's hidden target, Categories' secret category)
+because rules ship globally with `firebase deploy --only database` — landing it early means
+those games are pure client changes. Write is any member, not the host, because "the host"
+is a `state/` value the rules cannot cheaply check, and a room's members are already
+trusted with everything in `state/`.
+
 Two things that bite every time:
 
 - **Multi-location `update()` rules evaluate against the pre-update tree.** A batch that
