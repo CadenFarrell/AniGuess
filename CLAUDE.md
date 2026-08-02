@@ -71,6 +71,27 @@ network.
 
 ### Online rooms (Firebase Realtime Database)
 
+**The room lifecycle is `shared/hooks/useRoomCore.js`, not per-game.** AniGuess and AniTune
+each grew their own copy first and the copies drifted; a game's online hook now configures
+the core and adds only its own rules bindings:
+
+```js
+useRoomCore({ storageKey, playersPath, initialState, normalizeState, onExitRoom })
+```
+
+- `storageKey` — `<game>_online_room`, per-game so two games' saved rooms can't clobber
+  each other.
+- `playersPath` — where the roster lives under `state/`. Genuinely differs
+  (`gameSession/players` in AniGuess, `players` elsewhere); the join transaction and the
+  roster read both follow it.
+- `normalizeState` — repairs what RTDB dropped, at the single point state enters the hook.
+
+It owns codes, `memberUids`/`claims`/`open`, create/join/leave, the `onValue`
+subscription, presence and the grace-window clock, `guard`/`bestEffort`, `patchState`, the
+`once` one-shot, and host migration. What stays per-game is the
+departure-reconciliation effect: noticing *that* someone left is generic, deciding what
+their absence broke is not.
+
 All games share one `rooms/{code}` namespace — codes are unique across the whole app, not
 per game, so a new game cannot assume it has the code space to itself. A code is claimed by
 a `runTransaction` on `rooms/{code}/createdAt`. Codes are 5 chars from an alphabet with
@@ -116,6 +137,17 @@ Two things that bite every time:
   on read-back. Every room hook must therefore normalize state at *every* entry point (the
   `onValue` subscription *and* inside transaction callbacks, which see raw stored values)
   before handing anything to `rules.js`, which calls `.includes`/`.every` unguarded.
+- **An array with gaps comes back as one of three shapes.** RTDB drops null elements, so a
+  partly-filled fixed-length array (Blind Rank's ten slots) reads back as a *sparse* array,
+  or — once it is mostly empty — as an object keyed by index (`{ "5": … }`). Normalizing
+  one shape is not enough, and `Array.map`/`forEach` silently **skip holes**, so a sparse
+  array needs a plain index loop. `blindrank/rules.js`'s `normalizeBoard` handles all three;
+  copy it rather than rediscovering this.
+- **Rebuilding a keyed collection from the *active* roster deletes departed players' data.**
+  The active roster is the right input to readiness gates and the wrong input to anything
+  that reconstructs stored state — a normalizer fed active ids drops the absent players'
+  entries on the very next write, and their answers are gone by the reveal. Normalize
+  against everyone in the room; filter to active only at the gate.
 
 The room a device is in is remembered in localStorage under a per-game key
 (`<game>_online_room` — per-game so two games' saved rooms can't clobber each other), so a
