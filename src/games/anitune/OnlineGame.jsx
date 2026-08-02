@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAniTuneRoom } from './hooks/useAniTuneRoom';
 import { RACE } from './rules';
-import RoomSetup from './components/RoomSetup';
+import RoomSetup from '../../shared/components/RoomSetup';
+import { countShows } from '../../shared/utils/profileStats';
 import OnlineLobby from './components/OnlineLobby';
 import SyncedClipPlayer from './components/SyncedClipPlayer';
 import OnlineRaceRound from './components/OnlineRaceRound';
@@ -47,7 +48,12 @@ export default function OnlineGame({ onBack, onExit }) {
     return (
       <>
         <HubButton onClick={onExit} />
-        <RoomSetup room={room} onBack={onBack} />
+        <RoomSetup
+          room={room}
+          onBack={onBack}
+          tone="blue"
+          stat={(p) => `${countShows(p)} shows`}
+        />
       </>
     );
   }

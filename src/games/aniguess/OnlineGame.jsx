@@ -4,7 +4,8 @@ import { useWins } from '../../shared/hooks/useWins';
 import { isCorrectGuess } from './utils/guessMatch';
 import { buildWhoIsWho } from './utils/whoIsWho';
 import { roundComplete } from './rules';
-import RoomSetup from './components/RoomSetup';
+import RoomSetup from '../../shared/components/RoomSetup';
+import { countCharacters } from '../../shared/utils/profileStats';
 import OnlineLobby from './components/OnlineLobby';
 import OnlineCharacterAssignment from './components/OnlineCharacterAssignment';
 import CharacterReveal from './components/CharacterReveal';
@@ -155,7 +156,12 @@ export default function OnlineGame({ onBack, onExit }) {
     return (
       <>
         <HubButton onClick={onExit} />
-        <RoomSetup room={room} onBack={onBack} />
+        <RoomSetup
+          room={room}
+          onBack={onBack}
+          tone="purple"
+          stat={(p) => `${countCharacters(p)} characters`}
+        />
       </>
     );
   }

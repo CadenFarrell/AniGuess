@@ -1,17 +1,24 @@
 import { useState } from 'react';
-import { useProfileStore } from '../../../shared/context/profileContext';
-import AniListImport from '../../../shared/components/AniListImport';
-import OnlineIdentityCard from '../../../shared/components/OnlineIdentityCard';
-import ProfilePicker from '../../../shared/components/ProfilePicker';
-import { countCharacters } from '../../../shared/utils/profileStats';
+import { useProfileStore } from '../context/profileContext';
+import AniListImport from './AniListImport';
+import OnlineIdentityCard from './OnlineIdentityCard';
+import ProfilePicker from './ProfilePicker';
 import {
   Backdrop, Badge, Banner, Button, Card, Input, Screen, Wordmark,
-} from '../../../shared/ui';
+} from '../ui';
 
-export default function RoomSetup({ room, onBack }) {
-  // No name box any more — the hub already asked. This screen only ever wanted
-  // to know "who am I", and typing that answer fresh each time is what quietly
-  // created empty duplicate profiles.
+// Create/join a room. One screen for every online game — they differ only in
+// their accent and in which number they put on the identity card (AniGuess
+// cares how many characters you have, AniTune how many shows), so those are
+// props rather than two near-identical files.
+//
+//   tone  the game's accent, for the wordmark and the identity card
+//   stat  (profile) => string, the one-line summary under the player's name
+//
+// No name box: the hub already asked. This screen only ever wanted to know
+// "who am I", and typing that answer fresh each time is what quietly created
+// empty duplicate profiles. The profile itself is shared by every game.
+export default function RoomSetup({ room, onBack, tone = 'purple', stat }) {
   const { activeProfile: profile, saveProfile, selectProfile } = useProfileStore();
   const [codeInput, setCodeInput] = useState('');
   const [showImport, setShowImport] = useState(false);
@@ -48,7 +55,7 @@ export default function RoomSetup({ room, onBack }) {
     <>
       <Backdrop />
       <Screen onBack={onBack}>
-        <Wordmark tone="purple" size="md" level={2} className="mb-8">
+        <Wordmark tone={tone} size="md" level={2} className="mb-8">
           🌐 Play Online
         </Wordmark>
 
@@ -76,8 +83,8 @@ export default function RoomSetup({ room, onBack }) {
           <div>
             <OnlineIdentityCard
               profile={profile}
-              stat={`${countCharacters(profile)} characters`}
-              tone="purple"
+              stat={stat(profile)}
+              tone={tone}
               onSwitch={() => { setShowPicker(true); setError(''); }}
               onImport={() => setShowImport(true)}
             />
