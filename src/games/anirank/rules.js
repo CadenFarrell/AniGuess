@@ -1,14 +1,23 @@
-// All Blind Ranking logic: no React, no storage, no network. Each function
+// All AniRank logic: no React, no storage, no network. Each function
 // takes a slice of round state and returns a { patch } for the caller to apply
 // however its persistence layer works — useState locally, a Firebase
 // transaction online. See CLAUDE.md: change game behaviour here, not in the
 // hooks, or local and online drift apart.
 //
-// The game: ten shows arrive one at a time. Every player commits each one to a
-// slot before the next is revealed, and a placed show never moves. Slot 1 is
-// the oldest, slot 10 the newest. Everyone is on the same show at the same
-// time — that shared cursor is what keeps it blind, since a player who could
-// run ahead would be ranking a list they had already seen in full.
+// The game: ten cards arrive one at a time. Every player commits each one to a
+// slot before the next is revealed, and a placed card never moves. Everyone is
+// on the same card at the same time — that shared cursor is what keeps it blind,
+// since a player who could run ahead would be ranking a list they had already
+// seen in full.
+//
+// What the slots MEAN is not decided here. A card carries a `value` the deck
+// builder stamped on it from the round's axis (see axes.js), and the two modes
+// differ only in where the answer key comes from:
+//
+//   fact     rankMap(trueOrder(deck))  — sort the cards by their value
+//   opinion  rankMap(subject board)    — one player's own board is the key
+//
+// Both collapse to the same { itemId: rank } map, so scoreBoard never branches.
 
 export const BOARD_SIZE = 10;
 
@@ -57,15 +66,27 @@ export function placedCount(board) {
   return normalizeBoard(board).filter(Boolean).length;
 }
 
-export function startRound(players, deck) {
+// `subjectId` is the player an opinion round is about — everyone, including
+// them, ranks the cards as they would. Null for a fact round, and stored on the
+// round rather than derived so a mid-round roster change cannot silently move
+// the answer key out from under boards already committed against it.
+export function startRound(players, deck, subjectId = null) {
   return {
     deck,
     cursor: 0,
+    subjectId,
     boards: Object.fromEntries(players.map((p) => [p.id, new Array(deck.length).fill(null)])),
   };
 }
 
-// The show every player is currently placing.
+// Whose turn it is to be the subject. Indexed by round so it walks the roster
+// instead of re-picking at random and leaving someone out all night.
+export function subjectFor(playerIds, roundIndex = 0) {
+  if (!playerIds?.length) return null;
+  return playerIds[roundIndex % playerIds.length];
+}
+
+// The card every player is currently placing.
 export function currentItem(state) {
   return state.deck?.[state.cursor] ?? null;
 }
@@ -111,47 +132,114 @@ export function advanceCursor(state) {
   return { patch: { cursor: next }, finished };
 }
 
-// The order the shows should have been in. Sorted by year, with the title as a
-// stable tie-break so every device computes the identical answer.
+// The order the cards should have been in, for a FACT round. Sorted by the
+// `value` the deck builder stamped from the axis, with the title as a stable
+// tie-break so every device computes the identical answer.
 export function trueOrder(deck) {
-  return [...deck].sort((a, b) => a.year - b.year || a.title.localeCompare(b.title));
+  return [...deck].sort((a, b) => a.value - b.value || a.title.localeCompare(b.title));
 }
 
-// Scores one finished board.
+/**
+ * Collapses any answer key into { itemId: rank }, which is the only thing
+ * scoreBoard needs and the reason it never has to know which mode it is in.
+ *
+ * Cards sharing a `value` share a rank, so a fact round where two shows aired
+ * the same year accepts either order — the tie-forgiveness that used to live in
+ * the `a.year <= b.year` comparison, now expressed once. A subject's board has
+ * no values (every slot is a deliberate choice), so each position is its own
+ * rank and there are no ties to forgive.
+ */
+export function rankMap(ordered) {
+  const list = ordered ?? [];
+  const out = {};
+  let rank = 0;
+  let previous;
+  // A plain index loop, not forEach: forEach skips holes, and a board that came
+  // back from RTDB half-filled is exactly the sparse shape normalizeBoard exists
+  // to repair. Callers pass dense arrays today; this stays correct if one doesn't.
+  for (let i = 0; i < list.length; i++) {
+    const item = list[i];
+    if (!item) continue;
+    const tied = previous != null && item.value != null && item.value === previous;
+    if (!tied) rank = i;
+    out[item.id] = rank;
+    previous = item.value ?? null;
+  }
+  return out;
+}
+
+// The answer key for a round, whichever mode it is in. Returns null when an
+// opinion round has no usable subject board — the caller renders an unscored
+// reveal rather than inventing a winner.
+export function truthFor(state, { opinion = false } = {}) {
+  if (!opinion) return trueOrder(state.deck ?? []);
+  const board = normalizeBoard(state.boards?.[state.subjectId], state.deck?.length ?? BOARD_SIZE);
+  return board.every(Boolean) ? board : null;
+}
+
+// Scores one finished board against an answer key.
 //
 // `ordered` — adjacent pairs left in the right relative order, out of nine. The
-// headline score, and deliberately forgiving: one show in the wrong place costs
-// a point or two rather than shifting everything after it. Two shows from the
-// same year count as ordered either way round, so a tie is never a trap.
+// headline score, and deliberately forgiving: one card in the wrong place costs
+// a point or two rather than shifting everything after it.
 //
-// `exact` — slots holding the show that truly belongs there. Reported for
+// `exact` — slots holding the card that truly belongs there. Reported for
 // interest, not scored, because with ties it is not always achievable.
-export function scoreBoard(board, deck) {
+export function scoreBoard(board, deck, truth) {
   const size = deck?.length ?? BOARD_SIZE;
   const filled = normalizeBoard(board, size);
+  const key = truth ?? trueOrder(deck ?? []);
+  const ranks = rankMap(key);
 
   let ordered = 0;
   for (let i = 0; i < size - 1; i++) {
     const a = filled[i];
     const b = filled[i + 1];
-    if (a && b && a.year <= b.year) ordered++;
+    if (!a || !b) continue;
+    const ra = ranks[a.id];
+    const rb = ranks[b.id];
+    if (ra != null && rb != null && ra <= rb) ordered++;
   }
 
-  const truth = trueOrder(deck ?? []);
   let exact = 0;
   for (let i = 0; i < size; i++) {
-    if (filled[i] && truth[i] && filled[i].id === truth[i].id) exact++;
+    if (filled[i] && key[i] && filled[i].id === key[i].id) exact++;
   }
 
   const perfect = ordered === size - 1;
   return { ordered, exact, perfect, score: ordered };
 }
 
-// Every player's score for the round, keyed by id — the shape totalScores and
-// shared/utils/ranking.js's computeRankedPlayers both expect.
-export function finalScores(state, playerIds) {
+/**
+ * Every player's score for the round, keyed by id — the shape totalScores and
+ * shared/utils/ranking.js's computeRankedPlayers both expect.
+ *
+ * In an opinion round the subject cannot be scored against their own board, so
+ * they take the mean of everyone who guessed at them. Scoring them zero would
+ * punish a player for being picked, and leaving them out puts a hole in the
+ * leaderboard; the mean reads as "how predictable were you", which is the thing
+ * the round is actually measuring about them.
+ *
+ * Returns {} when there is no answer key (an unscored round, or a subject who
+ * never finished their board) — callers gate applyRoundScores on that.
+ */
+export function finalScores(state, playerIds, { opinion = false, scoring = true } = {}) {
+  if (!scoring) return {};
+  const truth = truthFor(state, { opinion });
+  if (!truth) return {};
+
   const out = {};
-  for (const id of playerIds) out[id] = scoreBoard(state.boards?.[id], state.deck).score;
+  for (const id of playerIds) {
+    if (opinion && id === state.subjectId) continue;
+    out[id] = scoreBoard(state.boards?.[id], state.deck, truth).score;
+  }
+
+  if (opinion && state.subjectId && playerIds.includes(state.subjectId)) {
+    const guesses = Object.values(out);
+    out[state.subjectId] = guesses.length
+      ? Math.round(guesses.reduce((a, b) => a + b, 0) / guesses.length)
+      : 0;
+  }
   return out;
 }
 

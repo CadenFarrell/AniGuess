@@ -3,9 +3,10 @@ import { ref, set, runTransaction } from 'firebase/database';
 import { getFirebaseDb } from '../../../shared/services/firebase';
 import { useRoomCore } from '../../../shared/hooks/useRoomCore';
 import { buildDeck } from '../utils/deck';
+import { getAxis, isOpinion } from '../axes';
 import * as rules from '../rules';
 
-const ROOM_KEY = 'blindrank_online_room';
+const ROOM_KEY = 'anirank_online_room';
 
 const initialState = (localProfile) => ({
   view: 'lobby',
@@ -13,6 +14,10 @@ const initialState = (localProfile) => ({
   settings: null,
   game: null,
   totalScores: {},
+  // Counts rounds played so the opinion subject walks the roster instead of
+  // landing on the same person every game. Stored on the room, not derived from
+  // totalScores, because an unscored round still has to advance the turn.
+  roundIndex: 0,
   players: [localProfile],
 });
 
@@ -43,19 +48,20 @@ const normalizeState = (val) => {
     settings: val.settings ?? null,
     presence: val.presence ?? {},
     totalScores: val.totalScores ?? {},
+    roundIndex: val.roundIndex ?? 0,
     players,
     game: normalizeGame(val.game, players.map((p) => p.id)),
   };
 };
 
-// The Firebase-backed twin of useBlindRankRound. Same pure rules; the room
+// The Firebase-backed twin of useAniRankRound. Same pure rules; the room
 // lifecycle comes from shared/hooks/useRoomCore.js.
 //
 // Everyone places at once here rather than passing a device, but the cursor is
 // still shared: the next show is revealed only when every *active* player has
 // committed the current one. That gate is the only place a departure can wedge
 // the round, and the reconciliation effect at the bottom is what unsticks it.
-export function useBlindRankRoom() {
+export function useAniRankRoom() {
   const core = useRoomCore({
     storageKey: ROOM_KEY,
     playersPath: 'players',
@@ -95,21 +101,35 @@ export function useBlindRankRoom() {
   const startGame = useCallback(async (settings) => {
     if (!isHost) return;
     // Deal from the players actually here — a departed player's list should not
-    // shape the deck, least of all under "shared shows only".
+    // shape the deck, least of all under "shared cards only".
     const dealtIn = rosterRef.current.active;
     const db = getFirebaseDb();
-    const { deck, candidates, enough } = buildDeck(dealtIn, { sharedOnly: settings.sharedOnly });
+    const axis = getAxis(settings.axisId);
+    const { deck, candidates, enough } = buildDeck(dealtIn, {
+      axis,
+      sharedOnly: settings.sharedOnly,
+    });
     if (!enough) {
-      setSyncError(`Only ${candidates} shows with a known air date in common — need ${rules.BOARD_SIZE}.`);
+      const noun = axis.items === 'characters' ? 'characters' : 'shows';
+      setSyncError(
+        `Only ${candidates} ${noun} in common for this mode — need ${rules.BOARD_SIZE}.`
+      );
       return;
     }
+
+    const roundIndex = state?.roundIndex ?? 0;
+    const subjectId = isOpinion(axis)
+      ? rules.subjectFor(dealtIn.map((p) => p.id), roundIndex)
+      : null;
+
     await bestEffort(set(ref(db, `rooms/${roomCode}/open`), false));
     await patchState({
       settings,
-      game: rules.startRound(dealtIn, deck),
+      game: rules.startRound(dealtIn, deck, subjectId),
+      roundIndex: roundIndex + 1,
       view: 'round',
     });
-  }, [isHost, roomCode, patchState, bestEffort, rosterRef, setSyncError]);
+  }, [isHost, roomCode, patchState, bestEffort, rosterRef, setSyncError, state]);
 
   const place = useCallback((slotIndex) => (
     applyGame((g) => rules.placeItem(g, myPlayerId, slotIndex))
@@ -130,7 +150,14 @@ export function useBlindRankRoom() {
     const db = getFirebaseDb();
     const snapshot = state?.game;
     if (!snapshot) return false;
-    const scores = rules.finalScores(snapshot, playerIds);
+    const axis = getAxis(state?.settings?.axisId);
+    // Returns {} when the round has no answer key — an unscored round, or an
+    // opinion round whose subject left before finishing their board. Banking an
+    // empty object is a no-op, so the reveal still happens, just without points.
+    const scores = rules.finalScores(snapshot, playerIds, {
+      opinion: isOpinion(axis),
+      scoring: state?.settings?.scoring !== false,
+    });
 
     const claim = await runTransaction(ref(db, `rooms/${roomCode}/state/bankedAt`), (cur) =>
       (cur === snapshot.cursor ? undefined : snapshot.cursor)
@@ -159,6 +186,24 @@ export function useBlindRankRoom() {
 
     // Nobody left to play against.
     if (active.length < 1) return;
+
+    // The opinion subject IS the answer key, so their leaving is this game's
+    // second way to wedge a round. Reassigning is only safe before anyone has
+    // committed anything — after that, boards were built against a specific
+    // person and swapping them would silently rescore work already done, so the
+    // round plays out and finalScores returns no key (an unscored reveal).
+    if (game.subjectId && !activeIds.includes(game.subjectId) && game.cursor === 0) {
+      const heir = activeIds[0];
+      if (heir) {
+        once(`subject:${game.subjectId}:${heir}`, () =>
+          applyGame((g) => (
+            g.cursor === 0 && g.subjectId === game.subjectId
+              ? { patch: { subjectId: heir } }
+              : { patch: {} }
+          )));
+      }
+      return;
+    }
 
     const done = game.cursor >= game.deck.length;
     if (done) {
@@ -189,6 +234,14 @@ export function useBlindRankRoom() {
     settings: state?.settings ?? null,
     totalScores: state?.totalScores ?? {},
     game,
+    // The round's axis and subject, resolved once here so no screen has to
+    // re-derive them from settings — and getAxis never returns undefined, so a
+    // room written by an older build still renders.
+    axis: getAxis(state?.settings?.axisId),
+    axisId: state?.settings?.axisId ?? null,
+    scoring: state?.settings?.scoring !== false,
+    subjectId: game?.subjectId ?? null,
+    subject: players.find((p) => p.id === game?.subjectId) ?? null,
     deck: game?.deck ?? [],
     cursor: game?.cursor ?? 0,
     item: game ? rules.currentItem(game) : null,

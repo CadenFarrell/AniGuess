@@ -2,10 +2,10 @@ import { describe, it, expect } from 'vitest';
 import {
   BOARD_SIZE, normalizeBoard, normalizeBoards, placedCount, startRound, currentItem,
   pendingPlacers, placeItem, everyonePlaced, advanceCursor, trueOrder, scoreBoard,
-  finalScores, applyRoundScores,
+  finalScores, applyRoundScores, rankMap, truthFor, subjectFor,
 } from './rules';
 
-const show = (id, year) => ({ id, title: id, year, coverImageUrl: '' });
+const show = (id, value) => ({ id, title: id, value, imageUrl: '' });
 const DECK = [
   show('a', 1998), show('b', 2006), show('c', 2013), show('d', 1995), show('e', 2020),
   show('f', 2001), show('g', 2016), show('h', 1988), show('i', 2009), show('j', 2022),
@@ -184,10 +184,10 @@ describe('advanceCursor', () => {
 
 describe('trueOrder', () => {
   it('sorts oldest first', () => {
-    expect(trueOrder(DECK).map((s) => s.year)).toEqual([1988, 1995, 1998, 2001, 2006, 2009, 2013, 2016, 2020, 2022]);
+    expect(trueOrder(DECK).map((s) => s.value)).toEqual([1988, 1995, 1998, 2001, 2006, 2009, 2013, 2016, 2020, 2022]);
   });
 
-  it('breaks year ties by title so every device computes the same answer', () => {
+  it('breaks value ties by title so every device computes the same answer', () => {
     const tied = [show('z', 2000), show('a', 2000)];
     expect(trueOrder(tied).map((s) => s.id)).toEqual(['a', 'z']);
     expect(trueOrder([...tied].reverse()).map((s) => s.id)).toEqual(['a', 'z']);
@@ -238,7 +238,7 @@ describe('scoreBoard', () => {
     expect(scoreBoard([...perfectBoard()].reverse(), DECK).ordered).toBe(0);
   });
 
-  it('never penalises two shows from the same year, whichever way round they sit', () => {
+  it('never penalises two cards with the same value, whichever way round they sit', () => {
     const deck = [show('a', 2000), show('b', 2000)];
     expect(scoreBoard([deck[0], deck[1]], deck).ordered).toBe(1);
     expect(scoreBoard([deck[1], deck[0]], deck).ordered).toBe(1);
@@ -266,6 +266,95 @@ describe('finalScores', () => {
   it('scores every player, including one who never placed anything', () => {
     const state = { deck: DECK, cursor: 10, boards: { p1: perfectBoard() } };
     expect(finalScores(state, ['p1', 'p2'])).toEqual({ p1: 9, p2: 0 });
+  });
+});
+
+// An opinion round has no objective answer — one player is the subject and
+// their own finished board is what everyone else is scored against.
+describe('opinion rounds', () => {
+  // Ten cards with no values, the shape an opinion axis deals.
+  const OPINION_DECK = DECK.map((s) => ({ ...s, value: null }));
+  const boardOf = (...ids) => ids.map((id) => OPINION_DECK.find((s) => s.id === id));
+  const ORDER = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+
+  it('walks the roster so the same player is not the subject every round', () => {
+    expect(subjectFor(['p1', 'p2', 'p3'], 0)).toBe('p1');
+    expect(subjectFor(['p1', 'p2', 'p3'], 1)).toBe('p2');
+    expect(subjectFor(['p1', 'p2', 'p3'], 3)).toBe('p1');
+    expect(subjectFor([], 0)).toBe(null);
+  });
+
+  it('records the subject on the round rather than deriving it later', () => {
+    const state = startRound(players('p1', 'p2'), OPINION_DECK, 'p2');
+    expect(state.subjectId).toBe('p2');
+  });
+
+  it('gives every slot of a subject board its own rank, since there are no ties', () => {
+    const ranks = rankMap(boardOf(...ORDER));
+    expect(ranks.a).toBe(0);
+    expect(ranks.j).toBe(9);
+  });
+
+  it('lets cards sharing a value share a rank, so a fact tie is never a trap', () => {
+    const ranks = rankMap([show('x', 2000), show('y', 2000), show('z', 2005)]);
+    expect(ranks.x).toBe(0);
+    expect(ranks.y).toBe(0);
+    expect(ranks.z).toBe(2);
+  });
+
+  it('uses the subject board as the answer key', () => {
+    const state = {
+      deck: OPINION_DECK, cursor: 10, subjectId: 'p2',
+      boards: { p1: boardOf(...ORDER), p2: boardOf(...ORDER) },
+    };
+    expect(truthFor(state, { opinion: true }).map((s) => s.id)).toEqual(ORDER);
+  });
+
+  it('scores a guesser who matched the subject perfectly', () => {
+    const state = {
+      deck: OPINION_DECK, cursor: 10, subjectId: 'p2',
+      boards: { p1: boardOf(...ORDER), p2: boardOf(...ORDER) },
+    };
+    expect(finalScores(state, ['p1', 'p2'], { opinion: true }).p1).toBe(9);
+  });
+
+  it('gives the subject the mean of the guesses, not a zero for being picked', () => {
+    const reversed = [...ORDER].reverse();
+    const state = {
+      deck: OPINION_DECK, cursor: 10, subjectId: 'p3',
+      boards: {
+        p1: boardOf(...ORDER),      // perfect: 9
+        p2: boardOf(...reversed),   // inverted: 0
+        p3: boardOf(...ORDER),      // the key
+      },
+    };
+    const scores = finalScores(state, ['p1', 'p2', 'p3'], { opinion: true });
+    expect(scores.p1).toBe(9);
+    expect(scores.p2).toBe(0);
+    expect(scores.p3).toBe(5); // round(9 + 0 / 2) — how predictable they were
+  });
+
+  // The subject leaving mid-round is this game's second way to lose the answer
+  // key; the round still reveals, just without points.
+  it('has no answer key when the subject never finished their board', () => {
+    const half = [...boardOf(...ORDER.slice(0, 5)), ...new Array(5).fill(null)];
+    const state = {
+      deck: OPINION_DECK, cursor: 10, subjectId: 'p2',
+      boards: { p1: boardOf(...ORDER), p2: half },
+    };
+    expect(truthFor(state, { opinion: true })).toBe(null);
+    expect(finalScores(state, ['p1', 'p2'], { opinion: true })).toEqual({});
+  });
+
+  it('scores nothing at all when the round was set to keep no score', () => {
+    const state = {
+      deck: OPINION_DECK, cursor: 10, subjectId: 'p2',
+      boards: { p1: boardOf(...ORDER), p2: boardOf(...ORDER) },
+    };
+    expect(finalScores(state, ['p1', 'p2'], { opinion: true, scoring: false })).toEqual({});
+    // …and a fact round can be unscored too.
+    expect(finalScores({ deck: DECK, cursor: 10, boards: {} }, ['p1'], { scoring: false }))
+      .toEqual({});
   });
 });
 

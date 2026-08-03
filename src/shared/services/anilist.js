@@ -10,6 +10,9 @@ query ($userName: String, $type: MediaType, $statusIn: [MediaListStatus]) {
         media {
           id
           format
+          episodes
+          averageScore
+          popularity
           startDate { year month day }
           title { romaji english }
           coverImage { large }
@@ -144,6 +147,12 @@ export async function fetchUserAnimeList(username, { statusIn = ['COMPLETED'] } 
         status: entry.status,
         format: media.format ?? null,
         startDate: media.startDate ?? null,
+        // The numeric axes AniRank ranks by. Nullable on purpose: an unaired or
+        // obscure show genuinely has no averageScore, and a null has to survive
+        // to the deck builder so it can drop the item rather than sort it as 0.
+        episodes: media.episodes ?? null,
+        averageScore: media.averageScore ?? null,
+        popularity: media.popularity ?? null,
         relatedIds: seasonRelatedIds(media),
       });
     }

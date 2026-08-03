@@ -138,10 +138,10 @@ Two things that bite every time:
   `onValue` subscription *and* inside transaction callbacks, which see raw stored values)
   before handing anything to `rules.js`, which calls `.includes`/`.every` unguarded.
 - **An array with gaps comes back as one of three shapes.** RTDB drops null elements, so a
-  partly-filled fixed-length array (Blind Rank's ten slots) reads back as a *sparse* array,
+  partly-filled fixed-length array (AniRank's ten slots) reads back as a *sparse* array,
   or — once it is mostly empty — as an object keyed by index (`{ "5": … }`). Normalizing
   one shape is not enough, and `Array.map`/`forEach` silently **skip holes**, so a sparse
-  array needs a plain index loop. `blindrank/rules.js`'s `normalizeBoard` handles all three;
+  array needs a plain index loop. `anirank/rules.js`'s `normalizeBoard` handles all three;
   copy it rather than rediscovering this.
 - **Rebuilding a keyed collection from the *active* roster deletes departed players' data.**
   The active roster is the right input to readiness gates and the wrong input to anything
@@ -179,6 +179,24 @@ Every read runs `normalizeProfile`, so older saved shapes are repaired without a
 migration flag — and it guards missing `animeList`/`characters`, because the picker
 renders *every* saved profile, so a half-shaped one now takes the hub down on mount
 rather than merely being invisible.
+
+**What a profile actually stores is narrower than what the import fetches, and
+conflating the two ships a broken game.** `fetchUserAnimeList` returns far more per
+show than `mergeAnimeIntoProfile` persists; anything not in the list below is dropped
+at `AniListImport.runImport` and is simply not there at read time.
+
+| entry | stored fields |
+| --- | --- |
+| anime | `id`, `title`, `characters`, plus the `STAT_KEYS` in `profileMerge.js` (`coverImageUrl`, `startDate`, `episodes`, `averageScore`, `popularity`) |
+| character | `id`, `name`, `role`, `gender`, `imageUrl`, `description`, `favourites`, `genres` |
+
+The stats arrived after the first games did, so **they are absent, not null, on any
+profile imported before them** — a re-import backfills (`backfillStats`, which never
+overwrites a value already there). A feature that ranks or filters by one must treat
+missing as "not eligible" and say so on screen, the way `anirank/axes.js` returns
+`null` from `valueFor` and the setup screen offers a re-import. AniRank's release-year
+mode shipped dealing zero cards for exactly this reason: its comment described the
+fetch shape and the code read the stored one.
 
 Two layers, and components must use the outer one:
 

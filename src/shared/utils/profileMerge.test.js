@@ -180,6 +180,76 @@ describe('mergeAnimeIntoProfile', () => {
   });
 });
 
+// The regression that made AniRank unplayable: the import fetched startDate
+// and friends, then persisted only { id, title, characters }, so every ranking
+// axis had null to sort by and no round could ever be dealt.
+describe('mergeAnimeIntoProfile — per-show stats', () => {
+  const stats = {
+    coverImageUrl: 'cover.jpg',
+    startDate: { year: 2013, month: 4, day: 7 },
+    episodes: 25,
+    averageScore: 84,
+    popularity: 500000,
+  };
+
+  it('stores the stats on a newly added show', () => {
+    const { profile: merged } = mergeAnimeIntoProfile(profileWith([]), [{
+      animeId: 1, memberIds: [1], title: 'Attack on Titan', characters: [char('Eren')], ...stats,
+    }]);
+
+    expect(merged.animeList[0]).toMatchObject(stats);
+  });
+
+  it('backfills stats onto an entry saved before the fields existed', () => {
+    const profile = profileWith([entry('anilist_anime_1', 'Attack on Titan', ['Eren'])]);
+
+    const { profile: merged } = mergeAnimeIntoProfile(profile, [{
+      animeId: 1, memberIds: [1], title: 'Attack on Titan', characters: [char('Eren')], ...stats,
+    }]);
+
+    expect(merged.animeList).toHaveLength(1);
+    expect(merged.animeList[0]).toMatchObject(stats);
+  });
+
+  it('does not overwrite a stat the entry already carries', () => {
+    const profile = profileWith([
+      { ...entry('anilist_anime_1', 'Attack on Titan', ['Eren']), averageScore: 99 },
+    ]);
+
+    const { profile: merged } = mergeAnimeIntoProfile(profile, [{
+      animeId: 1, memberIds: [1], title: 'Attack on Titan', characters: [char('Eren')], ...stats,
+    }]);
+
+    expect(merged.animeList[0].averageScore).toBe(99);
+    expect(merged.animeList[0].episodes).toBe(25);
+  });
+
+  it('leaves an entry untouched when the import carries no stats', () => {
+    const profile = profileWith([entry('anilist_anime_1', 'Show', ['A'])]);
+
+    const { profile: merged } = mergeAnimeIntoProfile(profile, [{
+      animeId: 1, memberIds: [1], title: 'Show', characters: [char('A')],
+    }]);
+
+    expect(merged.animeList[0]).not.toHaveProperty('startDate');
+  });
+
+  it('keeps the surviving entry stats when seasons are folded together', () => {
+    const profile = profileWith([
+      entry('anilist_anime_1', 'Attack on Titan', ['Eren']),
+      entry('anilist_anime_2', 'Attack on Titan Season 2', ['Ymir']),
+    ]);
+
+    const { profile: merged } = mergeAnimeIntoProfile(profile, [{
+      animeId: 1, memberIds: [1, 2], title: 'Attack on Titan',
+      characters: [char('Eren'), char('Ymir')], ...stats,
+    }]);
+
+    expect(merged.animeList).toHaveLength(1);
+    expect(merged.animeList[0].startDate.year).toBe(2013);
+  });
+});
+
 describe('dedupeProfileAnimeList', () => {
   it('merges separate season entries into one show', () => {
     // The case the user actually hits: an old import saved each season on its

@@ -5,7 +5,7 @@ import { normalizeTitle } from '../../../shared/utils/ranking';
 import { shuffle } from '../../../shared/utils/random';
 
 // Re-exported so this module's own callers and tests keep one import site;
-// the implementation moved to shared/ when Blind Ranking needed it too.
+// the implementation moved to shared/ when AniRank needed it too.
 export { shuffle };
 
 /**

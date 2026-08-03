@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useProfileStore } from '../../../shared/context/profileContext';
 import AniListImport from '../../../shared/components/AniListImport';
 import { profileFingerprint } from '../../../shared/utils/profileStats';
-import { eligibleShows } from '../utils/deck';
+import AxisPicker from './AxisPicker';
+import { eligibleItems } from '../utils/deck';
+import { AXES, DEFAULT_AXIS_ID, getAxis } from '../axes';
 import { BOARD_SIZE } from '../rules';
 import {
   Backdrop, Badge, Banner, Button, Card, CardRow, Checkbox, Screen, Wordmark,
@@ -13,6 +15,8 @@ import {
 export default function OnlineLobby({ room }) {
   const { activeProfile, saveProfile } = useProfileStore();
   const [sharedOnly, setSharedOnly] = useState(true);
+  const [axisId, setAxisId] = useState(DEFAULT_AXIS_ID);
+  const [scoring, setScoring] = useState(true);
   const [importMode, setImportMode] = useState(null); // null | 'pick' | 'refresh'
 
   const players = room.players ?? [];
@@ -38,8 +42,17 @@ export default function OnlineLobby({ room }) {
 
   const showCount = (p) => (p.animeList || []).length;
   const everyoneHasShows = active.every((p) => showCount(p) > 0);
-  const eligible = eligibleShows(active, { sharedOnly });
-  const enough = eligible.length >= BOARD_SIZE;
+
+  const axis = getAxis(axisId);
+  const noun = axis.items === 'characters' ? 'characters' : 'shows';
+  // Counted for every axis so the picker can show which modes this room can
+  // actually play — a fact axis reads 0 until someone re-imports their list.
+  const counts = useMemo(() => Object.fromEntries(
+    AXES.map((a) => [a.id, eligibleItems(active, { axis: a, sharedOnly }).length])
+  ), [active, sharedOnly]);
+
+  const eligible = counts[axis.id] ?? 0;
+  const enough = eligible >= BOARD_SIZE;
   const canStart = active.length >= 2 && everyoneHasShows && enough;
 
   return (
@@ -47,7 +60,7 @@ export default function OnlineLobby({ room }) {
       <Backdrop />
       <Screen width="md">
         <Wordmark tone="amber" size="sm" level={2} className="mb-6">
-          🌐 Blind Rank Lobby
+          🌐 AniRank Lobby
         </Wordmark>
 
         <div className="mb-8 text-center">
@@ -121,17 +134,35 @@ export default function OnlineLobby({ room }) {
 
         {room.isHost && (
           <>
+            <AxisPicker
+              value={axisId}
+              onChange={setAxisId}
+              counts={active.length ? counts : undefined}
+            />
+
             <Card title="⚙️ Settings" padding="lg" className="mb-6">
               <Checkbox
-                label="Shared shows only"
+                label={`Shared ${noun} only`}
                 checked={sharedOnly}
                 onChange={(e) => setSharedOnly(e.target.checked)}
                 className="mb-2"
               />
-              <p className="ml-10 text-base text-white/50">
-                Only use shows <em>everyone</em> has on their list. Everyone ranks the same ten,
-                so a show only one player knows is a free guess for the rest.
+              <p className="ml-10 mb-4 text-base text-white/50">
+                Only use {noun} <em>everyone</em> has on their list. Everyone ranks the same ten,
+                so a card only one player knows is a free guess for the rest.
               </p>
+
+              <Checkbox
+                label="Keep score"
+                checked={scoring}
+                onChange={(e) => setScoring(e.target.checked)}
+                className="mb-2"
+              />
+              <p className="ml-10 text-base text-white/50">
+                Turn this off to just build boards and compare them at the end — no answer
+                key, no points, nothing to win.
+              </p>
+
               <p className="mt-4 text-sm text-white/30">
                 You&apos;re the host — your settings apply to everyone.
               </p>
@@ -144,8 +175,10 @@ export default function OnlineLobby({ room }) {
             )}
             {active.length >= 2 && everyoneHasShows && !enough && (
               <Banner tone="warning" className="mb-4">
-                ⚠️ Need {BOARD_SIZE} shows with a known air date to fill a board — found {eligible.length}.
-                {sharedOnly ? ' Turn off “Shared shows only”, or import matching titles.' : ''}
+                ⚠️ Need {BOARD_SIZE} {noun} to fill a board — found {eligible}.
+                {axis.kind === 'fact'
+                  ? ' This mode needs AniList stats that older saved profiles don’t carry — everyone should refresh their list above.'
+                  : sharedOnly ? ` Turn off “Shared ${noun} only”, or import matching titles.` : ''}
               </Banner>
             )}
 
@@ -153,7 +186,7 @@ export default function OnlineLobby({ room }) {
               variant="primary"
               size="xl"
               fullWidth
-              onClick={() => room.startGame({ sharedOnly })}
+              onClick={() => room.startGame({ sharedOnly, axisId, scoring })}
               disabled={!canStart}
             >
               🎮 Start Game

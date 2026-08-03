@@ -4,7 +4,7 @@ import OnlineGame from './OnlineGame';
 import { firebaseEnabled } from '../../shared/services/firebase';
 import { Backdrop, Button, GhostButton, Screen, Wordmark } from '../../shared/ui';
 
-export default function BlindRankGame({ onExit }) {
+export default function AniRankGame({ onExit }) {
   const [mode, setMode] = useState(null); // null | 'local' | 'online'
 
   if (mode === 'local') return <LocalGame onExit={onExit} />;
@@ -14,8 +14,8 @@ export default function BlindRankGame({ onExit }) {
     <>
       <Backdrop />
       <Screen center>
-        <Wordmark tone="amber" subtitle="Rank ten shows oldest to newest — one at a time" className="mb-10">
-          Blind Rank
+        <Wordmark tone="amber" subtitle="Ten cards, one at a time, no takebacks" className="mb-10">
+          AniRank
         </Wordmark>
         <div className="flex flex-col gap-4">
           <Button variant="primary" size="xl" fullWidth onClick={() => setMode('local')}>

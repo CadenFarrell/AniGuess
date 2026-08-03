@@ -94,6 +94,54 @@ export function mergeCharacterEdges(edgeGroups) {
   return [...byId.values()];
 }
 
+// Sortable number for an AniList FuzzyDate — a local copy of franchise.js's
+// airDateKey, kept here so this module stays importable on its own. Missing
+// parts sort last so a dateless entry never wins an "earliest" comparison.
+const airDateKey = (d) => (d?.year ?? 9999) * 10000 + (d?.month ?? 99) * 100 + (d?.day ?? 99);
+
+/**
+ * Folds one franchise group's members into the per-show facts a profile stores.
+ *
+ * A group is ONE card in AniRank, so each field needs a rule for which season
+ * speaks for the whole franchise, and they are deliberately not all the same:
+ *
+ *   startDate  earliest member — a franchise debuted when its first season did,
+ *              which is also what blind ranking by year is asking about.
+ *   episodes   summed — the card stands for every season, so its length is all
+ *              of them. Null only when no member reports a count at all, since
+ *              a partial sum still beats dropping the show from the axis.
+ *   the rest   the canonical member (group.key), the flagship entry that already
+ *              gives the group its title and cover.
+ *
+ * Returns only keys it actually has, so callers can spread it without writing
+ * nulls over data an earlier import stored.
+ */
+export function summarizeGroupStats(group) {
+  const members = group?.members ?? [];
+  if (!members.length) return {};
+
+  const canonical = members.find((m) => m.id === group.key) ?? members[0];
+  const earliest = members.reduce(
+    (best, m) => (airDateKey(m.startDate) < airDateKey(best.startDate) ? m : best),
+    members[0]
+  );
+
+  const counted = members.filter((m) => Number.isFinite(m.episodes));
+  const episodes = counted.length
+    ? counted.reduce((sum, m) => sum + m.episodes, 0)
+    : null;
+
+  const stats = {
+    coverImageUrl: group.coverImageUrl || canonical.coverImageUrl || '',
+    startDate: earliest.startDate ?? null,
+    episodes,
+    averageScore: canonical.averageScore ?? null,
+    popularity: canonical.popularity ?? null,
+  };
+
+  return Object.fromEntries(Object.entries(stats).filter(([, v]) => v != null && v !== ''));
+}
+
 // Filters AniList character edges down to MAIN + high-favourite SUPPORTING,
 // optionally caps the result (sorted by favourites) and maps into the shape
 // normalizeCharacter (src/shared/utils/character.js) already expects.
@@ -119,6 +167,11 @@ export function filterAndMapCharacterEdges(edges, {
     gender: e.node.gender ?? 'Unknown',
     imageUrl: e.node.image?.large ?? '',
     description: trimDesc(e.node.description),
+    // Kept, not just used-and-dropped: it is already the value the cutoff above
+    // and the maxCharacters sort run on, and it is the only per-character number
+    // a saved profile can carry — AniRank's "least → most favourited" axis is
+    // exactly this field, so discarding it would mean a network call per round.
+    favourites: e.node.favourites ?? 0,
     genres,
   }));
 }

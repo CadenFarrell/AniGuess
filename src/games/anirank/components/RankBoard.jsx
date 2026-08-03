@@ -4,18 +4,21 @@ import { Badge, Card } from '../../../shared/ui';
 // reports which slot was tapped, and knows nothing about whose board it is or
 // where the state lives.
 //
-// Slot 1 is the oldest. Tapping an empty slot commits the current show there
-// permanently, which is the whole game, so the confirm step is deliberate:
-// a mis-tap cannot be undone and the board is small on a phone.
-export default function RankBoard({ board, item, disabled = false, onPlace }) {
+// What the ends of the board MEAN comes from the round's axis (see ../axes.js) —
+// slot 1 is the low end, whatever "low" is this round. Tapping an empty slot
+// commits the current card there permanently, which is the whole game, so a
+// mis-tap cannot be undone and the board is small on a phone.
+export default function RankBoard({
+  board, item, disabled = false, lowLabel = 'LOW', highLabel = 'HIGH', onPlace,
+}) {
   return (
     <Card padding="sm" className="mb-6">
       <div className="mb-3 flex items-center justify-between px-1">
         <span className="font-display text-sm font-bold tracking-widest text-white/40">
-          ← OLDEST
+          ← {lowLabel}
         </span>
         <span className="font-display text-sm font-bold tracking-widest text-white/40">
-          NEWEST →
+          {highLabel} →
         </span>
       </div>
 
@@ -30,7 +33,7 @@ export default function RankBoard({ board, item, disabled = false, onPlace }) {
                 disabled={!canPlace}
                 aria-label={
                   empty
-                    ? `Place ${item?.title ?? 'show'} in slot ${i + 1}`
+                    ? `Place ${item?.title ?? 'card'} in slot ${i + 1}`
                     : `Slot ${i + 1}: ${slot.title}`
                 }
                 className={`focus-pop flex w-full items-center gap-3 rounded-pop-sm border-2 px-3 py-2.5
@@ -66,24 +69,26 @@ export default function RankBoard({ board, item, disabled = false, onPlace }) {
   );
 }
 
-// The show currently being placed, shown above the board.
-export function CurrentShow({ item, index, total, subtitle }) {
+// The card currently being placed, shown above the board. A card is a show or a
+// character depending on the axis; `subtitle` is the show a character came from,
+// and is stamped by the deck builder rather than derived here.
+export function CurrentItem({ item, index, total }) {
   if (!item) return null;
   return (
     <div className="mb-6 text-center">
       <p className="mb-2 text-base text-white/40">
-        Show {index + 1} of {total}
+        Card {index + 1} of {total}
       </p>
-      {item.coverImageUrl && (
+      {item.imageUrl && (
         <img
-          src={item.coverImageUrl}
+          src={item.imageUrl}
           alt=""
           className="mx-auto mb-3 h-40 w-auto rounded-pop border-2 border-ink object-cover"
         />
       )}
       <h2 className="font-display text-3xl font-extrabold text-white">{item.title}</h2>
-      {/* The year is the answer — never rendered before the reveal. */}
-      {subtitle && <p className="mt-2 text-lg text-white/60">{subtitle}</p>}
+      {/* `value` is the answer on a fact axis — never rendered before the reveal. */}
+      {item.subtitle && <p className="mt-2 text-lg text-white/60">{item.subtitle}</p>}
     </div>
   );
 }

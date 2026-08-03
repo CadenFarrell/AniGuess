@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { fetchUserAnimeList, fetchManyAnimeCharacters } from '../services/anilist';
-import { filterAndMapCharacterEdges, mergeCharacterEdges } from '../utils/anilistFormat';
+import { filterAndMapCharacterEdges, mergeCharacterEdges, summarizeGroupStats } from '../utils/anilistFormat';
 import { groupIntoFranchises } from '../utils/franchise';
 import {
   mergeAnimeIntoProfile,
@@ -190,7 +190,16 @@ export default function AniListImport({ profile, onClose, onImported, autoRefres
         maxCharacters: MAX_CHARACTERS_PER_SHOW,
         genres,
       });
-      return { animeId: group.key, memberIds: group.memberIds, title: group.title, characters };
+      // The per-show facts ride along with the cast. Without them a saved entry
+      // is only { id, title, characters }, which is why every ranking axis but
+      // "opinion" had no data to sort by.
+      return {
+        animeId: group.key,
+        memberIds: group.memberIds,
+        title: group.title,
+        ...summarizeGroupStats(group),
+        characters,
+      };
     });
 
     const { profile: merged, addedAnime, addedChars } = mergeAnimeIntoProfile(profile, importedAnimeList);

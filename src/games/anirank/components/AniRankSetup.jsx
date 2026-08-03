@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useProfileStore } from '../../../shared/context/profileContext';
 import AniListImport from '../../../shared/components/AniListImport';
 import ProfilePicker from '../../../shared/components/ProfilePicker';
-import { eligibleShows } from '../utils/deck';
+import AxisPicker from './AxisPicker';
+import { eligibleItems } from '../utils/deck';
+import { AXES, DEFAULT_AXIS_ID, getAxis, isOpinion } from '../axes';
 import { BOARD_SIZE } from '../rules';
 import {
   Backdrop, Badge, Banner, Button, Card, CardRow, Checkbox, GhostButton, Screen, Wordmark,
@@ -10,12 +12,14 @@ import {
 
 // Local setup. Same shape as AniTuneSetup — your main profile is already
 // seated, the picker adds the rest of the couch, and nobody types a name.
-export default function BlindRankSetup({ onStart, onExit, error }) {
+export default function AniRankSetup({ onStart, onExit, error }) {
   const { activeId, activeProfile, saveProfile } = useProfileStore();
   const [players, setPlayers] = useState(() => (activeProfile ? [activeProfile] : []));
   const [showPicker, setShowPicker] = useState(false);
   const [importTarget, setImportTarget] = useState(null);
   const [sharedOnly, setSharedOnly] = useState(true);
+  const [axisId, setAxisId] = useState(DEFAULT_AXIS_ID);
+  const [scoring, setScoring] = useState(true);
 
   const handleImported = (merged) => {
     saveProfile(merged);
@@ -23,9 +27,21 @@ export default function BlindRankSetup({ onStart, onExit, error }) {
     setImportTarget(null);
   };
 
-  const eligible = eligibleShows(players, { sharedOnly });
-  const enough = eligible.length >= BOARD_SIZE;
-  const canStart = players.length >= 1 && enough;
+  const axis = getAxis(axisId);
+  const opinion = isOpinion(axis);
+
+  // Counted for every axis, not just the selected one, so the picker can show
+  // which modes this table can actually play before anyone commits to one.
+  const counts = useMemo(() => Object.fromEntries(
+    AXES.map((a) => [a.id, eligibleItems(players, { axis: a, sharedOnly }).length])
+  ), [players, sharedOnly]);
+
+  const eligible = counts[axis.id] ?? 0;
+  const enough = eligible >= BOARD_SIZE;
+  const noun = axis.items === 'characters' ? 'characters' : 'shows';
+  // The subject is the answer key, so someone has to be guessing at them.
+  const enoughPlayers = opinion && scoring ? players.length >= 2 : players.length >= 1;
+  const canStart = enoughPlayers && enough;
 
   return (
     <>
@@ -33,10 +49,10 @@ export default function BlindRankSetup({ onStart, onExit, error }) {
       <Screen width="md">
         <Wordmark
           tone="amber"
-          subtitle="Rank ten shows oldest to newest — one at a time, no takebacks"
+          subtitle="Ten cards, one at a time, no takebacks"
           className="mb-10"
         >
-          Blind Rank
+          AniRank
         </Wordmark>
 
         <Button
@@ -101,34 +117,57 @@ export default function BlindRankSetup({ onStart, onExit, error }) {
           </Card>
         )}
 
+        <AxisPicker value={axisId} onChange={setAxisId} counts={players.length ? counts : undefined} />
+
         <Card title="⚙️ Settings" padding="lg" className="mb-6">
           <Checkbox
-            label="Shared shows only"
+            label={`Shared ${noun} only`}
             checked={sharedOnly}
             onChange={(e) => setSharedOnly(e.target.checked)}
             className="mb-2"
           />
+          <p className="ml-10 mb-4 text-base text-white/50">
+            Only use {noun} <em>everyone</em> has on their list. Everyone ranks the same ten,
+            so a card only one player knows is a free guess for the rest.
+          </p>
+
+          <Checkbox
+            label="Keep score"
+            checked={scoring}
+            onChange={(e) => setScoring(e.target.checked)}
+            className="mb-2"
+          />
           <p className="ml-10 text-base text-white/50">
-            Only use shows <em>everyone</em> has on their list. Everyone ranks the same ten,
-            so a show only one player knows is a free guess for the rest.
+            Turn this off to just build boards and compare them at the end — no answer
+            key, no points, nothing to win.
           </p>
         </Card>
 
         {players.length > 0 && (
           <p className="mb-4 text-center text-base text-white/50">
-            {eligible.length} show{eligible.length === 1 ? '' : 's'} to draw from
+            {eligible} {eligible === 1 ? noun.replace(/s$/, '') : noun} to draw from
             {sharedOnly && players.length > 1 && ' (shared by everyone)'}
           </p>
         )}
 
-        {/* With a small shared list this is the ordinary outcome, not an edge
-            case, so it gets a reason rather than a dead Start button. */}
+        {/* With a small shared list — or a fact axis on a profile imported before
+            the stats existed — this is the ordinary outcome, not an edge case, so
+            it gets a reason rather than a dead Start button. */}
         {players.length > 0 && !enough && (
           <Banner tone="warning" className="mb-4">
-            ⚠️ Need {BOARD_SIZE} shows with a known air date to fill a board — found {eligible.length}.
-            {sharedOnly && players.length > 1
-              ? ' Turn off “Shared shows only”, or import more lists.'
-              : ' Import a bigger list with the 🔗 button.'}
+            ⚠️ Need {BOARD_SIZE} {noun} to fill a board — found {eligible}.
+            {axis.kind === 'fact'
+              ? ' Re-import a list with the 🔗 button: this mode needs stats that older saved profiles don’t carry.'
+              : sharedOnly && players.length > 1
+                ? ` Turn off “Shared ${noun} only”, or import more lists.`
+                : ' Import a bigger list with the 🔗 button.'}
+          </Banner>
+        )}
+
+        {players.length === 1 && opinion && scoring && (
+          <Banner tone="warning" className="mb-4">
+            ⚠️ An opinion round needs someone to guess at the subject. Add a player, or
+            turn off “Keep score” to rank on your own.
           </Banner>
         )}
 
@@ -146,7 +185,7 @@ export default function BlindRankSetup({ onStart, onExit, error }) {
           variant="primary"
           size="xl"
           fullWidth
-          onClick={() => onStart({ players, sharedOnly })}
+          onClick={() => onStart({ players, sharedOnly, axisId, scoring })}
           disabled={!canStart}
         >
           🎮 Start Game

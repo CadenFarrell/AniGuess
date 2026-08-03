@@ -1,9 +1,10 @@
-import { useBlindRankRoom } from './hooks/useBlindRankRoom';
+import { useAniRankRoom } from './hooks/useAniRankRoom';
 import RoomSetup from '../../shared/components/RoomSetup';
 import { countShows } from '../../shared/utils/profileStats';
 import OnlineLobby from './components/OnlineLobby';
-import BlindRankResults from './components/BlindRankResults';
-import RankBoard, { CurrentShow, WaitingOn } from './components/RankBoard';
+import AniRankResults from './components/AniRankResults';
+import RankBoard, { CurrentItem, WaitingOn } from './components/RankBoard';
+import { isOpinion, promptFor } from './axes';
 import WaitingScreen from '../aniguess/components/WaitingScreen';
 import { Backdrop, Badge, Banner, GhostButton, HubButton, Screen } from '../../shared/ui';
 
@@ -11,7 +12,7 @@ import { Backdrop, Badge, Banner, GhostButton, HubButton, Screen } from '../../s
 // shell() wraps every in-room screen with the room code, a way out and the
 // sync-error banner, and room.view picks the screen.
 export default function OnlineGame({ onBack, onExit }) {
-  const room = useBlindRankRoom();
+  const room = useAniRankRoom();
 
   if (!room.roomCode) {
     return (
@@ -105,7 +106,15 @@ export default function OnlineGame({ onBack, onExit }) {
             })}
           </div>
 
-          <CurrentShow item={room.item} index={room.cursor} total={room.deck.length} />
+          <CurrentItem item={room.item} index={room.cursor} total={room.deck.length} />
+
+          <p className="mb-2 text-center text-base font-bold text-white/70">
+            {/* The subject ranks for real — they are the answer key, so telling
+                them to guess at themselves would be nonsense. */}
+            {isOpinion(room.axis) && room.subjectId === room.myPlayerId
+              ? 'You’re the subject — rank these honestly. Everyone else is guessing at you.'
+              : promptFor(room.axis, room.subject?.name ?? 'they')}
+          </p>
 
           {room.iHavePlaced ? (
             <>
@@ -124,6 +133,8 @@ export default function OnlineGame({ onBack, onExit }) {
             board={room.myBoard}
             item={room.item}
             disabled={room.iHavePlaced}
+            lowLabel={room.axis.lowLabel}
+            highLabel={room.axis.highLabel}
             onPlace={room.place}
           />
 
@@ -137,10 +148,13 @@ export default function OnlineGame({ onBack, onExit }) {
 
   if (room.view === 'results' && room.game) {
     return shell(
-      <BlindRankResults
+      <AniRankResults
         players={room.players}
         boards={room.game.boards}
         deck={room.deck}
+        axisId={room.axisId}
+        subjectId={room.subjectId}
+        scoring={room.scoring}
         totalScores={room.totalScores}
         departedIds={room.departedIds}
         onPlayAgain={room.returnToLobby}

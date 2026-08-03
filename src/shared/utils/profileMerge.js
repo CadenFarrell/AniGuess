@@ -65,9 +65,38 @@ function matchesGroupIdentity(entry, identity) {
     || franchiseTitleKey(entry.title) === identity.titleKey;
 }
 
+// The per-show facts a saved entry carries beyond its cast. Only ever written
+// from an import, and only these keys — a profile entry is otherwise
+// { id, title, characters }, and every consumer has to keep tolerating an entry
+// that predates this list (they are absent, not null, on an old profile).
+//
+// They exist because a ranking game needs a number per show and the alternative
+// is a network call per round, which would break the "local play touches no
+// network" property CLAUDE.md asks callers to preserve.
+const STAT_KEYS = ['coverImageUrl', 'startDate', 'episodes', 'averageScore', 'popularity'];
+
+function pickStats(imported) {
+  const out = {};
+  for (const key of STAT_KEYS) {
+    if (imported[key] != null) out[key] = imported[key];
+  }
+  return out;
+}
+
+// Fills in stats the entry doesn't have yet, and deliberately does NOT overwrite
+// ones it does. A re-import is the repair path for profiles saved before these
+// fields existed, but it must not clobber a value already stored — the imported
+// group is dated by its earliest season, which is not necessarily what an entry
+// merged from another source should be re-dated to.
+function backfillStats(entry, imported) {
+  for (const [key, value] of Object.entries(pickStats(imported))) {
+    if (entry[key] == null) entry[key] = value;
+  }
+}
+
 // Merges freshly-imported anime/characters into an existing profile. Imported
 // entries are franchise groups: { animeId (canonical AniList id), memberIds,
-// title, characters }.
+// title, characters } plus the STAT_KEYS above.
 //
 // Because a franchise's seasons may already be saved as separate entries from an
 // older import, an existing entry is considered part of the group if it carries
@@ -93,6 +122,7 @@ export function mergeAnimeIntoProfile(profile, importedAnimeList) {
       animeList.push({
         id: identity.canonicalId,
         title: imported.title,
+        ...pickStats(imported),
         characters: imported.characters,
       });
       addedAnime++;
@@ -108,6 +138,7 @@ export function mergeAnimeIntoProfile(profile, importedAnimeList) {
     const [base, ...rest] = matches;
     base.id = identity.canonicalId;
     if (isBetterTitle(imported, base)) base.title = imported.title;
+    backfillStats(base, imported);
     for (const dupe of rest) {
       for (const char of dupe.characters) addCharacterIfNew(base, char);
     }
