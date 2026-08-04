@@ -18,7 +18,7 @@ export default function LocalGame({ onExit }) {
   // the roster instead of asking the same person to be the subject every time.
   const [roundIndex, setRoundIndex] = useState(0);
 
-  function start({ players, sharedOnly, axisId, scoring }, nextRound = 0) {
+  function start({ players, sharedOnly, axisId, scoring, blind }, nextRound = 0) {
     setError(null);
     const axis = getAxis(axisId);
     const { deck, candidates, enough } = buildDeck(players, { axis, sharedOnly });
@@ -32,7 +32,9 @@ export default function LocalGame({ onExit }) {
     const subjectId = isOpinion(axis)
       ? subjectFor(players.map((p) => p.id), nextRound)
       : null;
-    setGame({ players, deck, sharedOnly, axisId, scoring, subjectId });
+    // `blind` rides along in `game` so onPlayAgain, which re-passes the whole
+    // object back into start(), deals the next ten the same way.
+    setGame({ players, deck, sharedOnly, axisId, scoring, blind, subjectId });
     setRoundIndex(nextRound);
     setFinished(null);
     setView('round');
@@ -46,6 +48,7 @@ export default function LocalGame({ onExit }) {
         axisId={game.axisId}
         subjectId={game.subjectId}
         scoring={game.scoring}
+        blind={game.blind}
         onFinish={(result) => { setFinished(result); setView('results'); }}
         onQuit={() => { setGame(null); setView('setup'); }}
       />

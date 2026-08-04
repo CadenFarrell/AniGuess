@@ -20,6 +20,15 @@ export default function AniRankSetup({ onStart, onExit, error }) {
   const [sharedOnly, setSharedOnly] = useState(true);
   const [axisId, setAxisId] = useState(DEFAULT_AXIS_ID);
   const [scoring, setScoring] = useState(true);
+  const [blind, setBlind] = useState(() => getAxis(DEFAULT_AXIS_ID).defaultBlind);
+
+  // Picking a mode resets how it is dealt to that mode's default. Modes differ
+  // enough here that a sticky toggle would silently carry "open" from an opinion
+  // round into a fact one, where seeing all ten is a different game.
+  const handleAxisChange = (id) => {
+    setAxisId(id);
+    setBlind(getAxis(id).defaultBlind);
+  };
 
   const handleImported = (merged) => {
     saveProfile(merged);
@@ -47,9 +56,11 @@ export default function AniRankSetup({ onStart, onExit, error }) {
     <>
       <Backdrop />
       <Screen width="md">
+        {/* The subtitle is true of both deals. The old "one at a time, no
+            takebacks" described blind mode, but the default axis deals open. */}
         <Wordmark
           tone="amber"
-          subtitle="Ten cards, one at a time, no takebacks"
+          subtitle="Ten cards, one board, best at the top"
           className="mb-10"
         >
           AniRank
@@ -117,7 +128,11 @@ export default function AniRankSetup({ onStart, onExit, error }) {
           </Card>
         )}
 
-        <AxisPicker value={axisId} onChange={setAxisId} counts={players.length ? counts : undefined} />
+        <AxisPicker
+          value={axisId}
+          onChange={handleAxisChange}
+          counts={players.length ? counts : undefined}
+        />
 
         <Card title="⚙️ Settings" padding="lg" className="mb-6">
           <Checkbox
@@ -129,6 +144,17 @@ export default function AniRankSetup({ onStart, onExit, error }) {
           <p className="ml-10 mb-4 text-base text-white/50">
             Only use {noun} <em>everyone</em> has on their list. Everyone ranks the same ten,
             so a card only one player knows is a free guess for the rest.
+          </p>
+
+          <Checkbox
+            label="Blind ranking"
+            checked={blind}
+            onChange={(e) => setBlind(e.target.checked)}
+            className="mb-2"
+          />
+          <p className="ml-10 mb-4 text-base text-white/50">
+            Cards arrive one at a time and can&rsquo;t be moved once placed. Turn it off to
+            see all ten at once and arrange them freely before locking in.
           </p>
 
           <Checkbox
@@ -185,7 +211,7 @@ export default function AniRankSetup({ onStart, onExit, error }) {
           variant="primary"
           size="xl"
           fullWidth
-          onClick={() => onStart({ players, sharedOnly, axisId, scoring })}
+          onClick={() => onStart({ players, sharedOnly, axisId, scoring, blind })}
           disabled={!canStart}
         >
           🎮 Start Game

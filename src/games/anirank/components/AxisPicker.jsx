@@ -60,8 +60,13 @@ export default function AxisPicker({ value, onChange, disabled = false, counts }
                     <span className="block truncate font-display text-base font-extrabold text-white">
                       {axis.label}
                     </span>
+                    {/* Naming the top slot here is where the player meets the
+                        board's one rule — before the round, rather than working
+                        it out from a half-filled board mid-turn. */}
                     <span className="block truncate text-sm text-white/50">
                       {axis.items === 'characters' ? 'Characters' : 'Shows'}
+                      {' · #1 = '}
+                      {axis.topLabel}
                     </span>
                   </span>
                   {count != null && (

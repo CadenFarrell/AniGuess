@@ -17,7 +17,15 @@ export default function OnlineLobby({ room }) {
   const [sharedOnly, setSharedOnly] = useState(true);
   const [axisId, setAxisId] = useState(DEFAULT_AXIS_ID);
   const [scoring, setScoring] = useState(true);
+  const [blind, setBlind] = useState(() => getAxis(DEFAULT_AXIS_ID).defaultBlind);
   const [importMode, setImportMode] = useState(null); // null | 'pick' | 'refresh'
+
+  // Picking a mode resets how it is dealt to that mode's default — see the same
+  // handler in AniRankSetup.
+  const handleAxisChange = (id) => {
+    setAxisId(id);
+    setBlind(getAxis(id).defaultBlind);
+  };
 
   const players = room.players ?? [];
   const me = players.find((p) => p.id === room.myPlayerId) ?? null;
@@ -136,7 +144,7 @@ export default function OnlineLobby({ room }) {
           <>
             <AxisPicker
               value={axisId}
-              onChange={setAxisId}
+              onChange={handleAxisChange}
               counts={active.length ? counts : undefined}
             />
 
@@ -150,6 +158,17 @@ export default function OnlineLobby({ room }) {
               <p className="ml-10 mb-4 text-base text-white/50">
                 Only use {noun} <em>everyone</em> has on their list. Everyone ranks the same ten,
                 so a card only one player knows is a free guess for the rest.
+              </p>
+
+              <Checkbox
+                label="Blind ranking"
+                checked={blind}
+                onChange={(e) => setBlind(e.target.checked)}
+                className="mb-2"
+              />
+              <p className="ml-10 mb-4 text-base text-white/50">
+                Cards arrive one at a time and can&rsquo;t be moved once placed. Turn it off to
+                see all ten at once and arrange them freely before locking in.
               </p>
 
               <Checkbox
@@ -186,7 +205,7 @@ export default function OnlineLobby({ room }) {
               variant="primary"
               size="xl"
               fullWidth
-              onClick={() => room.startGame({ sharedOnly, axisId, scoring })}
+              onClick={() => room.startGame({ sharedOnly, axisId, scoring, blind })}
               disabled={!canStart}
             >
               🎮 Start Game

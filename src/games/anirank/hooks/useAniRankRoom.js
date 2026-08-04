@@ -33,6 +33,11 @@ function normalizeGame(game, playerIds) {
     ...game,
     deck,
     cursor: game.cursor ?? 0,
+    // `!== false` rather than `?? true`: a round written before open mode
+    // existed carries no flag at all, and every one of those was blind.
+    blind: game.blind !== false,
+    // Nobody locked in yet is an empty object, which RTDB does not store.
+    locked: game.locked ?? {},
     boards: rules.normalizeBoards(game.boards, playerIds, deck.length || rules.BOARD_SIZE),
   };
 }
@@ -125,14 +130,36 @@ export function useAniRankRoom() {
     await bestEffort(set(ref(db, `rooms/${roomCode}/open`), false));
     await patchState({
       settings,
-      game: rules.startRound(dealtIn, deck, subjectId),
+      game: rules.startRound(dealtIn, deck, subjectId, { blind: settings.blind !== false }),
       roundIndex: roundIndex + 1,
+      // Clearing the banking claim is load-bearing, not tidiness. finishRound
+      // claims a round by writing bankedAt only if it differs from the round's
+      // cursor, and returnToLobby leaves the old value behind — so a second
+      // blind round, which also ends on cursor 10, would find bankedAt already
+      // 10, abort the claim and silently never add its scores. An open round
+      // never moves the cursor off 0, which would make that every round.
+      bankedAt: null,
       view: 'round',
     });
   }, [isHost, roomCode, patchState, bestEffort, rosterRef, setSyncError, state]);
 
   const place = useCallback((slotIndex) => (
     applyGame((g) => rules.placeItem(g, myPlayerId, slotIndex))
+  ), [applyGame, myPlayerId]);
+
+  // The open-round trio. Same single transaction on state/game as `place`, so a
+  // player rearranging their board cannot lose a write from someone else doing
+  // the same at that instant.
+  const placeCard = useCallback((itemId, slotIndex) => (
+    applyGame((g) => rules.placeCard(g, myPlayerId, itemId, slotIndex))
+  ), [applyGame, myPlayerId]);
+
+  const clearSlot = useCallback((slotIndex) => (
+    applyGame((g) => rules.clearSlot(g, myPlayerId, slotIndex))
+  ), [applyGame, myPlayerId]);
+
+  const lockIn = useCallback(() => (
+    applyGame((g) => rules.lockIn(g, myPlayerId))
   ), [applyGame, myPlayerId]);
 
   // Back to the lobby to play again with the same group; reopens the room so
@@ -192,12 +219,12 @@ export function useAniRankRoom() {
     // committed anything — after that, boards were built against a specific
     // person and swapping them would silently rescore work already done, so the
     // round plays out and finalScores returns no key (an unscored reveal).
-    if (game.subjectId && !activeIds.includes(game.subjectId) && game.cursor === 0) {
+    if (game.subjectId && !activeIds.includes(game.subjectId) && rules.roundUntouched(game)) {
       const heir = activeIds[0];
       if (heir) {
         once(`subject:${game.subjectId}:${heir}`, () =>
           applyGame((g) => (
-            g.cursor === 0 && g.subjectId === game.subjectId
+            rules.roundUntouched(g) && g.subjectId === game.subjectId
               ? { patch: { subjectId: heir } }
               : { patch: {} }
           )));
@@ -205,11 +232,16 @@ export function useAniRankRoom() {
       return;
     }
 
-    const done = game.cursor >= game.deck.length;
-    if (done) {
+    // Blind: the deck ran out. Open: everyone still here has locked in — which
+    // is also the gate that unsticks a round whose last player closed their tab.
+    if (rules.roundFinished(game, activeIds)) {
       once('finish', () => finishRound());
       return;
     }
+
+    // An open round has no cursor to move — boards are committed whole, and the
+    // check above is the only thing that ends it.
+    if (rules.isOpen(game)) return;
 
     // Everyone still here has committed this show — reveal the next one.
     if (rules.everyonePlaced(game, activeIds)) {
@@ -221,6 +253,10 @@ export function useAniRankRoom() {
         )));
     }
   }, [roomCode, state, game, myPlayerId, roster, once, applyGame, finishRound]);
+
+  const myBoard = game
+    ? rules.normalizeBoard(game.boards?.[myPlayerId], game.deck.length)
+    : [];
 
   return {
     uid: core.uid, roomCode, myPlayerId,
@@ -244,9 +280,15 @@ export function useAniRankRoom() {
     subject: players.find((p) => p.id === game?.subjectId) ?? null,
     deck: game?.deck ?? [],
     cursor: game?.cursor ?? 0,
+    // Read off the round, not the settings: the round is what the rules act on,
+    // and it is the copy that survived RTDB and normalizeGame's defaulting.
+    open: game ? rules.isOpen(game) : false,
     item: game ? rules.currentItem(game) : null,
-    myBoard: game ? rules.normalizeBoard(game.boards?.[myPlayerId], game.deck.length) : [],
+    myBoard,
+    tray: game ? rules.unplacedCards(game, myPlayerId) : [],
+    boardFull: myBoard.length > 0 && myBoard.every(Boolean),
     iHavePlaced: game ? rules.placedCount(game.boards?.[myPlayerId]) > game.cursor : false,
+    iHaveLockedIn: game ? !!game.locked?.[myPlayerId] : false,
     // Who the round is still waiting on — rendered as names, so a paused board
     // says why rather than just sitting there.
     pendingNames: game
@@ -260,6 +302,6 @@ export function useAniRankRoom() {
     playerStatuses: core.playerStatuses,
     dropping: core.dropping,
     graceMs: core.graceMs,
-    startGame, place, guard,
+    startGame, place, placeCard, clearSlot, lockIn, guard,
   };
 }

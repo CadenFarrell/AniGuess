@@ -14,7 +14,7 @@ export default function AniRankGame({ onExit }) {
     <>
       <Backdrop />
       <Screen center>
-        <Wordmark tone="amber" subtitle="Ten cards, one at a time, no takebacks" className="mb-10">
+        <Wordmark tone="amber" subtitle="Ten cards, one board, one right order" className="mb-10">
           AniRank
         </Wordmark>
         <div className="flex flex-col gap-4">

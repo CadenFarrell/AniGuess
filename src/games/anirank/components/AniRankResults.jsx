@@ -138,12 +138,17 @@ export default function AniRankResults({
 // One player's board as a strip of ten, each slot tinted by whether the card
 // sitting there belongs after the one before it. With no answer key the strip
 // still renders — it just shows what they picked, uncoloured.
+//
+// The strip runs LEFT to right where the board ran TOP to bottom, so it is
+// captioned: the same ten slots turned through ninety degrees is exactly the
+// point at which a reader stops being sure which end was #1.
 function PlayerRow({ board, deck, truth }) {
   const filled = normalizeBoard(board, deck.length);
   const ranks = truth ? rankMap(truth) : null;
   const positionOf = new Map((truth ?? []).map((item, i) => [item.id, i + 1]));
 
   return (
+    <>
     <div className="flex gap-1 overflow-x-auto">
       {filled.map((slot, i) => {
         const prev = filled[i - 1];
@@ -172,5 +177,11 @@ function PlayerRow({ board, deck, truth }) {
         );
       })}
     </div>
+    <div className="mt-1 flex justify-between px-0.5 font-display text-xs font-black
+      tracking-widest text-white/25">
+      <span>#1</span>
+      <span>#{deck.length}</span>
+    </div>
+    </>
   );
 }

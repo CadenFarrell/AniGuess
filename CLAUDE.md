@@ -69,6 +69,17 @@ and online play. **Change game behaviour in `rules.js`, not in the hooks** — a
 `*.test.js` files that cover it are the reason it stays testable without a DOM or a
 network.
 
+**AniRank's board runs top-down: slot 1 is the top of the ranking — the MOST of whatever
+the axis measures.** `trueOrder` sorts *descending* to match, and every axis names its ends
+`topLabel`/`bottomLabel` rather than low/high. That naming is the fix for a real bug, not
+tidiness: `lowLabel`/`highLabel` said nothing about which way a vertical list runs, so the
+board spent a release rendering `← OLDEST` beside the slot that held the newest show. Only
+the comparator knows the direction — `rankMap` ranks by *position in the list it is handed*
+and `scoreBoard` compares adjacent ranks with `<=`, so both are direction-agnostic and a
+future flip means editing one line. `axes.test.js` pins labels to that line by running each
+fact axis's `valueFor` through `trueOrder`; without it a flipped label pair passes the
+entire suite, which is how the two drifted apart in the first place.
+
 ### Online rooms (Firebase Realtime Database)
 
 **The room lifecycle is `shared/hooks/useRoomCore.js`, not per-game.** AniGuess and AniTune

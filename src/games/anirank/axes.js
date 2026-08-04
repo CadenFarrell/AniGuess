@@ -13,6 +13,18 @@
 //
 // `items` decides which pool the deck is drawn from: a profile's shows, or the
 // characters inside them.
+//
+// `defaultBlind` decides which way the round is dealt, and the host can override
+// it per round (see the "Blind ranking" toggle in the setup screens):
+//
+//   true   cards arrive one at a time on a shared cursor and a placed card can
+//          never be moved. Right for facts, where the game IS committing under
+//          pressure without knowing what is still to come.
+//   false  all ten cards are on the table at once and can be rearranged until
+//          the player locks in. Right for opinions — and not merely nicer, since
+//          the subject's own board is the answer key everyone else is scored
+//          against. Dealt blind, that key records the order the cards happened to
+//          arrive in as much as what the subject actually thinks.
 
 import { characterNameKey } from '../../shared/utils/character';
 
@@ -28,16 +40,30 @@ import { characterNameKey } from '../../shared/utils/character';
 // to play this mode" rather than silently dealing a broken round.
 const num = (v) => (Number.isFinite(v) ? v : null);
 
+// Which end of the board is which, and the one rule a new axis must obey:
+//
+//   SLOT 1 IS THE TOP OF THE RANKING — the MOST of whatever this axis measures.
+//
+// So `topLabel` names the biggest `value` and `bottomLabel` the smallest, and
+// rules.js's trueOrder sorts descending to match. The fields are named for the
+// ends of the *board* rather than the ends of the scale on purpose: the previous
+// `lowLabel`/`highLabel` pair said nothing about which way a vertical list runs,
+// and duly ended up pointing the opposite way to the sort.
+//
+// `label` and `prompt` read top-to-bottom for the same reason — a mode called
+// "Worst → Best" above a board whose first slot is the best is a contradiction
+// the player has to resolve mid-round.
 export const AXES = [
   // ---- facts: shows -------------------------------------------------------
   {
     id: 'year',
     kind: 'fact',
     items: 'shows',
+    defaultBlind: true,
     label: 'Release date',
-    prompt: 'Rank these shows from oldest to newest.',
-    lowLabel: 'OLDEST',
-    highLabel: 'NEWEST',
+    prompt: 'Rank these shows newest to oldest.',
+    topLabel: 'NEWEST',
+    bottomLabel: 'OLDEST',
     // A franchise is dated by its first season — summarizeGroupStats stores the
     // earliest member's date, and the deck builder collapses seasons the same way.
     // The 1900 floor rejects AniList's placeholder dates, not real old anime.
@@ -51,10 +77,11 @@ export const AXES = [
     id: 'rated',
     kind: 'fact',
     items: 'shows',
+    defaultBlind: true,
     label: 'AniList score',
-    prompt: 'Rank these shows from lowest to highest AniList score.',
-    lowLabel: 'LOWEST',
-    highLabel: 'HIGHEST',
+    prompt: 'Rank these shows from highest to lowest AniList score.',
+    topLabel: 'HIGHEST',
+    bottomLabel: 'LOWEST',
     valueFor: (show) => num(show?.averageScore),
     format: (v) => `${v}%`,
   },
@@ -62,10 +89,11 @@ export const AXES = [
     id: 'popular',
     kind: 'fact',
     items: 'shows',
+    defaultBlind: true,
     label: 'Popularity',
-    prompt: 'Rank these shows from least to most popular on AniList.',
-    lowLabel: 'LEAST',
-    highLabel: 'MOST',
+    prompt: 'Rank these shows from most to least popular on AniList.',
+    topLabel: 'MOST',
+    bottomLabel: 'LEAST',
     valueFor: (show) => num(show?.popularity),
     format: (v) => `${v.toLocaleString()} members`,
   },
@@ -73,10 +101,11 @@ export const AXES = [
     id: 'length',
     kind: 'fact',
     items: 'shows',
+    defaultBlind: true,
     label: 'Episode count',
-    prompt: 'Rank these shows from shortest to longest.',
-    lowLabel: 'SHORTEST',
-    highLabel: 'LONGEST',
+    prompt: 'Rank these shows from longest to shortest.',
+    topLabel: 'LONGEST',
+    bottomLabel: 'SHORTEST',
     valueFor: (show) => num(show?.episodes),
     format: (v) => `${v} eps`,
   },
@@ -86,10 +115,11 @@ export const AXES = [
     id: 'favourites',
     kind: 'fact',
     items: 'characters',
+    defaultBlind: true,
     label: 'Character popularity',
-    prompt: 'Rank these characters from least to most favourited on AniList.',
-    lowLabel: 'LEAST',
-    highLabel: 'MOST',
+    prompt: 'Rank these characters from most to least favourited on AniList.',
+    topLabel: 'MOST',
+    bottomLabel: 'LEAST',
     valueFor: (char) => num(char?.favourites),
     format: (v) => `${v.toLocaleString()} ♥`,
   },
@@ -101,55 +131,61 @@ export const AXES = [
     id: 'best',
     kind: 'opinion',
     items: 'shows',
-    label: 'Worst → Best',
-    prompt: (name) => `Rank these shows worst to best, as ${name} would.`,
-    lowLabel: 'WORST',
-    highLabel: 'BEST',
+    defaultBlind: false,
+    label: 'Best → Worst',
+    prompt: (name) => `Rank these shows best to worst, as ${name} would.`,
+    topLabel: 'BEST',
+    bottomLabel: 'WORST',
   },
   {
     id: 'overrated',
     kind: 'opinion',
     items: 'shows',
-    label: 'Overrated → Underrated',
-    prompt: (name) => `Rank these from most overrated to most underrated, as ${name} would.`,
-    lowLabel: 'OVERRATED',
-    highLabel: 'UNDERRATED',
+    defaultBlind: false,
+    label: 'Underrated → Overrated',
+    prompt: (name) => `Rank these from most underrated to most overrated, as ${name} would.`,
+    topLabel: 'UNDERRATED',
+    bottomLabel: 'OVERRATED',
   },
   {
     id: 'rewatch',
     kind: 'opinion',
     items: 'shows',
-    label: 'Drop it → Rewatch forever',
-    prompt: (name) => `Rank these from "drop by episode 3" to "rewatch forever", as ${name} would.`,
-    lowLabel: 'DROP IT',
-    highLabel: 'FOREVER',
+    defaultBlind: false,
+    label: 'Rewatch forever → Drop it',
+    prompt: (name) => `Rank these from "rewatch forever" to "drop by episode 3", as ${name} would.`,
+    topLabel: 'FOREVER',
+    bottomLabel: 'DROP IT',
   },
   {
     id: 'fight',
     kind: 'opinion',
     items: 'characters',
-    label: 'Would lose → Would win',
-    prompt: (name) => `Rank these characters from would-lose to would-win in a fight, as ${name} would.`,
-    lowLabel: 'WOULD LOSE',
-    highLabel: 'WOULD WIN',
+    defaultBlind: false,
+    label: 'Would win → Would lose',
+    prompt: (name) => `Rank these characters from would-win to would-lose in a fight, as ${name} would.`,
+    topLabel: 'WOULD WIN',
+    bottomLabel: 'WOULD LOSE',
   },
   {
     id: 'betray',
     kind: 'opinion',
     items: 'characters',
-    label: 'Loyal → Would betray you',
-    prompt: (name) => `Rank these characters from most loyal to most likely to betray you, as ${name} would.`,
-    lowLabel: 'LOYAL',
-    highLabel: 'TRAITOR',
+    defaultBlind: false,
+    label: 'Traitor → Loyal',
+    prompt: (name) => `Rank these characters from most likely to betray you to most loyal, as ${name} would.`,
+    topLabel: 'TRAITOR',
+    bottomLabel: 'LOYAL',
   },
   {
     id: 'roommate',
     kind: 'opinion',
     items: 'characters',
-    label: 'Worst → Best roommate',
-    prompt: (name) => `Rank these characters from worst to best roommate, as ${name} would.`,
-    lowLabel: 'WORST',
-    highLabel: 'BEST',
+    defaultBlind: false,
+    label: 'Best → Worst roommate',
+    prompt: (name) => `Rank these characters from best to worst roommate, as ${name} would.`,
+    topLabel: 'BEST',
+    bottomLabel: 'WORST',
   },
 ];
 

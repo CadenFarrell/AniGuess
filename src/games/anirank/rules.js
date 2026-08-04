@@ -4,20 +4,39 @@
 // transaction online. See CLAUDE.md: change game behaviour here, not in the
 // hooks, or local and online drift apart.
 //
-// The game: ten cards arrive one at a time. Every player commits each one to a
-// slot before the next is revealed, and a placed card never moves. Everyone is
-// on the same card at the same time — that shared cursor is what keeps it blind,
-// since a player who could run ahead would be ranking a list they had already
-// seen in full.
+// The game is dealt one of two ways, chosen per round by `blind` and defaulted
+// per axis (see axes.js):
+//
+//   blind  ten cards arrive one at a time. Every player commits each one to a
+//          slot before the next is revealed, and a placed card never moves.
+//          Everyone is on the same card at the same time — that shared cursor is
+//          what keeps it blind, since a player who could run ahead would be
+//          ranking a list they had already seen in full.
+//   open   all ten are on the table from the start. Cards move between slots and
+//          back to the tray freely until the player locks in, and `cursor` never
+//          moves off 0. The round ends when everyone active has locked in.
+//
+// Only the way boards get FILLED differs. Everything downstream — trueOrder,
+// rankMap, truthFor, scoreBoard, finalScores — reads finished boards and never
+// asks how the cards got there.
+//
+// pendingPlacers is the single branch point between the two, deliberately: every
+// readiness gate in both hooks funnels through it (everyonePlaced delegates to
+// it, local play takes its head as the hot seat, online play renders it as
+// "waiting on…"), so branching once there gives open rounds the same
+// departed-player escape hatches blind rounds already have.
 //
 // What the slots MEAN is not decided here. A card carries a `value` the deck
 // builder stamped on it from the round's axis (see axes.js), and the two modes
 // differ only in where the answer key comes from:
 //
-//   fact     rankMap(trueOrder(deck))  — sort the cards by their value
+//   fact     rankMap(trueOrder(deck))  — sort the cards by their value, biggest
+//                                        first, because slot 1 is the top spot
 //   opinion  rankMap(subject board)    — one player's own board is the key
 //
-// Both collapse to the same { itemId: rank } map, so scoreBoard never branches.
+// Both collapse to the same { itemId: rank } map, so scoreBoard never branches —
+// and rank 0 means "belongs at the top" either way, so nothing below this line
+// has to know which direction trueOrder sorts in.
 
 export const BOARD_SIZE = 10;
 
@@ -70,11 +89,16 @@ export function placedCount(board) {
 // them, ranks the cards as they would. Null for a fact round, and stored on the
 // round rather than derived so a mid-round roster change cannot silently move
 // the answer key out from under boards already committed against it.
-export function startRound(players, deck, subjectId = null) {
+export function startRound(players, deck, subjectId = null, { blind = true } = {}) {
   return {
     deck,
     cursor: 0,
     subjectId,
+    blind,
+    // Who has committed their whole board. Only an open round writes to it — a
+    // blind round's progress is derived from the cursor instead, so there is
+    // nothing to keep in sync.
+    locked: {},
     boards: Object.fromEntries(players.map((p) => [p.id, new Array(deck.length).fill(null)])),
   };
 }
@@ -86,15 +110,29 @@ export function subjectFor(playerIds, roundIndex = 0) {
   return playerIds[roundIndex % playerIds.length];
 }
 
-// The card every player is currently placing.
+// Is this an open round? Stored as `blind`, read as the negative everywhere the
+// open path branches. Missing means blind: rounds written before open mode
+// existed have no flag, and every one of them was blind.
+export function isOpen(state) {
+  return state?.blind === false;
+}
+
+// The card every player is currently placing. Null in an open round, which has
+// no single current card — every caller already null-guards this, because a
+// blind round returns null once the cursor runs off the end of the deck.
 export function currentItem(state) {
+  if (isOpen(state)) return null;
   return state.deck?.[state.cursor] ?? null;
 }
 
-// Who the round is still waiting on for the current show. Local play takes the
-// first of these as "whose turn to pass the device to"; online play renders the
-// whole list as "waiting on…".
+// Who the round is still waiting on. Local play takes the first of these as
+// "whose turn to pass the device to"; online play renders the whole list as
+// "waiting on…".
+//
+// The one place the two modes diverge — see the header. Blind compares each
+// board against the shared cursor; open asks who has not locked in yet.
 export function pendingPlacers(state, playerIds) {
+  if (isOpen(state)) return playerIds.filter((id) => !state.locked?.[id]);
   return playerIds.filter((id) => placedCount(state.boards?.[id]) <= state.cursor);
 }
 
@@ -116,6 +154,86 @@ export function placeItem(state, playerId, slotIndex) {
   return { patch: { boards: { ...state.boards, [playerId]: next } } };
 }
 
+// --- Open rounds -----------------------------------------------------------
+//
+// The three ways a board changes when all ten cards are on the table at once.
+// Each refuses rather than throws for the same reasons placeItem does — a double
+// tap, a slow network replaying a write, or a device still showing a round the
+// room has moved past — plus one more: a blind round must never reach them, so
+// they all check the mode rather than trusting the caller to.
+
+// Puts a specific card in a slot. One rule covers every case the board needs,
+// and it is worth stating plainly because it replaces three:
+//
+//   the card goes in the tapped slot, and whatever was already there takes the
+//   card's old place — its previous slot if it had one, otherwise the tray.
+//
+// So dropping a tray card on an empty slot places, dragging a placed card to an
+// empty slot moves, and tapping two filled slots swaps them. Refusing an
+// occupied slot (and making the player empty it first) was the clumsier version
+// of the same gesture, and made reordering a finished board tedious.
+export function placeCard(state, playerId, itemId, slotIndex) {
+  if (!isOpen(state)) return { patch: {} };             // blind rounds go through placeItem
+  if (state.locked?.[playerId]) return { patch: {} };   // already committed
+
+  const size = state.deck?.length ?? BOARD_SIZE;
+  if (!Number.isInteger(slotIndex) || slotIndex < 0 || slotIndex >= size) return { patch: {} };
+
+  const item = (state.deck ?? []).find((c) => c?.id === itemId);
+  if (!item) return { patch: {} };                      // not a card in this round
+
+  const board = normalizeBoard(state.boards?.[playerId], size);
+  const from = board.findIndex((c) => c?.id === itemId);
+  if (from === slotIndex) return { patch: {} };         // already there — nothing moves
+
+  const next = [...board];
+  const displaced = next[slotIndex] ?? null;
+  next[slotIndex] = item;
+  // Only when the card came off the board does anything land back on it; a card
+  // picked out of the tray sends the one it displaced back to the tray, which is
+  // simply the absence of a slot.
+  if (from >= 0) next[from] = displaced;
+  return { patch: { boards: { ...state.boards, [playerId]: next } } };
+}
+
+// Returns a card to the tray.
+export function clearSlot(state, playerId, slotIndex) {
+  if (!isOpen(state)) return { patch: {} };
+  if (state.locked?.[playerId]) return { patch: {} };
+
+  const size = state.deck?.length ?? BOARD_SIZE;
+  if (!Number.isInteger(slotIndex) || slotIndex < 0 || slotIndex >= size) return { patch: {} };
+
+  const board = normalizeBoard(state.boards?.[playerId], size);
+  if (board[slotIndex] == null) return { patch: {} };
+
+  const next = [...board];
+  next[slotIndex] = null;
+  return { patch: { boards: { ...state.boards, [playerId]: next } } };
+}
+
+// Commits a finished board. The full-board check is what makes `locked` safe to
+// use as the readiness gate: a half-filled board that could lock in would end
+// the round early and, if it belonged to an opinion subject, do it with holes in
+// the answer key.
+export function lockIn(state, playerId) {
+  if (!isOpen(state)) return { patch: {} };
+  if (state.locked?.[playerId]) return { patch: {} };
+
+  const board = normalizeBoard(state.boards?.[playerId], state.deck?.length ?? BOARD_SIZE);
+  if (!board.every(Boolean)) return { patch: {} };
+  return { patch: { locked: { ...state.locked, [playerId]: true } } };
+}
+
+// The cards this player has not placed yet — the tray. Derived from the board
+// rather than stored, so it cannot disagree with what is on the board.
+export function unplacedCards(state, playerId) {
+  const deck = state.deck ?? [];
+  const board = normalizeBoard(state.boards?.[playerId], deck.length || BOARD_SIZE);
+  const placed = new Set(board.filter(Boolean).map((c) => c.id));
+  return deck.filter((c) => !placed.has(c?.id));
+}
+
 // True once everyone still in the room has committed the current show. Takes
 // the *active* ids, never the full roster: a closed tab would otherwise hold
 // the reveal open forever.
@@ -132,11 +250,40 @@ export function advanceCursor(state) {
   return { patch: { cursor: next }, finished };
 }
 
+// Is the round over? Blind rounds run out of deck; open rounds end when everyone
+// still here has locked in. Takes the *active* ids for the same reason
+// everyonePlaced does — waiting on a closed tab would hold the reveal forever.
+export function roundFinished(state, activeIds = []) {
+  if (!state) return false;
+  if (isOpen(state)) return everyonePlaced(state, activeIds);
+  return state.cursor >= (state.deck?.length ?? 0);
+}
+
+// Has nobody committed anything yet? This is the window in which an opinion
+// round can still change subject — boards built while guessing at one person
+// cannot honestly be rescored against another.
+//
+// An open round needs its own answer here, and this is the trap: its cursor sits
+// at 0 for the whole round, so the blind test would call it untouched right up
+// to the reveal and happily swap the answer key out from under ten finished
+// boards.
+export function roundUntouched(state) {
+  if (!state) return false;
+  if (!isOpen(state)) return state.cursor === 0;
+  if (Object.keys(state.locked ?? {}).length > 0) return false;
+  return Object.values(state.boards ?? {}).every((b) => placedCount(b) === 0);
+}
+
 // The order the cards should have been in, for a FACT round. Sorted by the
 // `value` the deck builder stamped from the axis, with the title as a stable
 // tie-break so every device computes the identical answer.
+//
+// DESCENDING, and that is the board's whole orientation: slot 1 is the TOP of
+// the ranking — the most of whatever this axis measures (see ../axes.js, where
+// every axis names its ends `topLabel`/`bottomLabel` to match). The tie-break
+// stays alphabetical because it only has to be deterministic, not meaningful.
 export function trueOrder(deck) {
-  return [...deck].sort((a, b) => a.value - b.value || a.title.localeCompare(b.title));
+  return [...deck].sort((a, b) => b.value - a.value || a.title.localeCompare(b.title));
 }
 
 /**

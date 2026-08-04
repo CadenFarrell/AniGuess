@@ -1,9 +1,10 @@
+import { useState } from 'react';
 import { useAniRankRoom } from './hooks/useAniRankRoom';
 import RoomSetup from '../../shared/components/RoomSetup';
 import { countShows } from '../../shared/utils/profileStats';
 import OnlineLobby from './components/OnlineLobby';
 import AniRankResults from './components/AniRankResults';
-import RankBoard, { CurrentItem, WaitingOn } from './components/RankBoard';
+import RankBoard, { CardTray, CurrentItem, LockInButton, WaitingOn } from './components/RankBoard';
 import { isOpinion, promptFor } from './axes';
 import WaitingScreen from '../aniguess/components/WaitingScreen';
 import { Backdrop, Badge, Banner, GhostButton, HubButton, Screen } from '../../shared/ui';
@@ -13,6 +14,21 @@ import { Backdrop, Badge, Banner, GhostButton, HubButton, Screen } from '../../s
 // sync-error banner, and room.view picks the screen.
 export default function OnlineGame({ onBack, onExit }) {
   const room = useAniRankRoom();
+
+  // Which tray card this device has picked up in an open round. Deliberately
+  // local state and never written to the room: it is a half-finished thought,
+  // and everything under state/ is readable by every member.
+  const [selectedId, setSelectedId] = useState(null);
+
+  // Drop it whenever the room changes screen, so a card held over from the last
+  // round is not still selected in the next one. Adjusted during render rather
+  // than in an effect: React re-runs this component before committing, so no
+  // cascading render — the effect version is what the lint rule forbids.
+  const [seenView, setSeenView] = useState(room.view);
+  if (seenView !== room.view) {
+    setSeenView(room.view);
+    setSelectedId(null);
+  }
 
   if (!room.roomCode) {
     return (
@@ -84,6 +100,33 @@ export default function OnlineGame({ onBack, onExit }) {
   }
 
   if (room.view === 'round' && room.game) {
+    const { open } = room;
+    // In an open round "done" means locked in, not "placed the current card".
+    const committed = open ? room.iHaveLockedIn : room.iHavePlaced;
+    // The whole deck, not the tray — a card lifted back off the board is held
+    // but no longer in the tray. See the same note in AniRankRound.
+    const selectedItem = room.deck.find((c) => c.id === selectedId) ?? null;
+
+    const handlePlace = (slotIndex) => {
+      if (!open) return room.place(slotIndex);
+      if (!selectedId) return;
+      room.placeCard(selectedId, slotIndex);
+      setSelectedId(null);
+    };
+
+    // Tapping a filled slot: put down what you are holding (swapping the two),
+    // or lift this one out if your hands are empty.
+    const handlePickUp = (slotIndex) => {
+      const card = room.myBoard[slotIndex];
+      if (!card) return;
+      if (selectedId === card.id) return setSelectedId(null);
+      if (selectedId) {
+        room.placeCard(selectedId, slotIndex);
+        return setSelectedId(null);
+      }
+      setSelectedId(card.id);
+    };
+
     return shell(
       <>
         <Backdrop />
@@ -106,7 +149,11 @@ export default function OnlineGame({ onBack, onExit }) {
             })}
           </div>
 
-          <CurrentItem item={room.item} index={room.cursor} total={room.deck.length} />
+          {open
+            ? !committed && (
+              <CardTray items={room.tray} selectedId={selectedId} onSelect={setSelectedId} />
+            )
+            : <CurrentItem item={room.item} index={room.cursor} total={room.deck.length} />}
 
           <p className="mb-2 text-center text-base font-bold text-white/70">
             {/* The subject ranks for real — they are the answer key, so telling
@@ -116,7 +163,7 @@ export default function OnlineGame({ onBack, onExit }) {
               : promptFor(room.axis, room.subject?.name ?? 'they')}
           </p>
 
-          {room.iHavePlaced ? (
+          {committed ? (
             <>
               <p className="mb-2 text-center font-display text-lg font-extrabold text-pop-lime">
                 Locked in ✓
@@ -125,18 +172,30 @@ export default function OnlineGame({ onBack, onExit }) {
             </>
           ) : (
             <p className="mb-4 text-center text-base text-white/50">
-              Pick a slot. Once it is placed it cannot be moved.
+              {open
+                ? 'Tap a card then a slot. Tap two slots to swap them — nothing counts until you lock in.'
+                : 'Pick a slot. Once it is placed it cannot be moved.'}
             </p>
           )}
 
           <RankBoard
             board={room.myBoard}
-            item={room.item}
-            disabled={room.iHavePlaced}
-            lowLabel={room.axis.lowLabel}
-            highLabel={room.axis.highLabel}
-            onPlace={room.place}
+            item={open ? selectedItem : room.item}
+            selectedId={open ? selectedId : null}
+            disabled={committed}
+            topLabel={room.axis.topLabel}
+            bottomLabel={room.axis.bottomLabel}
+            onPlace={handlePlace}
+            onClear={open ? room.clearSlot : undefined}
+            onPickUp={open ? handlePickUp : undefined}
           />
+
+          {open && !committed && (
+            <LockInButton
+              ready={room.boardFull}
+              onLockIn={() => { room.lockIn(); setSelectedId(null); }}
+            />
+          )}
 
           <div className="text-center">
             <GhostButton onClick={handleExitToHub}>← Leave game</GhostButton>
