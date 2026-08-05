@@ -8,6 +8,7 @@ const TONES = {
   lime: 'bg-pop-lime text-ink',
   amber: 'bg-pop-amber text-ink',
   blue: 'bg-pop-blue text-ink',
+  teal: 'bg-pop-teal text-ink',
 };
 
 const SIZES = {

@@ -12,6 +12,8 @@ import { Button, Card } from '../ui';
 const TONES = {
   purple: 'text-pop-purple',
   blue: 'text-pop-blue',
+  amber: 'text-pop-amber',
+  teal: 'text-pop-teal',
 };
 
 export default function OnlineIdentityCard({ profile, stat, tone = 'purple', onSwitch, onImport }) {

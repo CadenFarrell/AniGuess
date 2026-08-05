@@ -71,6 +71,13 @@
   --color-pop-amber: #ffc233; /* warnings, scores, the timer */
   --color-pop-blue: #3b9cff; /* asking a question */
 
+  /* DECORATIVE ONLY — a game's identity colour, with no semantic job. The six
+     above were all spoken for by the fourth game: pink, blue and amber name a
+     game each, and purple/lime/red mean whose-turn/yes/no everywhere in the app,
+     so a game wearing one of those would fight the meaning on its own screens.
+     Do not give this one a semantic role later; add another decorative token. */
+  --color-pop-teal: #2fd4c1; /* AniFake */
+
   --font-display: 'Baloo 2', 'Segoe UI', sans-serif;
   --font-sans: 'Nunito', 'Segoe UI', sans-serif;
 

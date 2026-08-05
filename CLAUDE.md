@@ -2,6 +2,21 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Working agreement
+
+**Ask everything in one round before building, then build the whole thing.** Any task, however
+small, starts with the questions needed to pin the spec — an assumption made silently at the
+start becomes work that has to be thrown away and redone. This sets *when* a round happens,
+not how big it is: a one-line tweak earns one question, not a padded set of four.
+
+Use option menus only for genuinely concrete alternatives (2–4 of them); ask open design
+questions — "how should X behave?" — in plain prose, because a menu forces a pick before the
+mechanics are on the table. Both can go in the same round.
+
+After the answers land, run to completion: no approval gates, no progress check-ins. If an
+ambiguity the round missed turns up mid-build, stop and ask rather than guess — but treat that
+as evidence the opening round was too thin.
+
 ## Commands
 
 ```bash
@@ -132,12 +147,33 @@ There are two such nodes, and they are mirror images — pick by who must not se
 | `assignments/{playerId}` | everyone **except** the owner | everyone except the owner | a value about you that you alone must not learn |
 | `secrets/{playerId}` | the owner **only** | any member | a value only you may learn |
 
-`secrets/` currently has no reader. It is deployed ahead of the games that need it
-(Imposter's per-player role, Wavelength's hidden target, Categories' secret category)
-because rules ship globally with `firebase deploy --only database` — landing it early means
-those games are pure client changes. Write is any member, not the host, because "the host"
+`secrets/` is read by AniFake (the dealt card) and is there for Wavelength's hidden target
+and Categories' secret category too. Write is any member, not the host, because "the host"
 is a `state/` value the rules cannot cheaply check, and a room's members are already
 trusted with everything in `state/`.
+
+Three things AniFake learned the hard way, all of which the next `secrets/` consumer
+inherits:
+
+- **`secrets/` is a sibling of `state/`, so `useRoomCore`'s subscription never sees it.**
+  The game hook needs its own `onValue` on `rooms/{code}/secrets/{myPlayerId}`.
+  `useRoom.js`'s `readAssignment` is the precedent — same shape, opposite rule.
+- **Stamp each card with the round, don't clear between rounds.** A clear is N writes that
+  can half-fail and leave the previous answer readable; a `forRound` stamp makes a stale
+  card invisible with no write at all. AniGuess's assignments do the same.
+- **Whoever computes the deal learns it.** There is no server, so one device — the host's —
+  holds the answer in the clear for the length of one function call. `dealRoles` returns it
+  and `startGame` destructures *only* `secrets`, deliberately, so it never reaches React
+  state or the room. That is the ceiling for a serverless party game; moving the deal into
+  a Cloud Function is the real fix.
+
+**Do not hand the reveal to one device.** The obvious design makes the host publish the
+answer key at the end; it breaks when the host *is* the hidden role and breaks worse when
+they leave mid-round. AniFake instead has every device publish only *its own* card once the
+vote closes (`state/game/reveal/{playerId}`) and derives the answer from the published set —
+so nothing about the secret exists in `state/` until it is over, no device is trusted with
+more than it was dealt, and a player who left is identified by elimination rather than
+wedging the room. See `anifake/rules.js`'s `publishCard` / `deriveTruth`.
 
 Two things that bite every time:
 

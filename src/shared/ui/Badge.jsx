@@ -9,6 +9,7 @@ const TONES = {
   red: 'bg-pop-red text-ink border-ink',
   amber: 'bg-pop-amber text-ink border-ink',
   blue: 'bg-pop-blue text-ink border-ink',
+  teal: 'bg-pop-teal text-ink border-ink',
 };
 
 export default function Badge({ tone = 'neutral', className = '', children }) {

@@ -14,6 +14,7 @@ const ACCENTS = {
   lime: { tile: 'bg-pop-lime', hover: 'hover:border-pop-lime' },
   amber: { tile: 'bg-pop-amber', hover: 'hover:border-pop-amber' },
   blue: { tile: 'bg-pop-blue', hover: 'hover:border-pop-blue' },
+  teal: { tile: 'bg-pop-teal', hover: 'hover:border-pop-teal' },
 };
 
 // One game on the menu. Built on `btn-pop` directly rather than <Button> —
