@@ -21,6 +21,7 @@ export default function AniFakeSetup({ onStart, onExit, error }) {
   const [sharedOnly, setSharedOnly] = useState(true);
   const [mode, setMode] = useState(DEFAULT_MODE_ID);
   const [laps, setLaps] = useState(DEFAULT_CLUE_ROUNDS);
+  const [talkMode, setTalkMode] = useState(false);
 
   const handleImported = (merged) => {
     saveProfile(merged);
@@ -144,10 +145,22 @@ export default function AniFakeSetup({ onStart, onExit, error }) {
             onChange={(e) => setSharedOnly(e.target.checked)}
             className="mb-2"
           />
-          <p className="ml-10 text-base text-white/50">
+          <p className="mb-5 ml-10 text-base text-white/50">
             Only use characters <em>everyone</em> has on their list. The whole table gives
             clues about one of them, so a character only one player has seen makes the
             round unplayable for the rest — and unfalsifiable for the fake.
+          </p>
+
+          <Checkbox
+            label="🗣️ Talk it out"
+            checked={talkMode}
+            onChange={(e) => setTalkMode(e.target.checked)}
+            className="mb-2"
+          />
+          <p className="ml-10 text-base text-white/50">
+            Say your clue out loud instead of typing it, and just tap to pass the turn on.
+            Faster round the table — but nothing is written down, so there is no clue list
+            to read back when it is time to vote.
           </p>
         </Card>
 
@@ -193,7 +206,7 @@ export default function AniFakeSetup({ onStart, onExit, error }) {
           variant="primary"
           size="xl"
           fullWidth
-          onClick={() => onStart({ players, sharedOnly, mode, laps })}
+          onClick={() => onStart({ players, sharedOnly, mode, laps, talkMode })}
           disabled={!canStart}
         >
           🎮 Start Game

@@ -25,6 +25,9 @@ export default function GameScreen({
   timerEnabled,
   timerSeconds,
   sharedShowsOnly = true,
+  // Local "talk it out": questions and guesses are spoken, and the table
+  // answers with the buttons. Nothing is typed and nothing is logged.
+  talkMode = false,
 }) {
   const [question, setQuestion] = useState('');
   const [guess, setGuess] = useState('');
@@ -112,11 +115,23 @@ export default function GameScreen({
     setWaitingForAnswer(true);
   };
 
+  // Talk mode has no question to submit, so there is nothing to stop the timer
+  // on: it runs while the question is being asked and stops on the answer,
+  // which is the same clock the typed path gives you.
+  const askAloud = () => {
+    setMode('choose');
+    setWaitingForAnswer(true);
+  };
+
   const answerQuestion = (answer) => {
     clearTimeout(timerRef.current);
     setTimerActive(false);
     setWaitingForAnswer(false);
-    const logEntry = { id: crypto.randomUUID(), type: 'question', text: pendingQuestion, answer };
+    // No `text` in talk mode — the question was spoken and is not recorded, and
+    // an empty string would render as a blank row if the log ever came back.
+    const logEntry = talkMode
+      ? { id: crypto.randomUUID(), type: 'question', answer }
+      : { id: crypto.randomUUID(), type: 'question', text: pendingQuestion, answer };
     setPendingQuestion('');
     onTurnComplete(logEntry);
   };
@@ -147,6 +162,23 @@ export default function GameScreen({
       clearTimeout(timerRef.current);
       setTimerActive(false);
       setGuess('');
+      setTurnOver({ reason: 'wrong', logEntry });
+    }
+  };
+
+  // Talk mode's guess: said out loud, so the table rules on it rather than
+  // matchGuess. A correct one still records the character's real name, because
+  // CorrectGuessScreen and the round-end summary both read that text.
+  const judgeSpokenGuess = (correct) => {
+    const logEntry = correct
+      ? { id: crypto.randomUUID(), type: 'guess', text: character.name, correct: true }
+      : { id: crypto.randomUUID(), type: 'guess', correct: false };
+
+    if (correct) {
+      onCorrectGuess(logEntry);
+    } else {
+      clearTimeout(timerRef.current);
+      setTimerActive(false);
       setTurnOver({ reason: 'wrong', logEntry });
     }
   };
@@ -193,7 +225,12 @@ export default function GameScreen({
       {/* Action Area */}
       {mode === 'choose' && !waitingForAnswer && (
         <div className="mb-5 flex gap-4">
-          <Button variant="info" size="lg" className="flex-1" onClick={() => setMode('question')}>
+          <Button
+            variant="info"
+            size="lg"
+            className="flex-1"
+            onClick={talkMode ? askAloud : () => setMode('question')}
+          >
             ❓ Ask a Question
           </Button>
           <Button variant="primary" size="lg" className="flex-1" onClick={() => setMode('guess')}>
@@ -202,7 +239,9 @@ export default function GameScreen({
         </div>
       )}
 
-      {mode === 'question' && !waitingForAnswer && (
+      {/* Unreachable in talk mode — askAloud jumps straight to the Yes/No card
+          rather than routing through a question to type. */}
+      {mode === 'question' && !talkMode && !waitingForAnswer && (
         <div className="mb-5">
           <Input
             type="text"
@@ -231,7 +270,42 @@ export default function GameScreen({
         </div>
       )}
 
-      {mode === 'guess' && (
+      {mode === 'guess' && talkMode && (
+        <div className="mb-5">
+          <div className="card-pop p-6 text-center">
+            <div className="text-5xl">🗣️</div>
+            <p className="mt-3 font-display text-2xl font-extrabold text-white">
+              {guesser.name}, say your guess out loud
+            </p>
+            <p className="mt-2 text-base text-white/50">
+              Everyone else — did they get it?
+            </p>
+            <div className="mt-6 flex gap-4">
+              <Button
+                variant="success"
+                size="xl"
+                className="flex-1"
+                onClick={() => judgeSpokenGuess(true)}
+              >
+                ✅ Got it
+              </Button>
+              <Button
+                variant="danger"
+                size="xl"
+                className="flex-1"
+                onClick={() => judgeSpokenGuess(false)}
+              >
+                ❌ Nope
+              </Button>
+            </div>
+          </div>
+          <div className="mt-3">
+            <GhostButton onClick={() => setMode('choose')}>← Back</GhostButton>
+          </div>
+        </div>
+      )}
+
+      {mode === 'guess' && !talkMode && (
         <div className="mb-5">
           <Input
             type="text"
@@ -287,9 +361,17 @@ export default function GameScreen({
       {/* Yes / No buttons */}
       {waitingForAnswer && (
         <div className="mb-5">
-          <p className="mb-4 text-center text-base text-white/60">
-            ❓ <span className="font-display text-lg font-extrabold text-white">{pendingQuestion}</span>
-          </p>
+          {talkMode ? (
+            <p className="mb-4 text-center text-base text-white/60">
+              ❓ <span className="font-display text-lg font-extrabold text-white">
+                {guesser.name}, ask your yes/no question out loud
+              </span>
+            </p>
+          ) : (
+            <p className="mb-4 text-center text-base text-white/60">
+              ❓ <span className="font-display text-lg font-extrabold text-white">{pendingQuestion}</span>
+            </p>
+          )}
           <p className="mb-4 text-center text-sm text-white/40">
             Everyone else — answer this question
           </p>
@@ -304,7 +386,10 @@ export default function GameScreen({
         </div>
       )}
 
-      <QuestionLog title={`${guesser.name}'s Question Log`} entries={questionLog} />
+      {/* Talk mode records nothing, so the log would be permanently empty. */}
+      {!talkMode && (
+        <QuestionLog title={`${guesser.name}'s Question Log`} entries={questionLog} />
+      )}
 
       {/* Turn-over acknowledgement — blocks until the device is handed on, so
           the result doesn't vanish the instant the next player's turn loads.
@@ -316,7 +401,9 @@ export default function GameScreen({
           <h2 className="mb-3 font-display text-4xl font-extrabold text-white">
             {turnOver.reason === 'timer' ? "Time's up!" : 'Not quite!'}
           </h2>
-          {turnOver.reason === 'wrong' && (
+          {/* A spoken guess has no text to quote back — the check is on the
+              text, not on the reason, so talk mode simply drops this line. */}
+          {turnOver.reason === 'wrong' && turnOver.logEntry.text && (
             <p className="mb-3 text-xl text-white/60">
               <span className="font-bold text-white">&quot;{turnOver.logEntry.text}&quot;</span>{' '}
               isn&apos;t your character.

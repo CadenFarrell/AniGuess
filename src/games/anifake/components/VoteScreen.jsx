@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import ClueLog from './ClueLog';
 import {
   Backdrop, Badge, Banner, Button, Card, CardRow, Screen, Wordmark,
 } from '../../../shared/ui';
@@ -53,23 +54,15 @@ export default function VoteScreen({
       <Screen width="md">
         <Wordmark tone="teal" size="sm" level={2} className="mb-6">🗳️ Who is the fake?</Wordmark>
 
-        <Card title="What was said" padding="lg" className="mb-6">
-          <div className="flex flex-wrap gap-2">
-            {clues.map((clue, i) => (
-              <span
-                key={`${clue.by}-${i}`}
-                className="rounded-pop-sm border-2 border-white/15 bg-surface-2 px-3 py-2"
-              >
-                <span className="font-display text-xs uppercase tracking-wider text-white/40">
-                  {nameOf(clue.by)}
-                </span>
-                <span className="ml-2 font-display text-lg font-extrabold text-white">
-                  {clue.text}
-                </span>
-              </span>
-            ))}
-          </div>
-        </Card>
+        {/* Empty in a talk-it-out round, where the clues were spoken and never
+            recorded. Dropped rather than shown blank: the table is voting from
+            memory, and an empty "what was said" card suggests the game lost it.
+            This is the hides-it-entirely caller ClueLog's header refers to. */}
+        {clues.length > 0 && (
+          <Card title="What was said" padding="lg" className="mb-6">
+            <ClueLog clues={clues} players={players} />
+          </Card>
+        )}
 
         {error && <Banner tone="danger" className="mb-4">{error}</Banner>}
 

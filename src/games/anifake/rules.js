@@ -162,6 +162,34 @@ export function currentSpeakerId(state) {
   return order[state.turn % order.length];
 }
 
+/**
+ * The clue log split into rounds, oldest first: [{ lap, clues }].
+ *
+ * Lives here rather than in the component because it is the only way it gets
+ * tested — the vitest config is node-env over `*.test.js`, so a .jsx helper
+ * would never run.
+ *
+ * Groups by the `lap` each clue was stamped with at submit time, NOT by
+ * position: skipDepartedTurn can jump the turn counter past a player, so a
+ * round can hold fewer clues than there are players and slicing the flat array
+ * into equal chunks would smear rounds into each other.
+ */
+export function cluesByLap(clues) {
+  const byLap = new Map();
+  for (const clue of clues ?? []) {
+    // A clue written before the field existed reads as round one rather than
+    // vanishing into a group of its own.
+    const lap = clue?.lap ?? 0;
+    if (!byLap.has(lap)) byLap.set(lap, []);
+    byLap.get(lap).push(clue);
+  }
+  // Numeric sort, explicitly: the default comparator is lexicographic, which
+  // orders round 10 before round 2 — reachable now that MAX_CLUE_ROUNDS is 10.
+  return [...byLap.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([lap, said]) => ({ lap, clues: said }));
+}
+
 export function countWords(text) {
   return (text || '').trim().split(/\s+/).filter(Boolean).length;
 }
@@ -182,6 +210,20 @@ export function submitClue(state, playerId, text) {
       turn: state.turn + 1,
     },
   };
+}
+
+// Talk mode's turn-advance: the clue was said out loud, so there is nothing to
+// record. Deliberately a sibling of submitClue rather than a flag on it —
+// submitClue's whole contract is "reject anything that is not a real clue", and
+// a mode flag that made it accept nothing would undo every guard it has.
+//
+// Nothing else in the round has to know: the lap, the speaker and cluesDone are
+// all derived from `turn`, so a round played this way simply ends with an empty
+// `clues` array. The past-the-end case needs no guard of its own —
+// currentSpeakerId is null once the lap is done, so no real id can match it.
+export function passTurn(state, playerId) {
+  if (currentSpeakerId(state) !== playerId) return { patch: {} };
+  return { patch: { turn: state.turn + 1 } };
 }
 
 // The lap cannot wait on someone who has closed their tab. Walks forward past

@@ -175,6 +175,49 @@ describe('the clue lap', () => {
     expect(rules.skipDepartedTurn(s, ['a']).patch).toEqual({});
   });
 
+  it('groups the log into rounds, oldest first', () => {
+    const clues = [
+      { by: 'a', text: 'one', lap: 0 },
+      { by: 'b', text: 'two', lap: 0 },
+      { by: 'a', text: 'three', lap: 1 },
+    ];
+    expect(rules.cluesByLap(clues)).toEqual([
+      { lap: 0, clues: [clues[0], clues[1]] },
+      { lap: 1, clues: [clues[2]] },
+    ]);
+  });
+
+  it('orders round 10 after round 2, not before it', () => {
+    // The default sort comparator is lexicographic, which puts "10" before "2".
+    // Reachable the moment MAX_CLUE_ROUNDS went past 9.
+    const clues = [
+      { by: 'a', text: 'late', lap: 9 },
+      { by: 'a', text: 'early', lap: 1 },
+    ];
+    expect(rules.cluesByLap(clues).map((r) => r.lap)).toEqual([1, 9]);
+  });
+
+  it('keeps a round that lost a speaker as its own group', () => {
+    // skipDepartedTurn can jump the counter, so a round can hold fewer clues
+    // than there are players. Grouping by the stamp rather than by position is
+    // what stops that smearing one round into the next.
+    const clues = [
+      { by: 'a', text: 'one', lap: 0 },
+      { by: 'c', text: 'two', lap: 0 },
+      { by: 'a', text: 'three', lap: 1 },
+      { by: 'c', text: 'four', lap: 1 },
+    ];
+    expect(rules.cluesByLap(clues).map((r) => r.clues.length)).toEqual([2, 2]);
+  });
+
+  it('treats an unstamped clue as round one, and survives an empty log', () => {
+    expect(rules.cluesByLap([{ by: 'a', text: 'old' }])).toEqual([
+      { lap: 0, clues: [{ by: 'a', text: 'old' }] },
+    ]);
+    expect(rules.cluesByLap([])).toEqual([]);
+    expect(rules.cluesByLap(undefined)).toEqual([]);
+  });
+
   it('holds the walk together at the top of the settable range', () => {
     // The setting is a typed number now, not a three-option dropdown, so the
     // upper end is reachable in a way it wasn't. Same assertion as the exact
@@ -200,6 +243,46 @@ describe('the clue lap', () => {
   it('clamps a laps count above the cap, and drops a fractional one', () => {
     expect(rules.startRound(['a', 'b', 'c'], { laps: 999 }).laps).toBe(rules.MAX_CLUE_ROUNDS);
     expect(rules.startRound(['a', 'b', 'c'], { laps: 2.7 }).laps).toBe(2);
+  });
+});
+
+describe('passTurn (talk mode)', () => {
+  it('advances the turn and records nothing', () => {
+    const s = round({ order: ['a', 'b', 'c'], laps: 1, turn: 0, clues: [] });
+    const { patch } = rules.passTurn(s, 'a');
+    // The absent `clues` key is the whole point: a spoken clue leaves no trace,
+    // so the vote screen has nothing to read back.
+    expect(patch).toEqual({ turn: 1 });
+    expect(rules.currentSpeakerId({ ...s, ...patch })).toBe('b');
+  });
+
+  it('refuses a pass from anyone but the current speaker', () => {
+    const s = round({ order: ['a', 'b', 'c'], turn: 0 });
+    expect(rules.passTurn(s, 'b').patch).toEqual({});
+  });
+
+  it('ends the lap after exactly one pass per speaker per lap', () => {
+    let s = round({ order: ['a', 'b', 'c'], laps: 2, turn: 0 });
+    for (let i = 0; i < 6; i++) {
+      s = { ...s, ...rules.passTurn(s, rules.currentSpeakerId(s)).patch };
+    }
+    expect(rules.cluesDone(s)).toBe(true);
+    expect(s.clues).toEqual([]);
+  });
+
+  it('is a no-op once the lap is done', () => {
+    // currentSpeakerId is null here, so no real id matches and the turn cannot
+    // run past the end — passTurn needs no bound of its own.
+    const s = round({ order: ['a', 'b', 'c'], laps: 1, turn: 3 });
+    expect(rules.passTurn(s, 'a').patch).toEqual({});
+  });
+
+  it('leaves clues already said in a mixed round untouched', () => {
+    const s = round({ order: ['a', 'b', 'c'], laps: 1, turn: 0 });
+    const afterClue = { ...s, ...rules.submitClue(s, 'a', 'loud').patch };
+    const afterPass = { ...afterClue, ...rules.passTurn(afterClue, 'b').patch };
+    expect(afterPass.clues).toEqual([{ by: 'a', text: 'loud', lap: 0 }]);
+    expect(rules.currentSpeakerId(afterPass)).toBe('c');
   });
 });
 

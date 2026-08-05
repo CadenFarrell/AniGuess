@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import SecretCard from './SecretCard';
+import ClueLog from './ClueLog';
 import { countWords } from '../rules';
 import {
   Backdrop, Badge, Banner, Button, Card, GhostButton, Input, Screen, Wordmark,
@@ -23,12 +24,17 @@ export default function ClueRound({
   lap = 0,
   laps = 1,
   local = false,
+  // Local "talk it out": the clue is said out loud and never recorded. Defaults
+  // off, so the online path through this same component is untouched.
+  talkMode = false,
+  turn = 0,
+  total = 0,
   onSubmit,
+  onPass,
   onQuit,
   error,
 }) {
   const [text, setText] = useState('');
-  const nameOf = (id) => players.find((p) => p.id === id)?.name ?? id;
 
   const words = countWords(text);
   const overLimit = words > wordLimit;
@@ -61,30 +67,45 @@ export default function ClueRound({
           Say too little and nobody believes you; say too much and the fake learns it too.
         </p>
 
-        <Card title={`Clues (${clues.length})`} padding="lg" className="mb-6">
-          {clues.length === 0 && (
-            <p className="text-white/40">Nothing said yet.</p>
-          )}
-          <div className="flex flex-wrap gap-2">
-            {clues.map((clue, i) => (
-              <span
-                key={`${clue.by}-${i}`}
-                className="rounded-pop-sm border-2 border-white/15 bg-surface-2 px-3 py-2"
-              >
-                <span className="font-display text-xs uppercase tracking-wider text-white/40">
-                  {nameOf(clue.by)}
-                </span>
-                <span className="ml-2 font-display text-lg font-extrabold text-white">
-                  {clue.text}
-                </span>
-              </span>
-            ))}
-          </div>
-        </Card>
+        {/* Nothing is recorded in talk mode, so the log is dropped rather than
+            left standing empty — a permanently blank card reads as a bug. What
+            replaces it is the only progress signal left: how far round the
+            table the turn has got. */}
+        {talkMode ? (
+          <p className="mb-6 text-center font-display text-lg font-extrabold text-white/40">
+            Clue {Math.min(turn + 1, total)} of {total}
+          </p>
+        ) : (
+          <Card title={`Clues (${clues.length})`} padding="lg" className="mb-6">
+            {clues.length === 0 && (
+              <p className="text-white/40">Nothing said yet.</p>
+            )}
+            <ClueLog clues={clues} players={players} />
+          </Card>
+        )}
 
         {error && <Banner tone="danger" className="mb-4">{error}</Banner>}
 
-        {isMyTurn ? (
+        {isMyTurn && talkMode ? (
+          <Card padding="lg" className="border-pop-teal text-center">
+            <div className="text-5xl">🗣️</div>
+            <p className="mt-3 font-display text-2xl font-extrabold text-white">
+              {speaker?.name ?? ''}, say your {wordLimit === 1 ? 'word' : 'clue'} out loud
+            </p>
+            <p className="mt-2 text-white/50">
+              Everyone heard it — tap when you&apos;re done and the turn moves on.
+            </p>
+            <Button
+              variant="success"
+              size="xl"
+              fullWidth
+              className="mt-6"
+              onClick={onPass}
+            >
+              ✅ Said it
+            </Button>
+          </Card>
+        ) : isMyTurn ? (
           <Card padding="lg" className="border-pop-teal">
             <p className="mb-3 font-display text-lg font-extrabold text-white">
               {local ? `${speaker?.name ?? ''}, your clue` : 'Your clue'}

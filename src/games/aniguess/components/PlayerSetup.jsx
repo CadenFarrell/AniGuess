@@ -72,6 +72,7 @@ export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayer
   const [twoStepRandom, setTwoStepRandom] = useState(false);
   const [timerEnabled, setTimerEnabled] = useState(false);
   const [sharedShowsOnly, setSharedShowsOnly] = useState(true);
+  const [talkMode, setTalkMode] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(60);
   const [pointsPerPosition, setPointsPerPosition] = useState([3, 2, 1, 0]);
 
@@ -225,8 +226,19 @@ export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayer
             label="Shared shows only"
             checked={sharedShowsOnly}
             onChange={(e) => setSharedShowsOnly(e.target.checked)}
-            className="mb-5"
+            className="mb-4"
           />
+          <Checkbox
+            label="🗣️ Talk it out"
+            checked={talkMode}
+            onChange={(e) => setTalkMode(e.target.checked)}
+            className="mb-2"
+          />
+          <p className="mb-5 ml-10 text-base text-white/50">
+            Ask your questions and say your guess out loud — the table answers with the
+            buttons. Nothing is typed and nothing is logged, so there is no question
+            history to look back at.
+          </p>
 
           {timerEnabled && (
             <div className="mb-5 flex items-center gap-3 text-lg text-white/70">
@@ -269,7 +281,10 @@ export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayer
           fullWidth
           onClick={() => onStartGame({
             players,
-            settings: { timerEnabled, timerSeconds, pointsPerPosition, sharedShowsOnly, twoStepRandom },
+            settings: {
+              timerEnabled, timerSeconds, pointsPerPosition, sharedShowsOnly, twoStepRandom,
+              talkMode,
+            },
           })}
           disabled={!canStart}
         >

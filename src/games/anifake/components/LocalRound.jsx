@@ -107,7 +107,11 @@ export default function LocalRound({ players, pool, settings, onFinish, onQuit }
       lap={round.lap}
       laps={settings.laps ?? 1}
       local
+      talkMode={Boolean(settings.talkMode)}
+      turn={round.state.turn}
+      total={round.totalTurns}
       onSubmit={round.submitClue}
+      onPass={round.passTurn}
       onQuit={onQuit}
     />
   );

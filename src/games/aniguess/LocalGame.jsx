@@ -159,6 +159,7 @@ function App({ onExit }) {
           timerEnabled={gameSession.settings.timerEnabled}
           timerSeconds={gameSession.settings.timerSeconds}
           sharedShowsOnly={gameSession.settings.sharedShowsOnly ?? true}
+          talkMode={gameSession.settings.talkMode ?? false}
         />
       )}
 

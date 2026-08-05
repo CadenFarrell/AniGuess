@@ -18,7 +18,7 @@ export default function LocalGame({ onExit }) {
   // hook whose lazy initializer has already run.
   const [roundKey, setRoundKey] = useState(0);
 
-  const start = ({ players, sharedOnly, mode, laps }) => {
+  const start = ({ players, sharedOnly, mode, laps, talkMode }) => {
     setError(null);
     const pool = eligibleCharacters(players, { sharedOnly });
     const needed = minPool(mode);
@@ -28,7 +28,11 @@ export default function LocalGame({ onExit }) {
       setError(`Only ${pool.length} characters to draw from — ${mode} mode needs ${needed}.`);
       return;
     }
-    setGame({ players, pool, sharedOnly, settings: { mode, laps, wordLimit: 1 } });
+    // talkMode rides in settings rather than on the round: it decides which
+    // screen renders, never what the rules accept, so it must not reach
+    // rules.startRound. onPlayAgain spreads settings straight back in here, so
+    // a re-deal keeps it without any extra plumbing.
+    setGame({ players, pool, sharedOnly, settings: { mode, laps, wordLimit: 1, talkMode } });
     setFinished(null);
     setRoundKey((k) => k + 1);
     setView('round');

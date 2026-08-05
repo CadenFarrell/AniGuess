@@ -32,6 +32,13 @@ export function useAniFakeRound(players, pool, { mode = 'blind', laps = 1, wordL
     apply((s) => rules.submitClue(s, rules.currentSpeakerId(s), text));
   }, [apply]);
 
+  // Talk mode's "said it" button. Resolves the speaker from the state it is
+  // advancing, exactly as submitClue does, so a double tap cannot skip whoever
+  // the first tap already moved the turn to.
+  const passTurn = useCallback(() => {
+    apply((s) => rules.passTurn(s, rules.currentSpeakerId(s)));
+  }, [apply]);
+
   const castVote = useCallback((voterId, targetId) => {
     apply((s) => rules.castVote(s, voterId, targetId));
   }, [apply]);
@@ -61,6 +68,10 @@ export function useAniFakeRound(players, pool, { mode = 'blind', laps = 1, wordL
     ...truth,
     speaker: players.find((p) => p.id === rules.currentSpeakerId(state)) ?? null,
     lap: rules.lapOf(state),
+    // From the round, not from settings: startRound clamps `laps` into range,
+    // and the order is fixed at deal time — so a typed lap count out of bounds
+    // or a roster that changed underneath cannot desync the progress readout.
+    totalTurns: rules.totalTurns(state),
     cluesDone: rules.cluesDone(state),
     everyoneVoted: rules.everyoneVoted(state, playerIds),
     needsSteal: rules.needsSteal(state, deal.fakeId),
@@ -68,6 +79,7 @@ export function useAniFakeRound(players, pool, { mode = 'blind', laps = 1, wordL
     // mean keying on a `truth` object rebuilt every render anyway.
     scores: rules.scoreRound(state, truth),
     submitClue,
+    passTurn,
     castVote,
     submitSteal,
   };
