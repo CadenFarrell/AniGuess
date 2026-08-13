@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { games } from './registry';
+import ErrorBoundary from '../shared/components/ErrorBoundary';
 import ListManager from '../shared/components/ListManager';
 import ProfileButton from '../shared/components/ProfileButton';
 import ProfilePicker from '../shared/components/ProfilePicker';
@@ -90,7 +91,19 @@ export default function HubScreen() {
   const active = games.find((g) => g.id === gameId);
   if (active) {
     const Game = active.Component;
-    return <Game onExit={() => setGameId(null)} />;
+    // Its own boundary, so a render crash inside one game costs that game
+    // rather than the arcade. Without it the root boundary caught everything
+    // and the only way out was a reload — which meant any bug in the newest
+    // game read to a player as the whole app being broken.
+    //
+    // Keyed by game id so the caught state cannot outlive the game that
+    // produced it; going back to the menu unmounts the boundary anyway, and
+    // the key makes that true even if this branch is ever reused.
+    return (
+      <ErrorBoundary key={active.id} onBack={() => setGameId(null)}>
+        <Game onExit={() => setGameId(null)} />
+      </ErrorBoundary>
+    );
   }
 
   if (editingListId) {
