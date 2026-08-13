@@ -5,6 +5,7 @@ import SettingsFooter from '../../../shared/components/SettingsFooter';
 import { useGamePrefs } from '../../../shared/hooks/useGamePrefs';
 import { profileFingerprint } from '../../../shared/utils/profileStats';
 import AxisPicker from './AxisPicker';
+import FormatOption from './FormatOption';
 import { useCustomPrompts } from '../hooks/useCustomPrompts';
 import { eligibleItems, opinionPoolCounts } from '../utils/deck';
 import { DEFAULT_PREFS, axisIdOf, resolveSavedAxis } from '../prefs';
@@ -33,6 +34,7 @@ export default function OnlineLobby({ room }) {
   const [blind, setBlind] = useState(
     () => (axisIdOf(savedAxis) === prefs.axisId ? prefs.blind : getAxis(savedAxis).defaultBlind)
   );
+  const [format, setFormat] = useState(prefs.format);
   const [importMode, setImportMode] = useState(null); // null | 'pick' | 'refresh'
 
   // Picking a mode resets how it is dealt to that mode's default — see the same
@@ -42,11 +44,21 @@ export default function OnlineLobby({ room }) {
     setBlind(getAxis(spec).defaultBlind);
   };
 
-  const remembered = { sharedOnly, scoring, blind, axisId: axisIdOf(axis) };
+  // Online offers TWO formats where local offers three. Building a list is solo
+  // and takes an hour, so the room's version of the tier half is publish-and-
+  // compare rather than a builder — which means the S–D-vs-1..N choice has
+  // nothing to act on here. Flipping into this half therefore restores whichever
+  // tier format is remembered rather than picking one, so using the lobby never
+  // silently rewrites a choice only the local builder can express.
+  const comparing = format !== 'round';
+  const savedTierFormat = prefs.format !== 'round' ? prefs.format : 'tiers';
+
+  const remembered = { sharedOnly, scoring, blind, format, axisId: axisIdOf(axis) };
 
   const applyDefaults = () => {
     setSharedOnly(DEFAULT_PREFS.sharedOnly);
     setScoring(DEFAULT_PREFS.scoring);
+    setFormat(DEFAULT_PREFS.format);
     handleAxisChange(DEFAULT_PREFS.axisId);
     resetPrefs();
   };
@@ -92,7 +104,14 @@ export default function OnlineLobby({ room }) {
 
   const eligible = counts[resolved.id] ?? 0;
   const enough = eligible >= BOARD_SIZE;
-  const canStart = active.length >= 2 && everyoneHasShows && enough;
+  // Comparing has no deck to fill and no answer key, so the only requirement is
+  // somebody to compare with. It does not gate on anyone having a list either:
+  // publishing happens after Start, and a lobby that refused to open because
+  // nobody had built one yet would be unopenable for a room where everyone
+  // intends to build one.
+  const canStart = comparing
+    ? active.length >= 2
+    : active.length >= 2 && everyoneHasShows && enough;
 
   return (
     <>
@@ -173,6 +192,46 @@ export default function OnlineLobby({ room }) {
 
         {room.isHost && (
           <>
+            {/* Above the mode picker because it decides how much of the picker
+                applies — the same order and the same reason as AniRankSetup. */}
+            <Card title="🎲 Format" padding="lg" className="mb-6">
+              <div className="flex flex-col gap-2">
+                <FormatOption
+                  active={!comparing}
+                  onClick={() => setFormat('round')}
+                  title="🎲 Round of ten"
+                  hint="Ten random cards, everyone ranks the same board, scored against an answer key."
+                />
+                <FormatOption
+                  active={comparing}
+                  onClick={() => setFormat(savedTierFormat)}
+                  title="📊 Compare tier lists"
+                  hint="Everyone sends a list they already built, and the room sees where you agree."
+                />
+              </div>
+            </Card>
+
+            {/* None of the round options mean anything to a comparison: there is
+                no deal to make blind, no answer key to score against, and each
+                published list already carries the axis it was built with. An
+                inert control is worse than an absent one — see AniRankSetup. */}
+            {comparing ? (
+              <Card padding="lg" className="mb-6">
+                <p className="text-base text-white/60">
+                  Lists are built in local play and saved to each player&rsquo;s own device.
+                  Start, and everyone picks one to send.
+                </p>
+                <p className="mt-3 text-sm text-white/30">
+                  You&apos;re the host — your settings apply to everyone.
+                </p>
+                <SettingsFooter
+                  values={remembered}
+                  defaults={DEFAULT_PREFS}
+                  onReset={applyDefaults}
+                />
+              </Card>
+            ) : (
+              <>
             <AxisPicker
               value={axis}
               onChange={handleAxisChange}
@@ -236,6 +295,8 @@ export default function OnlineLobby({ room }) {
                   : sharedOnly ? ` Turn off “Shared ${noun} only”, or import matching titles.` : ''}
               </Banner>
             )}
+              </>
+            )}
 
             <Button
               variant="primary"
@@ -243,11 +304,13 @@ export default function OnlineLobby({ room }) {
               fullWidth
               onClick={() => {
                 savePrefs(remembered);
-                room.startGame({ sharedOnly, axis, scoring, blind });
+                const settings = { sharedOnly, axis, scoring, blind, format };
+                if (comparing) room.startCompare(settings);
+                else room.startGame(settings);
               }}
               disabled={!canStart}
             >
-              🎮 Start Game
+              {comparing ? '📊 Open the comparison' : '🎮 Start Game'}
             </Button>
           </>
         )}

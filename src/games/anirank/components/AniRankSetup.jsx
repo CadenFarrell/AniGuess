@@ -5,6 +5,7 @@ import ProfilePicker from '../../../shared/components/ProfilePicker';
 import SettingsFooter from '../../../shared/components/SettingsFooter';
 import { useGamePrefs } from '../../../shared/hooks/useGamePrefs';
 import AxisPicker from './AxisPicker';
+import FormatOption from './FormatOption';
 import { useCustomPrompts } from '../hooks/useCustomPrompts';
 import { eligibleItems, opinionPoolCounts } from '../utils/deck';
 import { DEFAULT_PREFS, axisIdOf, resolveSavedAxis } from '../prefs';
@@ -328,19 +329,3 @@ export default function AniRankSetup({ onStart, error, onBack }) {
 
 // One format. Same treatment as AxisPicker's AxisButton so the two cards read as
 // one set of choices rather than two unrelated widgets.
-function FormatOption({ active, onClick, title, hint }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={`focus-pop rounded-pop-sm border-2 px-3 py-2.5 text-left transition-colors
-        ${active
-          ? 'border-pop-amber bg-pop-amber/20'
-          : 'border-white/10 bg-surface-2/40 hover:border-white/30'}`}
-    >
-      <span className="block font-display text-base font-extrabold text-white">{title}</span>
-      <span className="block text-sm text-white/50">{hint}</span>
-    </button>
-  );
-}

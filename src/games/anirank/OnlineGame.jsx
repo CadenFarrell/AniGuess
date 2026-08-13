@@ -3,6 +3,7 @@ import { useAniRankRoom } from './hooks/useAniRankRoom';
 import RoomSetup from '../../shared/components/RoomSetup';
 import { countShows } from '../../shared/utils/profileStats';
 import OnlineLobby from './components/OnlineLobby';
+import RoomTiers from './RoomTiers';
 import AniRankResults from './components/AniRankResults';
 import RankBoard, { CardTray, CurrentItem, LockInButton, WaitingOn } from './components/RankBoard';
 import { isOpinion, promptFor } from './axes';
@@ -97,6 +98,12 @@ export default function OnlineGame({ onBack, onExit }) {
 
   if (room.view === 'lobby') {
     return shell(<OnlineLobby room={room} />);
+  }
+
+  // The room's other half. No `room.game` guard, unlike every branch below:
+  // there is no round here, and startCompare explicitly nulls `game`.
+  if (room.view === 'tiers') {
+    return shell(<RoomTiers room={room} />);
   }
 
   if (room.view === 'round' && room.game) {

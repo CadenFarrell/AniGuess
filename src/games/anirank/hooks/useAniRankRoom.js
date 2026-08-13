@@ -4,6 +4,7 @@ import { getFirebaseDb } from '../../../shared/services/firebase';
 import { useRoomCore } from '../../../shared/hooks/useRoomCore';
 import { buildDeck } from '../utils/deck';
 import { getAxis, isOpinion } from '../axes';
+import { normalizeList } from '../tiers';
 import * as rules from '../rules';
 
 const ROOM_KEY = 'anirank_online_room';
@@ -69,6 +70,20 @@ const normalizeState = (val) => {
     roundIndex: val.roundIndex ?? 0,
     players,
     game: normalizeGame(val.game, players.map((p) => p.id)),
+    // The lists players have published to compare. normalizeList is the same
+    // repair useTierLists runs on every localStorage read, and it doubles as the
+    // RTDB normalizer for free: a row nobody put a card in is stored as
+    // `{ id, label }` with no `cards` at all, because RTDB drops empty arrays,
+    // and normalizeList's keep() already coerces a non-array to []. So the trap
+    // is handled by the function that had to handle it anyway.
+    //
+    // Built from what is STORED, never from the roster. Rebuilding a keyed
+    // collection from the active players deletes a departed player's entry on
+    // the very next write — and their list is the thing the room came here to
+    // compare. Only the "has everyone published?" gate filters to active.
+    tierLists: Object.fromEntries(
+      Object.entries(val.tierLists ?? {}).map(([id, list]) => [id, normalizeList(list)])
+    ),
   };
 };
 
@@ -155,6 +170,53 @@ export function useAniRankRoom() {
       view: 'round',
     });
   }, [isHost, roomCode, patchState, bestEffort, rosterRef, setSyncError, state]);
+
+  /**
+   * Open the room's other half: everyone publishes a tier list they already
+   * built, and the room compares them.
+   *
+   * Its own function rather than a branch inside startGame, because none of
+   * startGame applies — there is no deck to build, no subject to pick, no
+   * board size to check and nothing to bank. What the two share is only the
+   * settings write.
+   *
+   * `tierLists: null` clears whatever the last session published. Carrying them
+   * over would silently compare a list somebody sent two games ago — including
+   * one from a player who has since left, which nothing on screen would
+   * distinguish from a list they just chose.
+   *
+   * The room deliberately stays open. Publishing is not a turn, so a player
+   * arriving late can still send a list and be compared; a round closes joins
+   * because a deck was already dealt without them.
+   */
+  const startCompare = useCallback(async (settings) => {
+    if (!isHost) return;
+    return patchState({ settings, game: null, tierLists: null, view: 'tiers' });
+  }, [isHost, patchState]);
+
+  /**
+   * Publish MY list into the room, replacing whatever I sent before.
+   *
+   * Returns false on a failed write, matching the convention AniFake's applyGame
+   * settled on: the caller renders a banner and the button stays pressable, so a
+   * dropped packet costs a tap rather than leaving someone permanently listed as
+   * not having published.
+   */
+  const publishList = useCallback((list) => {
+    if (!list) return Promise.resolve(false);
+    const db = getFirebaseDb();
+    // Normalized on the way out as well as on the way in. The list came from
+    // localStorage, which an older build may have written in an older shape, and
+    // publishing a shape the readers repair differently is how two devices end
+    // up comparing lists that are not the same list.
+    return set(
+      ref(db, `rooms/${roomCode}/state/tierLists/${myPlayerId}`),
+      normalizeList(list)
+    ).then(() => true).catch((e) => {
+      setSyncError(e?.message || 'Could not publish your list — check your connection.');
+      return false;
+    });
+  }, [roomCode, myPlayerId, setSyncError]);
 
   const place = useCallback((slotIndex) => (
     applyGame((g) => rules.placeItem(g, myPlayerId, slotIndex))
@@ -323,6 +385,11 @@ export function useAniRankRoom() {
     playerStatuses: core.playerStatuses,
     dropping: core.dropping,
     graceMs: core.graceMs,
+    // The compare half. `tierLists` is keyed by player id and holds everyone who
+    // has published, including players who have since left — see normalizeState.
+    tierLists: state?.tierLists ?? {},
+    myList: state?.tierLists?.[myPlayerId] ?? null,
+    startCompare, publishList,
     startGame, place, placeCard, clearSlot, lockIn, guard,
   };
 }

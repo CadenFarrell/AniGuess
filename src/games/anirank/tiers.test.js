@@ -62,6 +62,76 @@ describe('normalizeList', () => {
   });
 });
 
+// Publishing a list into a room sends it through Realtime Database, which does
+// not store empty arrays or empty objects — so a list comes back in a shape no
+// local save ever produces. normalizeList is what useAniRankRoom's
+// normalizeState leans on to repair it, which is only true if it actually
+// handles these; the alternative is a second normalizer that can disagree with
+// this one about what a list is.
+describe('normalizeList over an RTDB round trip', () => {
+  // What RTDB gives back: any key whose value was [] or {} is simply absent.
+  const throughRtdb = (value) => {
+    if (Array.isArray(value)) {
+      return value.length === 0 ? undefined : value.map(throughRtdb);
+    }
+    if (value && typeof value === 'object') {
+      const out = {};
+      for (const [k, v] of Object.entries(value)) {
+        const stripped = throughRtdb(v);
+        if (stripped !== undefined) out[k] = stripped;
+      }
+      return Object.keys(out).length === 0 ? undefined : out;
+    }
+    return value;
+  };
+
+  it('keeps an empty row that RTDB dropped the cards array from', () => {
+    const sent = list([['S', ['a']], ['A', []], ['B', ['b']]]);
+    // The middle row survives as { id, label } with no `cards` at all.
+    const stored = throughRtdb(sent);
+    expect(stored.rows[1].cards).toBeUndefined();
+
+    const back = normalizeList(stored);
+    expect(rowLabels(back)).toEqual(['S', 'A', 'B']);
+    expect(rowCards(back)).toEqual([['a'], [], ['b']]);
+  });
+
+  it('rebuilds a list where every row came back empty', () => {
+    const back = normalizeList(throughRtdb(list([['S', []], ['A', []]])));
+    expect(rowLabels(back)).toEqual(['S', 'A']);
+    expect(rowCards(back)).toEqual([[], []]);
+  });
+
+  it('survives a completely empty list, which RTDB stores as nothing', () => {
+    const back = normalizeList(throughRtdb(newList({ name: 'Empty' })));
+    expect(back.rows).toHaveLength(DEFAULT_TIER_LABELS.length);
+    expect(placedIds(back)).toEqual([]);
+  });
+
+  it('round-trips a populated list unchanged', () => {
+    const sent = list([['S', ['a', 'b']], ['A', ['c']]]);
+    expect(normalizeList(throughRtdb(sent))).toEqual(sent);
+  });
+
+  it('round-trips a ranked list, keeping its single row', () => {
+    const sent = ranked(['a', 'b', 'c']);
+    const back = normalizeList(throughRtdb(sent));
+    expect(back.rows).toHaveLength(1);
+    expect(back.rows[0].id).toBe(RANKED_ROW_ID);
+    expect(back.rows[0].cards).toEqual(['a', 'b', 'c']);
+  });
+
+  // The whole point of publishing: two devices that repaired the same stored
+  // blob must be comparing the same list.
+  it('agrees with itself after a round trip, so a comparison is unaffected', () => {
+    const a = list([['S', ['a']], ['A', []], ['B', ['b', 'c']]]);
+    const b = list([['S', ['a', 'b']], ['A', []], ['B', ['c']]]);
+    const direct = compareLists(a, b);
+    const viaRtdb = compareLists(normalizeList(throughRtdb(a)), normalizeList(throughRtdb(b)));
+    expect(viaRtdb).toEqual(direct);
+  });
+});
+
 describe('newList', () => {
   it('takes items and the axis id off the axis it was given', () => {
     const l = newList({ name: 'All-time', format: 'tiers', axis: { id: 'fight', items: 'characters' } });
