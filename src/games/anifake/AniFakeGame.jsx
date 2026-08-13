@@ -2,17 +2,22 @@ import { useState } from 'react';
 import LocalGame from './LocalGame';
 import OnlineGame from './OnlineGame';
 import { firebaseEnabled } from '../../shared/services/firebase';
-import { Backdrop, Button, GhostButton, Screen, Wordmark } from '../../shared/ui';
+import { Backdrop, Button, HubButton, Screen, Wordmark } from '../../shared/ui';
 
 export default function AniFakeGame({ onExit }) {
   const [mode, setMode] = useState(null); // null | 'local' | 'online'
 
-  if (mode === 'local') return <LocalGame onExit={onExit} />;
+  // Same onBack OnlineGame has always had: local play could otherwise only leave
+  // by the Hub button, so switching to online meant a full round-trip through it.
+  if (mode === 'local') return <LocalGame onExit={onExit} onBack={() => setMode(null)} />;
   if (mode === 'online') return <OnlineGame onBack={() => setMode(null)} onExit={onExit} />;
 
   return (
     <>
       <Backdrop />
+      {/* The menu is an in-game screen too, so the way home stays in the same
+          corner here as it does everywhere past it. */}
+      <HubButton onClick={onExit} />
       <Screen center>
         <Wordmark
           tone="teal"
@@ -35,9 +40,6 @@ export default function AniFakeGame({ onExit }) {
           >
             🌐 Play Online {!firebaseEnabled && '(not configured)'}
           </Button>
-          <div className="mt-2 text-center">
-            <GhostButton onClick={onExit}>← Back to hub</GhostButton>
-          </div>
         </div>
       </Screen>
     </>

@@ -2,14 +2,19 @@ import { useEffect, useState } from 'react';
 import { useAniRankRound } from '../hooks/useAniRankRound';
 import RankBoard, { CardTray, CurrentItem, LockInButton, PlacerBanner } from './RankBoard';
 import { isOpinion, promptFor } from '../axes';
-import { Backdrop, GhostButton, HubButton, Screen } from '../../../shared/ui';
+import { Backdrop, GhostButton, Screen } from '../../../shared/ui';
 
 // Local round orchestration: hands the pure round hook to the board, and calls
 // onFinish once the round is over.
+//
+// onQuit drops back to setup, and that is all it does. It used to be wired to a
+// "🏠 Hub" button here as well, which is why that button spent a release
+// returning to setup instead of the hub; leaving the game is now LocalGame's
+// one fixed Hub button, over every local view.
 export default function AniRankRound({
-  players, deck, axisId, subjectId, scoring, blind, onFinish, onQuit,
+  players, deck, axis: axisSpec, subjectId, scoring, blind, onFinish, onQuit,
 }) {
-  const round = useAniRankRound(players, deck, { axisId, subjectId, scoring, blind });
+  const round = useAniRankRound(players, deck, { axis: axisSpec, subjectId, scoring, blind });
   const { finished, state, scores, axis, open } = round;
   const subject = players.find((p) => p.id === subjectId) ?? null;
 
@@ -67,7 +72,6 @@ export default function AniRankRound({
 
   return (
     <>
-      <HubButton onClick={onQuit} confirm="Quit this round? The board will be lost." />
       <Backdrop />
       <Screen width="md">
         <PlacerBanner

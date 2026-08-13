@@ -121,12 +121,18 @@ export async function findAnimeByAniListId(anilistId, { signal } = {}) {
   return null;
 }
 
-// Themes for one anime, with the audio file attached. Keyed by slug, not by
-// numeric id — /anime/{id} is a 404, the show route wants /anime/{slug}.
-// Returns the raw anime object including `animethemes`.
+// Themes for one anime, with the audio file and the song's performers attached.
+// Keyed by slug, not by numeric id — /anime/{id} is a 404, the show route wants
+// /anime/{slug}. Returns the raw anime object including `animethemes`.
+//
+// `animethemes.song.artists` is one extra nesting level on a request we were
+// making anyway, so it costs nothing beyond payload — and it is the difference
+// between a reveal that names the band and one that doesn't. Changing this
+// include changes the shape of what buildQuestions caches, which is why that
+// cache key carries a version; bump it alongside any further change here.
 export async function fetchAnimeThemes(slug, { signal } = {}) {
   const json = await animethemesRequest(`/anime/${encodeURIComponent(slug)}`, {
-    include: 'animethemes.animethemeentries.videos.audio,animethemes.song',
+    include: 'animethemes.animethemeentries.videos.audio,animethemes.song.artists',
   }, { signal });
   return json?.anime ?? null;
 }

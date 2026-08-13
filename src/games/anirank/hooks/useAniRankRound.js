@@ -10,8 +10,10 @@ import { getAxis, isOpinion } from '../axes';
 // device places at once. It needs no branch for open rounds: the seat is the
 // head of rules.pendingPlacers, which in an open round means "first player who
 // has not locked in", so locking in passes the device on by itself.
-export function useAniRankRound(players, deck, { axisId, subjectId, scoring = true, blind = true } = {}) {
-  const axis = getAxis(axisId);
+export function useAniRankRound(players, deck, options = {}) {
+  const { subjectId, scoring = true, blind = true } = options;
+  // A spec, not an id: a built-in's id or a custom prompt's whole definition.
+  const axis = getAxis(options.axis);
   const opinion = isOpinion(axis);
   const [state, setState] = useState(
     () => rules.startRound(players, deck, opinion ? subjectId : null, { blind })

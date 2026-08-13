@@ -8,27 +8,57 @@ import { Badge, Button, GhostButton } from '../../../shared/ui';
 // answers stay hidden here until the reveal so nobody copies.
 export default function OnlineSimultaneousRound({
   players, questions, question, game, myPlayerId,
-  iHaveAnswered, clipStarted,
+  iHaveAnswered, iAmOut = false, lives = null, eliminated = [], clipStarted,
   onSubmit, onReveal,
 }) {
   const answers = game.answers || {};
-  const submittedCount = players.filter((p) => answers[p.id]).length;
-  const waitingOn = players.filter((p) => !answers[p.id]);
+  // Only players still in the running count toward the gate or the "waiting on"
+  // line: an eliminated player will never lock in, so naming them would read as
+  // the room waiting on someone who has nothing left to do.
+  const contenders = players.filter((p) => !eliminated.includes(p.id));
+  const submittedCount = contenders.filter((p) => answers[p.id]).length;
+  const waitingOn = contenders.filter((p) => !answers[p.id]);
 
   // Who's locked in — names only, never their guess or whether it was right.
   const strip = (
     <div className="mt-6 flex flex-wrap justify-center gap-2">
       {players.map((p) => {
+        const out = eliminated.includes(p.id);
         const locked = Boolean(answers[p.id]);
         return (
-          <Badge key={p.id} tone={locked ? 'lime' : 'neutral'}>
-            {locked ? '🔒' : '✍️'} {p.name}
+          <Badge
+            key={p.id}
+            tone={out ? 'red' : locked ? 'lime' : 'neutral'}
+            className={out ? 'opacity-60' : ''}
+          >
+            {out ? '💀' : locked ? '🔒' : '✍️'} {p.name}
             {p.id === myPlayerId ? ' (you)' : ''}
+            {lives && !out && (
+              <span className="ml-1">{'♥'.repeat(Math.max(0, lives[p.id] ?? 0))}</span>
+            )}
           </Badge>
         );
       })}
     </div>
   );
+
+  // Knocked out, but still in the room. Spectating is a real state rather than a
+  // dead screen: they keep watching the clips and the reveals, and the room does
+  // not wait on them.
+  if (iAmOut) {
+    return (
+      <div className="mt-6 text-center">
+        <div className="mb-3 text-5xl">💀</div>
+        <p className="font-display text-xl font-extrabold text-white">You&apos;re out</p>
+        <p className="mt-1 text-white/50">
+          Stick around — {waitingOn.length
+            ? `${waitingOn.map((p) => p.name).join(', ')} still to answer.`
+            : 'revealing…'}
+        </p>
+        {strip}
+      </div>
+    );
+  }
 
   if (iHaveAnswered) {
     return (
@@ -60,7 +90,7 @@ export default function OnlineSimultaneousRound({
         Which anime is this?
       </p>
       <p className="mb-4 text-center text-sm text-white/30">
-        Everyone types at once — {submittedCount}/{players.length} locked in.
+        Everyone types at once — {submittedCount}/{contenders.length} locked in.
       </p>
       <GuessInput
         key={question.id}

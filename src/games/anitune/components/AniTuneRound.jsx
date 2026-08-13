@@ -4,22 +4,25 @@ import RaceRound from './RaceRound';
 import SimultaneousRound from './SimultaneousRound';
 import QuestionReveal from './QuestionReveal';
 import { useAniTuneRound } from '../hooks/useAniTuneRound';
-import { RACE } from '../rules';
-import { Backdrop, Badge, GhostButton, HubButton, Screen } from '../../../shared/ui';
+import { isRace, hasLives, isEliminated } from '../rules';
+import { formatPoints } from '../../../shared/utils/deadline';
+import { Backdrop, Badge, GhostButton, Screen, TimerBar } from '../../../shared/ui';
 
 // Orchestrates one round: scoreboard, clip, and whichever mode's input area is
 // in play. All the game logic lives in ../rules.js via useAniTuneRound — this
 // component only decides what to render for the current phase.
 //
-// The two exits go to different places and are deliberately kept separate:
-// onBackToSetup re-deals with the same players, onQuitToHub leaves the game.
+// onBackToSetup re-deals with the same players. Leaving the game entirely is not
+// this component's business: LocalGame renders the one fixed "🏠 Hub" button
+// over every local view, so the exit stays in the same corner on all of them.
 export default function AniTuneRound({
-  round, players, questions, clipSeconds, mode, onFinish, onBackToSetup, onQuitToHub,
+  round, players, questions, clipSeconds, playbackRate = 1, mode, settings = {},
+  onFinish, onBackToSetup,
 }) {
   const {
-    state, activeId, isLastQuestion,
+    state, activeId, isLastQuestion, clock, setQuestion, openWindow,
     buzz, resolveBuzz, giveUp, startGuessing, beginEntry, submitAnswer, advance,
-  } = useAniTuneRound(players, mode, round.length);
+  } = useAniTuneRound(players, mode, round.length, settings);
 
   // Which question's clip has nothing left to give — either its window ran out
   // or it never loaded at all. Stored as an index rather than a flag so it
@@ -33,6 +36,13 @@ export default function AniTuneRound({
   // handed over; the person actually typing may replay it.
   const paused = state.phase === 'buzzed' || state.phase === 'handoff';
   const clipDone = clipDoneIndex === state.index;
+  const race = isRace(mode);
+  const lastManStanding = hasLives(mode);
+
+  // The expiry rule needs the question to grade the blank answers it records,
+  // and it fires from a timer rather than from a handler — so hand the current
+  // one down rather than making the hook reach back up for it.
+  useEffect(() => { setQuestion(question); }, [question, setQuestion]);
 
   // Warm the next clip — metadata alone took ~2s in testing, which would
   // otherwise be dead air between questions. Delayed rather than immediate:
@@ -53,9 +63,22 @@ export default function AniTuneRound({
     };
   }, [state.index, round]);
 
+  // Lives can end the round early, so "is this the last one" is a question only
+  // the rules can answer — nextQuestion reports it, and a finished patch is
+  // empty, which is how a last-one-standing round stops without running the
+  // remaining clips.
   const next = () => {
-    if (isLastQuestion) onFinish(state.scores);
-    else advance();
+    if (advance()) {
+      onFinish({
+        scores: state.scores,
+        lives: state.lives,
+        eliminated: state.eliminated,
+        // How many clips actually played. Not round.length: Lives can finish the
+        // round early, leaving dealt-but-unheard questions the recap must not
+        // list.
+        playedCount: state.index + 1,
+      });
+    }
   };
 
   const ranked = useMemo(
@@ -68,35 +91,49 @@ export default function AniTuneRound({
   return (
     <>
       <Backdrop />
-      {/* Guarded: unlike AniGuess there is no saved session to resume back
-          into, so leaving really does discard the round. */}
-      <HubButton
-        onClick={onQuitToHub}
-        confirm="Return to the hub? The scores so far will be lost."
-      />
       <Screen width="md">
-        {/* Scoreboard */}
+        {/* Scoreboard. In Lives the hearts matter more than the points, so they
+            sit beside the name and a knocked-out player is struck through rather
+            than dropped — being out is a standing, not an absence. */}
         <div className="mb-6 flex flex-wrap justify-center gap-2">
-          {ranked.map((p) => (
-            <Badge key={p.id} tone={p.id === activeId ? 'purple' : 'neutral'}>
-              {p.name} {state.scores[p.id] || 0}
-            </Badge>
-          ))}
+          {ranked.map((p) => {
+            const out = lastManStanding && isEliminated(state, p.id);
+            return (
+              <Badge
+                key={p.id}
+                tone={out ? 'red' : p.id === activeId ? 'purple' : 'neutral'}
+                className={out ? 'opacity-60' : ''}
+              >
+                {p.name} {formatPoints(state.scores[p.id] || 0)}
+                {lastManStanding && (
+                  <span className="ml-1">
+                    {out ? '💀' : '♥'.repeat(Math.max(0, state.lives?.[p.id] ?? 0))}
+                  </span>
+                )}
+              </Badge>
+            );
+          })}
         </div>
 
         <p className="mb-1 text-center text-base text-white/40">
           Question {state.index + 1} of {round.length}
         </p>
         <h2 className="mb-6 text-center font-display text-3xl font-extrabold text-white">
-          {mode === RACE ? 'Buzz in 🔔' : 'Everyone guesses 🤫'}
+          {race ? 'Buzz in 🔔' : lastManStanding ? 'Last one standing 💀' : 'Everyone guesses 🤫'}
         </h2>
 
         <ClipPlayer
           key={question.id}
           src={question.audioUrl}
           seconds={clipSeconds}
+          fraction={question.clipFraction}
+          playbackRate={playbackRate}
           revealed={revealed}
           paused={paused}
+          // The scoring window opens with the music, not with the deal — the
+          // clip can take seconds to load off a cold CDN, and starting the clock
+          // before anyone can hear anything would score patience.
+          onStarted={openWindow}
           onWindowEnded={() => setClipDoneIndex(state.index)}
           // A clip the CDN never served would otherwise strand race mode: with
           // nothing to listen to and no window to run out, the only way on
@@ -104,7 +141,19 @@ export default function AniTuneRound({
           onUnplayable={() => setClipDoneIndex(state.index)}
         />
 
-        {!revealed && mode === RACE && (
+        {/* The guess clock, distinct from the clip's own progress bar above:
+            that one is how much song is left, this is how long you have. They
+            are deliberately different lengths. */}
+        {!revealed && state.deadlineAt != null && (
+          <TimerBar
+            className="mt-4"
+            secondsLeft={clock.secondsLeft}
+            fraction={clock.fraction}
+            label={state.phase === 'buzzed' ? 'Time to answer' : 'Time to guess'}
+          />
+        )}
+
+        {!revealed && race && (
           <RaceRound
             players={players}
             questions={questions}
@@ -117,7 +166,7 @@ export default function AniTuneRound({
           />
         )}
 
-        {!revealed && mode !== RACE && (
+        {!revealed && !race && (
           <SimultaneousRound
             players={players}
             questions={questions}
@@ -125,6 +174,8 @@ export default function AniTuneRound({
             entryOrder={state.entryOrder}
             entryIndex={state.entryIndex}
             answers={state.answers}
+            lives={lastManStanding ? state.lives : null}
+            eliminated={state.eliminated}
             onStartGuessing={startGuessing}
             onReady={beginEntry}
             onSubmit={(text) => submitAnswer(question, text)}
@@ -137,6 +188,8 @@ export default function AniTuneRound({
             mode={mode}
             players={players}
             answers={state.answers}
+            windowMs={state.windowMs}
+            lives={lastManStanding ? state.lives : null}
             onNext={next}
             nextLabel={isLastQuestion ? 'See results →' : 'Next question →'}
           />

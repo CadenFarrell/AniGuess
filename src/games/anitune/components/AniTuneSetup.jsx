@@ -2,18 +2,16 @@ import { useState } from 'react';
 import { useProfileStore } from '../../../shared/context/profileContext';
 import AniListImport from '../../../shared/components/AniListImport';
 import ProfilePicker from '../../../shared/components/ProfilePicker';
-import { getEligibleAnimeList } from '../utils/questionPool';
-import { RACE, SIMULTANEOUS } from '../rules';
+import SettingsFooter from '../../../shared/components/SettingsFooter';
+import { useGamePrefs } from '../../../shared/hooks/useGamePrefs';
+import AniTuneSettings from './AniTuneSettings';
+import { eligibleCount } from '../utils/questionPool';
+import { DEFAULT_PREFS } from '../prefs';
 import {
-  Backdrop, Badge, Banner, Button, Card, CardRow, Checkbox, Field, GhostButton, Input, Screen, Wordmark,
+  Backdrop, Badge, Banner, Button, Card, CardRow, Screen, Wordmark,
 } from '../../../shared/ui';
 
-const MODES = [
-  { id: RACE, icon: '🔔', label: 'Race', blurb: 'First correct answer takes the point. Miss and you’re out for that song.' },
-  { id: SIMULTANEOUS, icon: '🤫', label: 'Everyone guesses', blurb: 'Pass the device round. Everyone who gets it right scores.' },
-];
-
-export default function AniTuneSetup({ onStart, onExit, preparing, progress, error }) {
+export default function AniTuneSetup({ onStart, preparing, progress, error, onBack }) {
   const { activeId, activeProfile, saveProfile } = useProfileStore();
   // Your main profile is already seated; the picker adds the rest of the couch.
   const [players, setPlayers] = useState(() => activeProfile ? [activeProfile] : []);
@@ -22,12 +20,19 @@ export default function AniTuneSetup({ onStart, onExit, preparing, progress, err
   // import path at all — it told you to go and do it in AniGuess, which is a
   // dead end for anyone who only wants to play AniTune.
   const [importTarget, setImportTarget] = useState(null);
-  const [mode, setMode] = useState(RACE);
-  const [sharedSongsOnly, setSharedSongsOnly] = useState(true);
-  const [includeOpenings, setIncludeOpenings] = useState(true);
-  const [includeEndings, setIncludeEndings] = useState(true);
-  const [roundSize, setRoundSize] = useState(10);
-  const [clipSeconds, setClipSeconds] = useState(10);
+  // Seeded from whatever this device last started a game with, not from the
+  // literal defaults — see shared/hooks/useGamePrefs.js.
+  //
+  // One object rather than a useState per key. At six settings the split was
+  // fine; at seventeen it is a list nobody keeps in sync with the lobby's copy,
+  // which is exactly the drift AniTuneSettings was extracted to stop.
+  const { prefs, savePrefs, resetPrefs } = useGamePrefs('anitune', DEFAULT_PREFS);
+  const [settings, setSettings] = useState(prefs);
+
+  const applyDefaults = () => {
+    setSettings(DEFAULT_PREFS);
+    resetPrefs();
+  };
 
   // Persist to the shared profile store *and* to this screen's roster, so the
   // "N shows in play" line and the Start gate update without a remount.
@@ -37,19 +42,19 @@ export default function AniTuneSetup({ onStart, onExit, preparing, progress, err
     setImportTarget(null);
   };
 
-  const eligible = getEligibleAnimeList(players, { sharedSongsOnly });
+  const eligible = eligibleCount(players, settings);
   const everyoneHasShows = players.every((p) => (p.animeList || []).length > 0);
   const canStart =
     players.length >= 1 &&
     everyoneHasShows &&
-    eligible.length > 0 &&
-    (includeOpenings || includeEndings) &&
+    eligible > 0 &&
+    (settings.includeOpenings || settings.includeEndings) &&
     !preparing;
 
   return (
     <>
       <Backdrop />
-      <Screen width="md">
+      <Screen width="md" onBack={onBack}>
         <Wordmark
           tone="blue"
           subtitle="Name the anime from its opening or ending"
@@ -125,95 +130,25 @@ export default function AniTuneSetup({ onStart, onExit, preparing, progress, err
           </Card>
         )}
 
-        {/* Mode picker. aria-pressed rather than a radio group because these are
-            two big tappable blocks, not a form control. */}
-        <div className="mb-6 grid gap-3 sm:grid-cols-2">
-          {MODES.map((m) => {
-            const selected = mode === m.id;
-            return (
-              <button
-                key={m.id}
-                onClick={() => setMode(m.id)}
-                disabled={preparing}
-                aria-pressed={selected}
-                className={`focus-pop rounded-pop border-2 p-4 text-left transition-colors disabled:opacity-40
-                  ${selected
-                    ? 'border-pop-blue bg-pop-blue/15'
-                    : 'border-white/15 bg-surface hover:border-white/30'}`}
-              >
-                <span className="text-2xl">{m.icon}</span>
-                <p className="mt-1 font-display text-lg font-extrabold text-white">{m.label}</p>
-                <p className="mt-1 text-sm text-white/50">{m.blurb}</p>
-              </button>
-            );
-          })}
+        <AniTuneSettings
+          players={players}
+          values={settings}
+          disabled={preparing}
+          onChange={(patch) => setSettings((s) => ({ ...s, ...patch }))}
+        />
+
+        <div className="mb-6">
+          <SettingsFooter values={settings} defaults={DEFAULT_PREFS} onReset={applyDefaults} />
         </div>
-
-        <Card title="⚙️ Settings" padding="lg" className="mb-6">
-          <Checkbox
-            label="Shared songs only"
-            checked={sharedSongsOnly}
-            disabled={preparing}
-            onChange={(e) => setSharedSongsOnly(e.target.checked)}
-            className="mb-2"
-          />
-          {/* ml-10 lines the note up with the label, clearing the 7-unit box
-              plus its 3-unit gap. */}
-          <p className="mb-5 ml-10 text-base text-white/50">
-            Only use shows <em>everyone</em> has on their list, so nobody is guessing blind.
-          </p>
-
-          <div className="mb-5 flex flex-wrap gap-x-8 gap-y-3">
-            <Checkbox
-              label="Openings"
-              checked={includeOpenings}
-              disabled={preparing}
-              onChange={(e) => setIncludeOpenings(e.target.checked)}
-            />
-            <Checkbox
-              label="Endings"
-              checked={includeEndings}
-              disabled={preparing}
-              onChange={(e) => setIncludeEndings(e.target.checked)}
-            />
-          </div>
-
-          <div className="flex gap-4">
-            <Field label="Questions" htmlFor="anitune-round-size" className="flex-1">
-              <Input
-                id="anitune-round-size"
-                type="number"
-                min={1}
-                max={50}
-                value={roundSize}
-                disabled={preparing}
-                onChange={(e) => setRoundSize(Math.max(1, parseInt(e.target.value) || 1))}
-                className="text-lg"
-              />
-            </Field>
-            <Field label="Clip length (s)" htmlFor="anitune-clip-seconds" className="flex-1">
-              <Input
-                id="anitune-clip-seconds"
-                type="number"
-                min={3}
-                max={30}
-                value={clipSeconds}
-                disabled={preparing}
-                onChange={(e) => setClipSeconds(Math.max(3, parseInt(e.target.value) || 3))}
-                className="text-lg"
-              />
-            </Field>
-          </div>
-        </Card>
 
         {players.length > 0 && (
           <p className="mb-4 text-center text-base text-white/50">
-            {eligible.length} show{eligible.length === 1 ? '' : 's'} in play
-            {sharedSongsOnly && players.length > 1 && ' (shared by everyone)'}
+            {eligible} show{eligible === 1 ? '' : 's'} in play
+            {settings.sharedSongsOnly && players.length > 1 && ' (shared by everyone)'}
           </p>
         )}
 
-        {players.length > 1 && sharedSongsOnly && eligible.length === 0 && (
+        {players.length > 1 && settings.sharedSongsOnly && eligible === 0 && (
           <Banner tone="warning" className="mb-4">
             ⚠️ No shows in common — turn off &ldquo;Shared songs only&rdquo; or import more lists.
           </Banner>
@@ -263,17 +198,14 @@ export default function AniTuneSetup({ onStart, onExit, preparing, progress, err
           variant="primary"
           size="xl"
           fullWidth
-          onClick={() => onStart({
-            players, mode, sharedSongsOnly, includeOpenings, includeEndings, roundSize, clipSeconds,
-          })}
+          onClick={() => {
+            savePrefs(settings);
+            onStart({ players, ...settings });
+          }}
           disabled={!canStart}
         >
           {preparing ? 'Preparing…' : '🎮 Start Game'}
         </Button>
-
-        <div className="mt-4 text-center">
-          <GhostButton onClick={onExit} disabled={preparing}>← Back to hub</GhostButton>
-        </div>
       </Screen>
     </>
   );

@@ -324,11 +324,31 @@ export function truthFor(state, { opinion = false } = {}) {
   return board.every(Boolean) ? board : null;
 }
 
-// Scores one finished board against an answer key.
+// Scores one finished board against an answer key: Kendall tau, every pair of
+// cards rather than only the neighbouring ones.
 //
-// `ordered` — adjacent pairs left in the right relative order, out of nine. The
-// headline score, and deliberately forgiving: one card in the wrong place costs
-// a point or two rather than shifting everything after it.
+// `concordant` — pairs the player got the right way round, out of 45 on a ten
+// card board. The score.
+//
+// This used to count only the nine ADJACENT pairs, and that was the bug behind
+// the whole reveal being unreadable. Nine of the forty-five relationships is not
+// a measurement of a ranking: a card could sit nine slots from home and cost at
+// most two points, because only its two neighbours ever noticed. A board dealt
+// by a random number generator scored 6/9 — 67% — for work nobody did. Worse, it
+// made the reveal impossible to draw honestly, because "these two are a pair" is
+// a fact about where you happened to drop them, not about the ranking.
+//
+// Counting every pair is proportional instead: being one slot out costs one
+// comparison, being nine out costs nine. It stays forgiving where it should —
+// dragging one card the length of the board costs 9 of 45, against 2 of 9 under
+// the old rule, so a single mistake is no more punished than before — and it
+// never cascades, because a displaced card is not re-charged for the cards it
+// pushed along.
+//
+// `ra <= rb`, not `<`, and that single character is the tie forgiveness: cards
+// sharing a value share a rank (see rankMap), so a fact round where two shows
+// aired the same year accepts either order and is never docked. It is also why
+// this function still knows nothing about which direction trueOrder sorts in.
 //
 // `exact` — slots holding the card that truly belongs there. Reported for
 // interest, not scored, because with ties it is not always achievable.
@@ -338,14 +358,23 @@ export function scoreBoard(board, deck, truth) {
   const key = truth ?? trueOrder(deck ?? []);
   const ranks = rankMap(key);
 
-  let ordered = 0;
-  for (let i = 0; i < size - 1; i++) {
-    const a = filled[i];
-    const b = filled[i + 1];
-    if (!a || !b) continue;
-    const ra = ranks[a.id];
-    const rb = ranks[b.id];
-    if (ra != null && rb != null && ra <= rb) ordered++;
+  let concordant = 0;
+  let inversions = 0;
+  // `comparisons` is counted rather than assumed to be 45: an unfinished board
+  // is scored on the pairs it actually has, so the denominator has to be real.
+  let comparisons = 0;
+  for (let i = 0; i < size; i++) {
+    for (let j = i + 1; j < size; j++) {
+      const a = filled[i];
+      const b = filled[j];
+      if (!a || !b) continue;
+      const ra = ranks[a.id];
+      const rb = ranks[b.id];
+      if (ra == null || rb == null) continue;
+      comparisons++;
+      if (ra <= rb) concordant++;
+      else inversions++;
+    }
   }
 
   let exact = 0;
@@ -353,8 +382,128 @@ export function scoreBoard(board, deck, truth) {
     if (filled[i] && key[i] && filled[i].id === key[i].id) exact++;
   }
 
-  const perfect = ordered === size - 1;
-  return { ordered, exact, perfect, score: ordered };
+  // Fullness is checked explicitly. The old `ordered === size - 1` test implied
+  // it by accident; `inversions === 0` does not, and would call a board with two
+  // cards on it perfect.
+  const perfect = comparisons > 0 && inversions === 0 && filled.every(Boolean);
+  return { concordant, inversions, comparisons, exact, perfect, score: concordant };
+}
+
+/**
+ * scoreBoard's totals, plus the per-slot detail the reveal draws.
+ *
+ * This lives here rather than in the results screen for the reason the whole
+ * file exists: what a player reads and what they were awarded have to come out
+ * of the same comparison.
+ *
+ *   slots[i]  { item, slot, trueSlot, band, drift, inPlace, conflicts }
+ *
+ * `conflicts` is the per-card cost: how many other cards this one is the wrong
+ * way round against. It is the honest blame, because summed over the board it
+ * IS the score — sum(conflicts) === 2 * inversions, every inversion counted once
+ * from each end. Anything else would be a proxy. Slot drift in particular is a
+ * bad proxy and used to drive the colour: a card three slots from home has zero
+ * conflicts if everything it passed was tied with it, and colouring that amber
+ * calls a correct board a mistake.
+ *
+ * There is deliberately no adjacent-pair array here any more. Neighbouring pairs
+ * stopped being the scoring unit when scoreBoard moved to Kendall tau, and
+ * drawing them would put back the exact misreading this rewrite removed — a mark
+ * between two cards that looks like a verdict on them, but is really an accident
+ * of where they were dropped.
+ *
+ * `band` is the span of key positions sharing this card's rank. rankMap gives
+ * tied cards one rank on purpose, so measuring drift from a single true position
+ * would report an unpenalised tie as misplaced. Anything inside its own band is
+ * in place with drift 0; outside, drift is the distance to the nearest end of
+ * the band (negative = ranked too high, positive = too low). Drift is text only
+ * — "belongs at #7" — and never the colour.
+ *
+ * `exact` stays scoreBoard's positional count, untouched, so nothing reading it
+ * changes; `inPlaceCount` is the band-aware one the screen shows. They differ
+ * only where there are ties, which is the case band exists for.
+ */
+export function explainBoard(board, deck, truth) {
+  const size = deck?.length ?? BOARD_SIZE;
+  const filled = normalizeBoard(board, size);
+
+  // No key at all: the reveal still draws what they picked, just unjudged.
+  //
+  // The totals are zeroed here rather than delegated, because scoreBoard falls
+  // back to trueOrder(deck) when handed no key — right for a fact round, wrong
+  // for the two callers that pass null on purpose (an unscored round, and the
+  // opinion subject, who is the key and cannot be measured against it). Passing
+  // through would print a score beside a row of blank verdicts.
+  if (!truth) {
+    return {
+      concordant: 0,
+      inversions: 0,
+      comparisons: 0,
+      exact: 0,
+      perfect: false,
+      score: 0,
+      inPlaceCount: 0,
+      slots: filled.map((item, i) => ({
+        item, slot: i, trueSlot: null, band: null, drift: null, inPlace: false, conflicts: 0,
+      })),
+    };
+  }
+
+  const totals = scoreBoard(board, deck, truth);
+  const ranks = rankMap(truth);
+
+  // One band per rank, spanning every key position that shares it. Built from
+  // the key rather than per card so a tie group of any size costs one pass.
+  const bands = new Map();
+  for (let i = 0; i < truth.length; i++) {
+    const rank = ranks[truth[i]?.id];
+    if (rank == null) continue;
+    const band = bands.get(rank);
+    if (band) band.hi = Math.max(band.hi, i);
+    else bands.set(rank, { lo: i, hi: i });
+  }
+
+  // Per-card blame, counted from both ends of every inversion so each card knows
+  // its own share. The same `ra <= rb` test scoreBoard uses, so the two can never
+  // disagree about what went wrong.
+  const conflicts = new Array(size).fill(0);
+  for (let i = 0; i < size; i++) {
+    for (let j = i + 1; j < size; j++) {
+      const a = filled[i];
+      const b = filled[j];
+      if (!a || !b) continue;
+      const ra = ranks[a.id];
+      const rb = ranks[b.id];
+      if (ra == null || rb == null || ra <= rb) continue;
+      conflicts[i]++;
+      conflicts[j]++;
+    }
+  }
+
+  const positionOf = new Map(truth.map((item, i) => [item.id, i + 1]));
+  let inPlaceCount = 0;
+  const slots = filled.map((item, i) => {
+    if (!item) {
+      return {
+        item: null, slot: i, trueSlot: null, band: null, drift: null, inPlace: false, conflicts: 0,
+      };
+    }
+    const band = bands.get(ranks[item.id]) ?? null;
+    const inPlace = Boolean(band && i >= band.lo && i <= band.hi);
+    if (inPlace) inPlaceCount++;
+    const drift = !band || inPlace ? 0 : i < band.lo ? i - band.lo : i - band.hi;
+    return {
+      item,
+      slot: i,
+      trueSlot: positionOf.get(item.id) ?? null,
+      band,
+      drift,
+      inPlace,
+      conflicts: conflicts[i],
+    };
+  });
+
+  return { ...totals, inPlaceCount, slots };
 }
 
 /**

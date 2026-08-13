@@ -6,6 +6,7 @@ import { Badge, Button, Card } from '../../../shared/ui';
 // the person entering fourth learns nothing from the first three.
 export default function SimultaneousRound({
   players, questions, phase, entryOrder, entryIndex, answers,
+  lives = null, eliminated = [],
   onStartGuessing, onReady, onSubmit,
 }) {
   const currentId = entryOrder[entryIndex];
@@ -17,10 +18,14 @@ export default function SimultaneousRound({
       {entryOrder.map((id) => {
         const player = players.find((p) => p.id === id);
         const locked = Boolean(answers[id]);
-        const tone = locked ? 'lime' : id === currentId ? 'purple' : 'neutral';
+        const out = eliminated.includes(id);
+        const tone = out ? 'red' : locked ? 'lime' : id === currentId ? 'purple' : 'neutral';
         return (
-          <Badge key={id} tone={tone}>
-            {locked ? '🔒' : id === currentId ? '✍️' : '⏳'} {player?.name}
+          <Badge key={id} tone={tone} className={out ? 'opacity-60' : ''}>
+            {out ? '💀' : locked ? '🔒' : id === currentId ? '✍️' : '⏳'} {player?.name}
+            {lives && !out && (
+              <span className="ml-1">{'♥'.repeat(Math.max(0, lives[id] ?? 0))}</span>
+            )}
           </Badge>
         );
       })}
@@ -33,9 +38,14 @@ export default function SimultaneousRound({
         <p className="mb-4 text-center text-base text-white/60">
           Everyone listen — you&apos;ll each get to answer.
         </p>
+        {/* No clock in this phase, deliberately. The table is still listening
+            together and deciding when to start passing the device; a countdown
+            here would be timing a conversation. Each player's clock starts when
+            the device reaches their hands. */}
         <Button variant="primary" size="lg" fullWidth onClick={onStartGuessing}>
           Start guessing →
         </Button>
+        {strip}
       </div>
     );
   }

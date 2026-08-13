@@ -7,7 +7,7 @@ import {
   classifyImportGroups,
   mergeImportedAnilistIds,
 } from '../utils/profileMerge';
-import { Badge, Button, Card, Checkbox, Input, Label, Modal } from '../ui';
+import { Badge, Button, Card, Checkbox, Input, Label, Modal, NumberInput } from '../ui';
 
 const MAX_CHARACTERS_PER_SHOW = 60;
 
@@ -47,7 +47,12 @@ export default function AniListImport({ profile, onClose, onImported, autoRefres
   // A first-ever import has nothing to compare against, so the whole feature
   // stays invisible: no summary, no badges, no toggle, everything preselected —
   // exactly the screen that shipped before this existed.
-  const isFirstImport = counts.known === 0;
+  //
+  // `stale` counts here too, and forgetting it is a live trap: a profile
+  // imported before character `favourites` existed classifies EVERY show stale
+  // and none known, which would read as a first import and hide the summary on
+  // the one profile that most needs it explained.
+  const isFirstImport = counts.known === 0 && counts.stale === 0;
 
   // Only offer the skip-the-checklist button while the field still names the
   // account this profile was built from — typing someone else's name is not a
@@ -202,7 +207,9 @@ export default function AniListImport({ profile, onClose, onImported, autoRefres
       };
     });
 
-    const { profile: merged, addedAnime, addedChars } = mergeAnimeIntoProfile(profile, importedAnimeList);
+    const {
+      profile: merged, addedAnime, addedChars, updatedChars,
+    } = mergeAnimeIntoProfile(profile, importedAnimeList);
     // All three are remembered only on a successful import, so a typo'd username
     // never sticks, and a cancelled run never claims coverage it doesn't have.
     setMergedProfile({
@@ -215,7 +222,7 @@ export default function AniListImport({ profile, onClose, onImported, autoRefres
       anilistImportedIds: mergeImportedAnilistIds(profile?.anilistImportedIds, memberIds),
       anilistImportSettings: { includeCurrent, mainOnly, minSupportingFavourites },
     });
-    setStats({ addedAnime, addedChars });
+    setStats({ addedAnime, addedChars, updatedChars });
     setStep('done');
     setAbortController(null);
   }
@@ -282,15 +289,18 @@ export default function AniListImport({ profile, onClose, onImported, autoRefres
                 onChange={(e) => setMainOnly(e.target.checked)}
               />
               {!mainOnly && (
-                <div className="flex items-center gap-3 text-white/70">
+                <div className="flex flex-wrap items-center gap-3 text-white/70">
                   <span>Min. favourites for supporting characters:</span>
-                  <Input
-                    type="number"
+                  {/* Steps by 25 — the useful range here is tens, not ones. */}
+                  <NumberInput
+                    size="sm"
                     min={0}
+                    max={10000}
+                    step={25}
                     value={minSupportingFavourites}
-                    aria-label="Minimum favourites"
-                    onChange={(e) => setMinSupportingFavourites(parseInt(e.target.value) || 0)}
-                    className="w-24 px-2 text-center"
+                    ariaLabel="Minimum favourites"
+                    onChange={setMinSupportingFavourites}
+                    className="w-44"
                   />
                 </div>
               )}
@@ -335,9 +345,10 @@ export default function AniListImport({ profile, onClose, onImported, autoRefres
             <Card padding="sm" className="mb-3 text-center">
               <p className="font-display font-extrabold text-white">✅ You&rsquo;re up to date</p>
               <p className="mt-1 text-sm text-white/50">
-                All {counts.known} shows on your AniList are already in your list. Use{' '}
-                <strong className="text-white/70">Select All</strong> to re-fetch them anyway —
-                handy if a show has gained characters, or you changed the Advanced settings.
+                All {counts.known} shows on your AniList are already in your list, with nothing
+                left to fill in. Use <strong className="text-white/70">Select All</strong> to
+                re-fetch them anyway — handy if a show has gained characters, or you changed
+                the Advanced settings.
               </p>
             </Card>
           )}
@@ -372,6 +383,7 @@ export default function AniListImport({ profile, onClose, onImported, autoRefres
             <p className="mb-2 text-xs text-white/40">
               {counts.new} new
               {counts.partial > 0 && ` · ${counts.partial} with a new season`}
+              {counts.stale > 0 && ` · ${counts.stale} missing character details`}
               {` · ${counts.known} already imported`}
             </p>
           )}
@@ -406,11 +418,14 @@ export default function AniListImport({ profile, onClose, onImported, autoRefres
                     <div className="h-14 w-10 flex-shrink-0 rounded bg-white/10" />
                   )}
                   <span className="min-w-0 flex-1 text-sm text-white">{group.title}</span>
-                  {/* Only 'partial' earns a badge. 'new' is already the checked
-                      majority and 'known' is dimmed and unchecked, so badging
-                      either would be 200 rows of decoration; a newly aired
-                      season is the one state a user must not miss. */}
+                  {/* 'new' is already the checked majority and 'known' is dimmed
+                      and unchecked, so badging either would be 200 rows of
+                      decoration. The two that earn one are the states a user
+                      would otherwise not know to act on: a newly aired season,
+                      and a show whose saved cast predates the details the games
+                      now read. */}
                   {state === 'partial' && <Badge tone="amber">New season</Badge>}
+                  {state === 'stale' && <Badge tone="amber">Missing details</Badge>}
                   {state === 'known' && (
                     <span className="flex-shrink-0 text-xs text-white/40">Imported</span>
                   )}
@@ -451,6 +466,19 @@ export default function AniListImport({ profile, onClose, onImported, autoRefres
           <p className="mb-2 font-display text-lg font-extrabold text-white">Import complete!</p>
           <p className="mb-6 text-white/60">
             +{stats?.addedAnime ?? 0} anime, +{stats?.addedChars ?? 0} characters
+            {/* Repairs are reported separately from additions, because a
+                re-import of a list you already have adds nothing and can still
+                have done the thing you ran it for — without this line that run
+                reads as "+0 anime, +0 characters" and looks like a failure. */}
+            {stats?.updatedChars > 0 && (
+              <>
+                <br />
+                <span className="text-pop-lime">
+                  {stats.updatedChars} existing character
+                  {stats.updatedChars === 1 ? '' : 's'} filled in with missing details
+                </span>
+              </>
+            )}
           </p>
           <Button variant="success" size="lg" fullWidth onClick={finishImport}>Done</Button>
         </div>

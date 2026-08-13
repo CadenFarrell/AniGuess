@@ -196,10 +196,6 @@ export default function OnlineGame({ onBack, onExit }) {
               onLockIn={() => { room.lockIn(); setSelectedId(null); }}
             />
           )}
-
-          <div className="text-center">
-            <GhostButton onClick={handleExitToHub}>← Leave game</GhostButton>
-          </div>
         </Screen>
       </>
     );
@@ -211,13 +207,15 @@ export default function OnlineGame({ onBack, onExit }) {
         players={room.players}
         boards={room.game.boards}
         deck={room.deck}
-        axisId={room.axisId}
+        axis={room.axis}
         subjectId={room.subjectId}
         scoring={room.scoring}
         totalScores={room.totalScores}
+        // Online only: totalScores is the running room total, so without this a
+        // player cannot tell what the round they just finished was worth.
+        roundScores={room.roundScores}
         departedIds={room.departedIds}
         onPlayAgain={room.returnToLobby}
-        onExit={handleExitToHub}
         playAgainLabel="🔁 Back to lobby"
       />
     );

@@ -6,8 +6,15 @@ import {
   mergeImportedAnilistIds,
 } from './profileMerge';
 
-const char = (name) => ({ id: `anilist_${name}`, name, role: 'Main', genres: [] });
+// Carries `favourites`, so the default fixture looks like a CURRENT import.
+// Without it every entry below would classify as stale and the coverage tests
+// would be testing the wrong thing.
+const char = (name) => ({ id: `anilist_${name}`, name, role: 'Main', genres: [], favourites: 500 });
+// A character as it was stored before `favourites` entered the shape: the field
+// is ABSENT, not zero. That distinction is the whole point of the backfill.
+const oldChar = (name) => ({ id: `anilist_${name}`, name, role: 'Main', genres: [] });
 const entry = (id, title, names) => ({ id, title, characters: names.map(char) });
+const oldEntry = (id, title, names) => ({ id, title, characters: names.map(oldChar) });
 const profileWith = (animeList) => ({ id: 'p1', name: 'Player', animeList });
 // A checklist row as groupIntoFranchises produces it: `key`, not `animeId`.
 const group = (key, title, memberIds = [key]) => ({ key, title, memberIds });
@@ -250,6 +257,93 @@ describe('mergeAnimeIntoProfile — per-show stats', () => {
   });
 });
 
+describe('mergeAnimeIntoProfile — repairing an already-saved character', () => {
+  // The whole reason a re-import is worth anything on a show you already have.
+  // This used to early-return, so every field of a stored character was frozen
+  // at its import vintage and a re-fetch pulled correct data and binned it.
+  const importOf = (characters) => [{ animeId: 1, memberIds: [1], title: 'Show', characters }];
+
+  it('fills in a field the stored character never had', () => {
+    const profile = profileWith([oldEntry('anilist_anime_1', 'Show', ['Ann'])]);
+    const { profile: merged, updatedChars } = mergeAnimeIntoProfile(
+      profile,
+      importOf([{ ...char('Ann'), favourites: 4200 }])
+    );
+
+    expect(merged.animeList[0].characters[0].favourites).toBe(4200);
+    expect(updatedChars).toBe(1);
+  });
+
+  it('never overwrites a value already stored, including a real zero', () => {
+    // backfillStats' rule, and what makes this safe to run on a curated profile:
+    // a repair can only add information. The zero matters on its own — a MAIN
+    // character skips the favourites threshold, so AniList reporting zero is a
+    // genuine answer, and treating it as absent would re-fetch it forever.
+    const profile = profileWith([{
+      id: 'anilist_anime_1',
+      title: 'Show',
+      characters: [{ ...char('Ann'), favourites: 0, imageUrl: 'mine.png' }],
+    }]);
+
+    const { profile: merged, updatedChars } = mergeAnimeIntoProfile(
+      profile,
+      importOf([{ ...char('Ann'), favourites: 9999, imageUrl: 'theirs.png' }])
+    );
+
+    expect(merged.animeList[0].characters[0].favourites).toBe(0);
+    expect(merged.animeList[0].characters[0].imageUrl).toBe('mine.png');
+    expect(updatedChars).toBe(0);
+  });
+
+  it('does not mutate the character objects it was handed', () => {
+    // mergeAnimeIntoProfile copies entries with a SHALLOW character copy, so the
+    // stored objects are the ones ProfileProvider is holding in React state.
+    // Repairing one in place would edit rendered state behind React's back.
+    const stored = oldChar('Ann');
+    const profile = profileWith([{ id: 'anilist_anime_1', title: 'Show', characters: [stored] }]);
+
+    const { profile: merged } = mergeAnimeIntoProfile(
+      profile,
+      importOf([{ ...char('Ann'), favourites: 4200 }])
+    );
+
+    expect(stored).not.toHaveProperty('favourites');
+    expect(merged.animeList[0].characters[0]).not.toBe(stored);
+  });
+
+  it('fills genres from absent or empty, but leaves a real list alone', () => {
+    // An empty array is "nothing on file" rather than a value — AniFake deals
+    // the blind fake one genre and has nothing to say without it.
+    const profile = profileWith([{
+      id: 'anilist_anime_1',
+      title: 'Show',
+      characters: [{ ...oldChar('Ann'), genres: [] }, { ...char('Bob'), genres: ['Comedy'] }],
+    }]);
+
+    const { profile: merged } = mergeAnimeIntoProfile(profile, importOf([
+      { ...char('Ann'), genres: ['Action'] },
+      { ...char('Bob'), genres: ['Horror'] },
+    ]));
+
+    expect(merged.animeList[0].characters[0].genres).toEqual(['Action']);
+    expect(merged.animeList[0].characters[1].genres).toEqual(['Comedy']);
+  });
+
+  it('counts additions and repairs apart', () => {
+    // A repair run on a list you already have adds nothing, and folding its
+    // updates into "+N characters" would describe work the import did not do.
+    const profile = profileWith([oldEntry('anilist_anime_1', 'Show', ['Ann'])]);
+
+    const { addedChars, updatedChars } = mergeAnimeIntoProfile(profile, importOf([
+      { ...char('Ann'), favourites: 4200 },
+      char('Bob'),
+    ]));
+
+    expect(addedChars).toBe(1);
+    expect(updatedChars).toBe(1);
+  });
+});
+
 describe('dedupeProfileAnimeList', () => {
   it('merges separate season entries into one show', () => {
     // The case the user actually hits: an old import saved each season on its
@@ -395,7 +489,7 @@ describe('classifyImportGroups', () => {
       group(2, 'B'),
     ]);
 
-    expect(counts).toEqual({ new: 2, partial: 0, known: 0 });
+    expect(counts).toEqual({ new: 2, partial: 0, stale: 0, known: 0 });
     expect([...suggested]).toEqual([1, 2]);
   });
 
@@ -469,7 +563,8 @@ describe('classifyImportGroups', () => {
   });
 
   it('tolerates a bare or missing profile', () => {
-    expect(classifyImportGroups(profileWith([]), []).counts).toEqual({ new: 0, partial: 0, known: 0 });
+    expect(classifyImportGroups(profileWith([]), []).counts)
+      .toEqual({ new: 0, partial: 0, stale: 0, known: 0 });
     expect(classifyImportGroups(undefined, [group(1, 'A')]).byKey.get(1)).toBe('new');
     expect(classifyImportGroups({ id: 'p1', name: 'P' }, [group(1, 'A')]).counts.new).toBe(1);
   });
@@ -483,6 +578,71 @@ describe('classifyImportGroups', () => {
     const after = { ...merged, anilistImportedIds: mergeImportedAnilistIds(undefined, [1, 2]) };
 
     expect(classifyImportGroups(after, [group(1, 'Show', [1, 2])]).suggested.size).toBe(0);
+  });
+});
+
+describe('classifyImportGroups — stale casts', () => {
+  const covered = (animeList, ids) => ({ ...profileWith(animeList), anilistImportedIds: ids });
+
+  it('flags a fully-imported show whose cast predates the stats', () => {
+    // The situation this exists for: every show paid for, so nothing is
+    // suggested, and yet a re-fetch would now genuinely repair the cast.
+    const profile = covered([oldEntry('anilist_anime_1', 'Show', ['A', 'B'])], [1]);
+
+    const { byKey, counts, suggested } = classifyImportGroups(profile, [group(1, 'Show', [1])]);
+
+    expect(byKey.get(1)).toBe('stale');
+    expect(counts.stale).toBe(1);
+    expect(counts.known).toBe(0);
+    expect(suggested.has(1)).toBe(true);
+  });
+
+  it('leaves a show alone once ANY of its cast carries the field', () => {
+    // Keyed on "none of them", not "any of them lack it": a fetch only returns
+    // MAIN plus SUPPORTING above the threshold, so a supporting character below
+    // it can never be filled — and "any" would re-suggest that show forever.
+    const profile = covered([{
+      id: 'anilist_anime_1',
+      title: 'Show',
+      characters: [char('A'), oldChar('B')],
+    }], [1]);
+
+    const { byKey, counts } = classifyImportGroups(profile, [group(1, 'Show', [1])]);
+
+    expect(byKey.get(1)).toBe('known');
+    expect(counts.stale).toBe(0);
+  });
+
+  it('stops being stale after one repairing import', () => {
+    const profile = covered([oldEntry('anilist_anime_1', 'Show', ['A'])], [1]);
+    expect(classifyImportGroups(profile, [group(1, 'Show', [1])]).byKey.get(1)).toBe('stale');
+
+    const { profile: repaired } = mergeAnimeIntoProfile(profile, [{
+      animeId: 1, memberIds: [1], title: 'Show', characters: [char('A')],
+    }]);
+
+    const after = { ...repaired, anilistImportedIds: [1] };
+    expect(classifyImportGroups(after, [group(1, 'Show', [1])]).byKey.get(1)).toBe('known');
+  });
+
+  it('does not promote a show that has no cast at all', () => {
+    // Nothing saved to repair — that is 'known' in the ordinary way, and
+    // flagging it would suggest a fetch that changes nothing.
+    const profile = covered([{ id: 'anilist_anime_1', title: 'Show', characters: [] }], [1]);
+
+    expect(classifyImportGroups(profile, [group(1, 'Show', [1])]).byKey.get(1)).toBe('known');
+  });
+
+  it('keeps the counts summing to the number of groups', () => {
+    const profile = covered([
+      oldEntry('anilist_anime_1', 'Stale', ['A']),
+      entry('anilist_anime_2', 'Fresh', ['B']),
+    ], [1, 2]);
+
+    const groups = [group(1, 'Stale', [1]), group(2, 'Fresh', [2]), group(3, 'Brand new', [3])];
+    const { counts } = classifyImportGroups(profile, groups);
+
+    expect(counts.new + counts.partial + counts.stale + counts.known).toBe(groups.length);
   });
 });
 

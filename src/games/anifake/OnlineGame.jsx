@@ -1,12 +1,16 @@
+import { useMemo } from 'react';
 import { useAniFakeRoom } from './hooks/useAniFakeRoom';
+import { eligibleCharacters } from './utils/pool';
 import RoomSetup from '../../shared/components/RoomSetup';
 import { countCharacters } from '../../shared/utils/profileStats';
 import OnlineLobby from './components/OnlineLobby';
+import CardCheck from './components/CardCheck';
 import ClueRound from './components/ClueRound';
 import VoteScreen from './components/VoteScreen';
 import StealScreen from './components/StealScreen';
 import AniFakeResults from './components/AniFakeResults';
 import WaitingScreen from '../aniguess/components/WaitingScreen';
+import { MAX_DEALS } from './rules';
 import { Banner, HubButton } from '../../shared/ui';
 
 // The online view-router. Same shape as src/games/anirank/OnlineGame.jsx: a
@@ -14,6 +18,16 @@ import { Banner, HubButton } from '../../shared/ui';
 // sync-error banner, and room.view picks the screen.
 export default function OnlineGame({ onBack, onExit }) {
   const room = useAniFakeRoom();
+
+  // What the caught fake's search box offers. Over the FULL roster, not
+  // room.activePlayers: the pool was dealt from the roster as it stood at
+  // startGame, so filtering to who is still here could drop the very list the
+  // secret came from. Hoisted above the early returns because the screen that
+  // needs it is behind three of them.
+  const searchable = useMemo(
+    () => eligibleCharacters(room.players, { sharedOnly: false }),
+    [room.players]
+  );
 
   if (!room.roomCode) {
     return (
@@ -80,11 +94,26 @@ export default function OnlineGame({ onBack, onExit }) {
 
   if (room.view === 'lobby') return shell(<OnlineLobby room={room} />);
 
+  if (room.view === 'check' && room.game) {
+    return shell(
+      <CardCheck
+        card={room.card}
+        phase={room.checkPhase}
+        responded={room.myCheckResponse}
+        pendingNames={room.checkPendingNames}
+        dealNumber={room.dealNumber}
+        maxDeals={MAX_DEALS}
+        onConfirm={() => room.respondToCheck(false)}
+        onRedeal={() => room.respondToCheck(true)}
+      />
+    );
+  }
+
   if (room.view === 'clues' && room.game) {
     return shell(
       <ClueRound
         clues={room.clues}
-        players={room.players}
+        players={room.seatedPlayers}
         speaker={room.speaker}
         isMyTurn={room.isMyTurn}
         card={room.card}
@@ -100,12 +129,17 @@ export default function OnlineGame({ onBack, onExit }) {
   if (room.view === 'vote' && room.game) {
     return shell(
       <VoteScreen
-        players={room.players}
-        voter={room.players.find((p) => p.id === room.myPlayerId) ?? null}
+        players={room.seatedPlayers}
+        voter={room.seatedPlayers.find((p) => p.id === room.myPlayerId) ?? null}
         voted={room.votedIds}
+        // The players the ballot is genuinely waiting on, so a closed tab does
+        // not leave the count stuck one short of a total nobody will reach.
+        voterIds={room.activeIds}
         departedIds={room.departedIds}
         clues={room.clues}
         myVote={room.myVote}
+        isRunoff={room.isRunoff}
+        runoffCandidates={room.runoffCandidates}
         onVote={room.castVote}
       />
     );
@@ -123,6 +157,7 @@ export default function OnlineGame({ onBack, onExit }) {
       <StealScreen
         isMine={isMine}
         fakeName={accused?.name ?? 'The fake'}
+        options={searchable}
         onSteal={room.submitSteal}
       />
     );
@@ -137,7 +172,7 @@ export default function OnlineGame({ onBack, onExit }) {
   if (room.view === 'results' && room.game) {
     return shell(
       <AniFakeResults
-        players={room.players}
+        players={room.seatedPlayers}
         game={room.game}
         fakeId={room.fakeId}
         secret={room.secret}
@@ -145,8 +180,7 @@ export default function OnlineGame({ onBack, onExit }) {
         roundScores={room.roundScores}
         totalScores={room.totalScores}
         departedIds={room.departedIds}
-        onPlayAgain={room.returnToLobby}
-        onExit={handleExitToHub}
+        onPlayAgain={room.returnToLobby}
         playAgainLabel="🔁 Back to lobby"
       />
     );

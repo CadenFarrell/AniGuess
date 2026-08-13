@@ -22,15 +22,24 @@ const MAX_LOAD_ATTEMPTS = 3;
 export default function ClipPlayer({
   src,
   seconds = 10,
+  // Where in the playable range to start, 0..1. Dealt with the question by
+  // pickRound rather than rolled here — this component used to pick its own
+  // offset on every mount, which meant a remount silently moved the clip and the
+  // sample-point setting had nowhere to take effect. SyncedClipPlayer has always
+  // taken it this way; now both do, and both map fraction to seconds identically.
+  fraction = 0.4,
+  playbackRate = 1,
   autoPlay = true,
   revealed = false,
   paused = false,
   onPlaybackError,
+  onStarted,
   onWindowEnded,
   onUnplayable,
 }) {
   const audioRef = useRef(null);
   const fadeRef = useRef(null);
+  const offsetRef = useRef(0);
   const [state, setState] = useState('loading'); // loading | ready | playing | done | error
   const [elapsed, setElapsed] = useState(0);
 
@@ -40,6 +49,8 @@ export default function ClipPlayer({
   endedRef.current = onWindowEnded;
   const unplayableRef = useRef(onUnplayable);
   unplayableRef.current = onUnplayable;
+  const startedRef = useRef(onStarted);
+  startedRef.current = onStarted;
 
   // Fresh element per clip. Reusing one and swapping .src leaves the old
   // buffered range attached and makes seeking unreliable.
@@ -78,11 +89,13 @@ export default function ClipPlayer({
     const onLoaded = () => {
       if (cancelled) return;
       clearTimeout(stallTimer);
-      // Start somewhere in the middle: the opening seconds are often silence
-      // or a fade-in, and the last stretch is often an outro.
+      // Leave room at the end for the whole window plus the outro, then take the
+      // dealt fraction of what's left. Same mapping SyncedClipPlayer uses, so a
+      // question sounds the same locally and online.
       const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
       const latest = Math.max(0, duration - seconds - 2);
-      audio.currentTime = latest > 4 ? 4 + Math.random() * (latest - 4) : 0;
+      offsetRef.current = Math.min(latest, fraction * latest);
+      audio.currentTime = offsetRef.current;
       setState('ready');
       if (autoPlay) startPlayback(audio);
     };
@@ -110,7 +123,14 @@ export default function ClipPlayer({
       audio.src = '';
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [src, seconds]);
+  }, [src, seconds, fraction]);
+
+  // Applied on its own rather than at play() time so a rate change mid-clip
+  // takes effect immediately. playbackRate survives pause/resume and seeking, so
+  // there is nothing to re-apply afterwards.
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.playbackRate = playbackRate;
+  }, [playbackRate, state]);
 
   // Once the answer is out, let the clip run on unbounded so the table can
   // listen to the rest of the song.
@@ -136,7 +156,10 @@ export default function ClipPlayer({
     const startedAt = audio.currentTime;
     setElapsed(0);
 
-    audio.play().then(() => setState('playing')).catch((err) => {
+    // The guess window opens here rather than on mount: play() resolving is the
+    // first moment anyone can actually hear anything, and a clock started while
+    // the CDN was still stalling would be scoring the connection.
+    audio.play().then(() => { setState('playing'); startedRef.current?.(); }).catch((err) => {
       // Autoplay without a gesture is refused by every browser; fall back to
       // showing the button rather than looking broken.
       setState('ready');
@@ -145,6 +168,11 @@ export default function ClipPlayer({
 
     fadeRef.current = setInterval(() => {
       if (!audioRef.current) return;
+      // Measured off currentTime, so `seconds` is seconds OF SONG, not of wall
+      // clock: at 1.5x you hear the same stretch of music in less real time.
+      // That keeps the speed setting a pure difficulty knob instead of secretly
+      // also being a length one — and it is what makes a paused race clip resume
+      // exactly where it left off, since currentTime simply stops advancing.
       const played = audioRef.current.currentTime - startedAt;
       setElapsed(played);
       if (revealed) return;
@@ -163,7 +191,10 @@ export default function ClipPlayer({
   function replay() {
     const audio = audioRef.current;
     if (!audio) return;
-    audio.currentTime = Math.max(0, audio.currentTime - elapsed);
+    // Back to the dealt offset, not "wherever we are minus what we played" —
+    // the old subtraction drifted a little each replay, and now that the offset
+    // is a property of the question there is an exact place to return to.
+    audio.currentTime = offsetRef.current;
     startPlayback(audio);
   }
 

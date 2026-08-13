@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   BOARD_SIZE, normalizeBoard, normalizeBoards, placedCount, startRound, currentItem,
   pendingPlacers, placeItem, everyonePlaced, advanceCursor, trueOrder, scoreBoard,
-  finalScores, applyRoundScores, rankMap, truthFor, subjectFor,
+  explainBoard, finalScores, applyRoundScores, rankMap, truthFor, subjectFor,
   isOpen, placeCard, clearSlot, lockIn, unplacedCards, roundFinished, roundUntouched,
 } from './rules';
 
@@ -15,6 +15,10 @@ const players = (...ids) => ids.map((id) => ({ id, name: id }));
 
 // A board holding the deck in perfectly sorted order.
 const perfectBoard = () => trueOrder(DECK);
+
+// What a flawless ten-card board is worth: every pair of cards compared, so
+// C(10,2) = 45 rather than the nine adjacent pairs the score used to count.
+const PERFECT = (DECK.length * (DECK.length - 1)) / 2;
 
 describe('normalizeBoard', () => {
   it('turns nothing into a full row of empty slots', () => {
@@ -203,72 +207,228 @@ describe('trueOrder', () => {
   });
 });
 
+// Kendall tau: every pair of cards, not only the neighbouring ones. Ten cards
+// make 45 comparisons.
 describe('scoreBoard', () => {
-  it('gives a perfect board every ordered pair', () => {
+  it('gives a perfect board every comparison', () => {
     const out = scoreBoard(perfectBoard(), DECK);
-    expect(out.ordered).toBe(9);
+    expect(out.concordant).toBe(45);
+    expect(out.inversions).toBe(0);
+    expect(out.comparisons).toBe(45);
     expect(out.exact).toBe(10);
     expect(out.perfect).toBe(true);
-    expect(out.score).toBe(9);
+    expect(out.score).toBe(45);
   });
 
   it('gives an exactly reversed board nothing', () => {
     const out = scoreBoard([...perfectBoard()].reverse(), DECK);
-    expect(out.ordered).toBe(0);
+    expect(out.concordant).toBe(0);
+    expect(out.inversions).toBe(45);
     expect(out.perfect).toBe(false);
   });
 
-  it('costs an adjacent swap only the pair between the two shows', () => {
+  it('costs an adjacent swap exactly one comparison', () => {
     const board = perfectBoard();
     [board[4], board[5]] = [board[5], board[4]];
-    expect(scoreBoard(board, DECK).ordered).toBe(8);
+    expect(scoreBoard(board, DECK).concordant).toBe(44);
   });
 
-  it('charges one point per misplaced show rather than cascading down the board', () => {
-    // The forgiving property the score exists for: with everything else in
-    // order, dropping the oldest show into the middle breaks only the pair it
-    // now sits in front of. The eight shows around it keep their points.
+  it('charges a displaced card for the cards it passed, and never twice', () => {
+    // The proportionality the old adjacent-pair rule could not express: dragging
+    // a card the length of the board puts it the wrong way round against the
+    // nine it jumped, and against nothing else. The nine it displaced are not
+    // themselves re-charged, so there is no cascade.
     const board = perfectBoard();
-    board.splice(4, 0, board.pop());     // 1988 moved from last to slot 4
-    expect(scoreBoard(board, DECK).ordered).toBe(8);
+    board.unshift(board.pop());          // 1988 moved from last to first
+    expect(scoreBoard(board, DECK).inversions).toBe(9);
+    expect(scoreBoard(board, DECK).concordant).toBe(36);
 
-    // Same for the newest show sent to the end.
+    // Same size of mistake in the other direction.
     const other = perfectBoard();
     other.push(other.shift());           // 2022 moved from first to last
-    expect(scoreBoard(other, DECK).ordered).toBe(8);
+    expect(scoreBoard(other, DECK).inversions).toBe(9);
 
-    // Only a thoroughly wrong board loses everything.
-    expect(scoreBoard([...perfectBoard()].reverse(), DECK).ordered).toBe(0);
+    // A one-slot slip stays cheap.
+    const slight = perfectBoard();
+    [slight[0], slight[1]] = [slight[1], slight[0]];
+    expect(scoreBoard(slight, DECK).inversions).toBe(1);
   });
 
   it('never penalises two cards with the same value, whichever way round they sit', () => {
     const deck = [show('a', 2000), show('b', 2000)];
-    expect(scoreBoard([deck[0], deck[1]], deck).ordered).toBe(1);
-    expect(scoreBoard([deck[1], deck[0]], deck).ordered).toBe(1);
+    expect(scoreBoard([deck[0], deck[1]], deck).concordant).toBe(1);
+    expect(scoreBoard([deck[1], deck[0]], deck).concordant).toBe(1);
+    expect(scoreBoard([deck[1], deck[0]], deck).inversions).toBe(0);
   });
 
-  it('scores an unfinished board on the pairs it does have', () => {
+  it('scores an unfinished board on the comparisons it does have', () => {
     const board = new Array(10).fill(null);
     board[0] = show('j', 2022);
     board[1] = show('e', 2020);
-    expect(scoreBoard(board, DECK).ordered).toBe(1);
+    const out = scoreBoard(board, DECK);
+    expect(out.comparisons).toBe(1);
+    expect(out.concordant).toBe(1);
+    // Flawless as far as it goes, but two cards are not a finished board.
+    expect(out.perfect).toBe(false);
   });
 
   it('scores an empty board zero rather than throwing', () => {
-    expect(scoreBoard(null, DECK)).toMatchObject({ ordered: 0, exact: 0, perfect: false });
+    expect(scoreBoard(null, DECK)).toMatchObject({
+      concordant: 0, inversions: 0, comparisons: 0, exact: 0, perfect: false,
+    });
   });
 
   it('reads a board RTDB stored as an index-keyed object', () => {
     const truth = perfectBoard();
     const asObject = Object.fromEntries(truth.map((s, i) => [i, s]));
-    expect(scoreBoard(asObject, DECK).ordered).toBe(9);
+    expect(scoreBoard(asObject, DECK).concordant).toBe(45);
+  });
+
+  it('rates a shuffled board far below the old adjacent-pair rule', () => {
+    // The arrangement a random number generator dealt during the redesign, over
+    // this tie-free deck. The old adjacent-pair rule scores it 5/9 — 56% for
+    // work nobody did — where every pair scores it 18/45, or 40%. Pinned because
+    // flattering a shuffle is the specific failure this rule replaced.
+    const order = [7, 10, 3, 5, 4, 9, 1, 8, 2, 6];
+    const key = perfectBoard();
+    const board = order.map((rank) => key[rank - 1]);
+    expect(scoreBoard(board, DECK, key).concordant).toBe(18);
+    expect(scoreBoard(board, DECK, key).inversions).toBe(27);
+  });
+});
+
+// The reveal's per-slot detail. The point of these is that what a player reads
+// cannot drift away from the points they were awarded.
+describe('explainBoard', () => {
+  const KEY = perfectBoard();
+  const totalConflicts = (out) => out.slots.reduce((n, s) => n + s.conflicts, 0);
+
+  it('blames every inversion on both of the cards in it', () => {
+    const boards = [
+      perfectBoard(),
+      [...perfectBoard()].reverse(),
+      (() => { const b = perfectBoard(); [b[4], b[5]] = [b[5], b[4]]; return b; })(),
+      (() => { const b = perfectBoard(); b.unshift(b.pop()); return b; })(),
+    ];
+    for (const board of boards) {
+      const out = explainBoard(board, DECK, KEY);
+      // The invariant the reveal rests on: per-card blame IS the score, counted
+      // once from each end. A diagram drawn from `conflicts` cannot disagree
+      // with the number of points awarded.
+      expect(totalConflicts(out)).toBe(2 * out.inversions);
+      expect(out.concordant + out.inversions).toBe(out.comparisons);
+    }
+  });
+
+  it('marks a perfect board blameless and every card in place', () => {
+    const out = explainBoard(perfectBoard(), DECK, KEY);
+    expect(out.slots.every((s) => s.conflicts === 0)).toBe(true);
+    expect(out.slots.every((s) => s.inPlace && s.drift === 0)).toBe(true);
+    expect(out.inPlaceCount).toBe(10);
+    expect(out.perfect).toBe(true);
+  });
+
+  it('blames every card on a reversed board against all nine others', () => {
+    const out = explainBoard([...perfectBoard()].reverse(), DECK, KEY);
+    expect(out.slots.every((s) => s.conflicts === 9)).toBe(true);
+    expect(out.concordant).toBe(0);
+  });
+
+  it('blames only the two cards in a swapped pair', () => {
+    const board = perfectBoard();
+    [board[4], board[5]] = [board[5], board[4]];
+    const out = explainBoard(board, DECK, KEY);
+    expect(out.slots[4].conflicts).toBe(1);
+    expect(out.slots[5].conflicts).toBe(1);
+    expect(out.slots.filter((s) => s.conflicts > 0)).toHaveLength(2);
+  });
+
+  it('charges a dragged card for everything it jumped, and its victims only once each', () => {
+    const board = perfectBoard();
+    board.unshift(board.pop());        // the oldest show dragged from slot 10 to slot 1
+    const out = explainBoard(board, DECK, KEY);
+    // It is the wrong way round against all nine it passed…
+    expect(out.slots[0].conflicts).toBe(9);
+    expect(out.slots[0].trueSlot).toBe(10);
+    // …and each of those nine carries exactly one share of the blame, rather
+    // than being re-charged for having been shoved along.
+    expect(out.slots.slice(1).every((s) => s.conflicts === 1)).toBe(true);
+    expect(out.inversions).toBe(9);
+  });
+
+  it('reports which way a card was misplaced, and by how far', () => {
+    const board = perfectBoard();
+    board.splice(4, 0, board.pop());   // the oldest show dragged from slot 10 to slot 5
+    const out = explainBoard(board, DECK, KEY);
+    const moved = out.slots[4];
+    expect(moved.trueSlot).toBe(10);
+    expect(moved.inPlace).toBe(false);
+    // Negative: sitting higher up the board than it belongs.
+    expect(moved.drift).toBe(-5);
+    // Everything below it shuffled down one and is now off by a single slot.
+    expect(out.slots[5].drift).toBe(1);
+  });
+
+  it('blames neither of a tied pair, whichever way round it sits', () => {
+    const deck = [show('x', 2000), show('y', 2000), show('z', 1990)];
+    const key = trueOrder(deck);
+    for (const board of [[deck[0], deck[1], deck[2]], [deck[1], deck[0], deck[2]]]) {
+      const out = explainBoard(board, deck, key);
+      expect(out.slots.map((s) => s.inPlace)).toEqual([true, true, true]);
+      expect(out.slots.map((s) => s.drift)).toEqual([0, 0, 0]);
+      expect(out.slots.map((s) => s.conflicts)).toEqual([0, 0, 0]);
+      expect(out.inPlaceCount).toBe(3);
+      expect(out.inversions).toBe(0);
+    }
+  });
+
+  it('ignores empty slots rather than blaming the cards beside them', () => {
+    const board = new Array(10).fill(null);
+    board[0] = show('j', 2022);
+    board[1] = show('e', 2020);
+    const out = explainBoard(board, DECK, KEY);
+    expect(out.comparisons).toBe(1);
+    expect(out.slots[0].conflicts).toBe(0);
+    expect(out.slots[2].item).toBe(null);
+    expect(out.slots[2].trueSlot).toBe(null);
+    expect(out.slots[2].conflicts).toBe(0);
+  });
+
+  it('describes an empty board rather than throwing', () => {
+    const out = explainBoard(null, DECK, KEY);
+    expect(out.slots).toHaveLength(10);
+    expect(out.slots.every((s) => s.conflicts === 0)).toBe(true);
+    expect(out.comparisons).toBe(0);
+    expect(out.inPlaceCount).toBe(0);
+  });
+
+  it('reads a board RTDB stored as an index-keyed object', () => {
+    const asObject = Object.fromEntries(perfectBoard().map((s, i) => [i, s]));
+    const out = explainBoard(asObject, DECK, KEY);
+    expect(out.concordant).toBe(45);
+    expect(out.inPlaceCount).toBe(10);
+  });
+
+  it('scores nothing at all when there is no answer key', () => {
+    // The opinion subject's own row, and any unscored round. Delegating the
+    // totals here would score them against trueOrder(deck) — a real number
+    // printed beside a row of blank verdicts.
+    const out = explainBoard(perfectBoard(), DECK, null);
+    expect(out).toMatchObject({
+      concordant: 0, inversions: 0, comparisons: 0, exact: 0, score: 0,
+      perfect: false, inPlaceCount: 0,
+    });
+    expect(out.slots.every((s) => s.conflicts === 0)).toBe(true);
+    expect(out.slots).toHaveLength(10);
+    expect(out.slots[0].item.id).toBe('j');
+    expect(out.slots[0].trueSlot).toBe(null);
   });
 });
 
 describe('finalScores', () => {
   it('scores every player, including one who never placed anything', () => {
     const state = { deck: DECK, cursor: 10, boards: { p1: perfectBoard() } };
-    expect(finalScores(state, ['p1', 'p2'])).toEqual({ p1: 9, p2: 0 });
+    expect(finalScores(state, ['p1', 'p2'])).toEqual({ p1: 45, p2: 0 });
   });
 });
 
@@ -318,7 +478,7 @@ describe('opinion rounds', () => {
       deck: OPINION_DECK, cursor: 10, subjectId: 'p2',
       boards: { p1: boardOf(...ORDER), p2: boardOf(...ORDER) },
     };
-    expect(finalScores(state, ['p1', 'p2'], { opinion: true }).p1).toBe(9);
+    expect(finalScores(state, ['p1', 'p2'], { opinion: true }).p1).toBe(PERFECT);
   });
 
   it('gives the subject the mean of the guesses, not a zero for being picked', () => {
@@ -326,15 +486,16 @@ describe('opinion rounds', () => {
     const state = {
       deck: OPINION_DECK, cursor: 10, subjectId: 'p3',
       boards: {
-        p1: boardOf(...ORDER),      // perfect: 9
-        p2: boardOf(...reversed),   // inverted: 0
+        p1: boardOf(...ORDER),      // perfect: every comparison
+        p2: boardOf(...reversed),   // inverted: none of them
         p3: boardOf(...ORDER),      // the key
       },
     };
     const scores = finalScores(state, ['p1', 'p2', 'p3'], { opinion: true });
-    expect(scores.p1).toBe(9);
+    expect(scores.p1).toBe(PERFECT);
     expect(scores.p2).toBe(0);
-    expect(scores.p3).toBe(5); // round(9 + 0 / 2) — how predictable they were
+    // round((45 + 0) / 2) — how predictable they were
+    expect(scores.p3).toBe(Math.round(PERFECT / 2));
   });
 
   // The subject leaving mid-round is this game's second way to lose the answer
@@ -683,8 +844,8 @@ describe('a whole open round, from deal to score', () => {
     // p1 matched the subject exactly, and the subject takes the mean of the
     // guesses made at them.
     const scores = finalScores(state, ids, { opinion: true, scoring: true });
-    expect(scores.p1).toBe(DECK.length - 1);
-    expect(scores.p2).toBe(DECK.length - 1);
+    expect(scores.p1).toBe(PERFECT);
+    expect(scores.p2).toBe(PERFECT);
   });
 
   it('ends a fact round the same way, scored against the deck', () => {

@@ -1,20 +1,36 @@
 import { useEffect, useRef, useState } from 'react';
 import { useProfileStore } from '../../../shared/context/profileContext';
 import AniListImport from '../../../shared/components/AniListImport';
+import SettingsFooter from '../../../shared/components/SettingsFooter';
+import { useGamePrefs } from '../../../shared/hooks/useGamePrefs';
 import { normalizeTitle } from '../../../shared/utils/ranking';
 import { profileFingerprint } from '../../../shared/utils/profileStats';
+import { DEFAULT_PREFS, POSITIONS } from '../prefs';
 import {
-  Backdrop, Badge, Banner, Button, Card, CardRow, Checkbox, Input, Screen, Wordmark,
+  Backdrop, Badge, Banner, Button, Card, CardRow, Checkbox, NumberInput, Screen, Wordmark,
 } from '../../../shared/ui';
 
 export default function OnlineLobby({ room }) {
   const { activeProfile, saveProfile } = useProfileStore();
-  const [sharedShowsOnly, setSharedShowsOnly] = useState(true);
-  const [twoStepRandom, setTwoStepRandom] = useState(false);
-  const [pointsPerPosition, setPointsPerPosition] = useState([3, 2, 1, 0]);
+  // Shares one saved set with PlayerSetup, which offers three more options than
+  // this lobby does (the timer and talk mode). savePrefs merges rather than
+  // replaces precisely so hosting a room cannot wipe those.
+  const { prefs, savePrefs, resetPrefs } = useGamePrefs('aniguess', DEFAULT_PREFS);
+  const [sharedShowsOnly, setSharedShowsOnly] = useState(prefs.sharedShowsOnly);
+  const [twoStepRandom, setTwoStepRandom] = useState(prefs.twoStepRandom);
+  const [pointsPerPosition, setPointsPerPosition] = useState(prefs.pointsPerPosition);
   // null | 'pick' | 'refresh' — same shape ListManager uses, so the one-tap
   // refresh path behaves identically wherever you reach it from.
   const [importMode, setImportMode] = useState(null);
+
+  const settings = { sharedShowsOnly, twoStepRandom, pointsPerPosition };
+
+  const applyDefaults = () => {
+    setSharedShowsOnly(DEFAULT_PREFS.sharedShowsOnly);
+    setTwoStepRandom(DEFAULT_PREFS.twoStepRandom);
+    setPointsPerPosition([...DEFAULT_PREFS.pointsPerPosition]);
+    resetPrefs();
+  };
 
   const players = room.gameSession?.players ?? [];
   const me = players.find((p) => p.id === room.myPlayerId) ?? null;
@@ -62,18 +78,23 @@ export default function OnlineLobby({ room }) {
   );
   const canStart = active.length >= 2 && allHaveChars && (!sharedShowsOnly || hasSharedAnime);
 
-  const updatePoints = (i, val) => {
+  // NumberInput hands over an already-parsed, already-clamped number, so this
+  // no longer parses anything — it only writes the slot.
+  const updatePoints = (i, n) => {
     const updated = [...pointsPerPosition];
-    updated[i] = parseInt(val) || 0;
+    updated[i] = n;
     setPointsPerPosition(updated);
   };
 
   const handleStart = () => {
+    savePrefs(settings);
     room.handleStartGame({
       // Deal in the players actually here — the turn rotation and the character
       // pool are both built from this list.
       players: active,
-      settings: { timerEnabled: false, timerSeconds: 60, pointsPerPosition, sharedShowsOnly, twoStepRandom },
+      // The timer literals are not defaults being restated: online play has no
+      // timer at all, so a remembered one from local play must not leak in here.
+      settings: { ...settings, timerEnabled: false, timerSeconds: 60 },
     });
   };
 
@@ -176,25 +197,32 @@ export default function OnlineLobby({ room }) {
             className="mb-5"
           />
 
-          <p className="mb-3 text-base text-white/70">Points per position:</p>
-          <div className="flex gap-4">
-            {['🥇', '🥈', '🥉', 'Rest'].map((label, i) => (
-              <div key={label} className="flex flex-col items-center gap-2">
-                <span className="text-lg">{label}</span>
-                <Input
-                  type="number"
-                  value={pointsPerPosition[i]}
-                  min={0}
-                  aria-label={`Points for ${label}`}
-                  onChange={(e) => updatePoints(i, e.target.value)}
-                  className="w-16 px-2 text-center text-lg"
-                />
-              </div>
-            ))}
-          </div>
+          <p className="mb-1 text-base text-white/70">Points per position:</p>
+          {/* One per row — see PlayerSetup, its twin. This screen is the reason:
+              its Screen defaults to max-w-md, so a four-across grid left each
+              cell narrower than the two buttons inside it. */}
+          {POSITIONS.map(({ icon, label }, i) => (
+            <CardRow key={label}>
+              <span className="text-white/80">
+                <span className="mr-2 text-lg">{icon}</span>
+                {label}
+              </span>
+              <NumberInput
+                size="sm"
+                value={pointsPerPosition[i]}
+                min={0}
+                max={99}
+                ariaLabel={`Points for ${label}`}
+                onChange={(n) => updatePoints(i, n)}
+                className="w-40 flex-shrink-0"
+              />
+            </CardRow>
+          ))}
           <p className="mt-4 text-sm text-white/30">
             You&apos;re the host — your settings apply to everyone.
           </p>
+
+          <SettingsFooter values={settings} defaults={DEFAULT_PREFS} onReset={applyDefaults} />
         </Card>
 
         {active.length >= 2 && !allHaveChars && (

@@ -96,7 +96,7 @@ function collapseCharacters(animeList, axis) {
  */
 export function eligibleItems(players, { axis, sharedOnly = true } = {}) {
   if (!players?.length) return [];
-  const resolved = getAxis(axis?.id ?? axis);
+  const resolved = getAxis(axis);
   const collapse = resolved.items === 'characters' ? collapseCharacters : collapseFranchises;
 
   const counts = new Map(); // key -> { entry, owners }
@@ -116,6 +116,28 @@ export function eligibleItems(players, { axis, sharedOnly = true } = {}) {
   return [...counts.values()]
     .filter((c) => !sharedOnly || c.owners.size === players.length)
     .map((c) => c.entry);
+}
+
+// Probes, not axes anyone plays: `kind` and `items` are the only two fields
+// eligibleItems reads, and getAxis hands back an object that already carries
+// them rather than trying to look it up.
+const OPINION_SHOWS = { kind: 'opinion', items: 'shows' };
+const OPINION_CHARACTERS = { kind: 'opinion', items: 'characters' };
+
+/**
+ * How many cards each opinion pool holds: { shows, characters }.
+ *
+ * An opinion axis applies no value filter — every show and every character is
+ * eligible — so its count depends on nothing but which pool it draws from. The
+ * setup screens need a count per custom prompt for the picker badges, and every
+ * prompt a player has written shares one of these two numbers; counting them
+ * individually would be a fresh pass over every player's whole list per prompt.
+ */
+export function opinionPoolCounts(players, { sharedOnly = true } = {}) {
+  return {
+    shows: eligibleItems(players, { axis: OPINION_SHOWS, sharedOnly }).length,
+    characters: eligibleItems(players, { axis: OPINION_CHARACTERS, sharedOnly }).length,
+  };
 }
 
 /**

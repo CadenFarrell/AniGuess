@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { ref, set, runTransaction } from 'firebase/database';
 import { getFirebaseDb } from '../../../shared/services/firebase';
 import { useRoomCore } from '../../../shared/hooks/useRoomCore';
+import { useDeadline } from '../../../shared/hooks/useDeadline';
 import { prepareQuestions } from '../services/buildQuestions';
 import * as rules from '../rules';
 
@@ -41,6 +42,25 @@ function normalizeGame(game) {
     ready: game.ready ?? {},
     buzzedBy: game.buzzedBy ?? null,
     clipStartAt: game.clipStartAt ?? null,
+    // The clock. All four are absolute instants or durations that RTDB drops
+    // when null, and rules.js compares them unguarded — a missing deadlineAt
+    // read as undefined would make isExpired's `now >= undefined` false and a
+    // missing windowMs would divide the speed bonus by undefined.
+    windowStartAt: game.windowStartAt ?? null,
+    windowMs: game.windowMs ?? null,
+    deadlineAt: game.deadlineAt ?? null,
+    pausedRemainingMs: game.pausedRemainingMs ?? null,
+    buzzedAt: game.buzzedAt ?? null,
+    // Lives. Back-compat defaults rather than assertions: a room created by an
+    // older build has neither, and every rule treats an absent lives map as
+    // "this mode does not use them" anyway.
+    lives: game.lives ?? {},
+    eliminated: game.eliminated ?? [],
+    // A round dealt before the clock existed carries no timing settings, and an
+    // untimed round is exactly what it should then play as.
+    timed: game.timed ?? false,
+    guessMs: game.guessMs ?? null,
+    answerMs: game.answerMs ?? null,
   };
 }
 
@@ -143,6 +163,11 @@ export function useAniTuneRoom() {
         sharedSongsOnly: settings.sharedSongsOnly,
         includeOpenings: settings.includeOpenings,
         includeEndings: settings.includeEndings,
+        popularity: settings.popularity,
+        yearFrom: settings.yearFrom,
+        yearTo: settings.yearTo,
+        samplePoint: settings.samplePoint,
+        maxPerAnime: settings.maxPerAnime,
         roundSize: settings.roundSize,
         onProgress: setPrepProgress,
       });
@@ -159,12 +184,12 @@ export function useAniTuneRoom() {
         return;
       }
 
-      // A shared per-question offset fraction so every device seeks to the same
-      // musical moment (ClipPlayer's own random offset would desync them).
-      const withFractions = round.map((q) => ({ ...q, clipFraction: 0.2 + Math.random() * 0.5 }));
+      // pickRound already stamped each question with a clipFraction, so every
+      // device seeks to the same musical moment — and local play gets the same
+      // guarantee for free, which it did not when this hook rolled the offsets.
       await patchState({
-        round: withFractions,
-        game: rules.startRound(dealtIn, settings.mode),
+        round,
+        game: rules.startRound(dealtIn, settings.mode, settings),
         view: 'round',
       });
     } catch (e) {
@@ -195,27 +220,66 @@ export function useAniTuneRoom() {
     ));
   }, [roomCode, guard, serverOffsetRef]);
 
+  // --- The clock ---
+
+  // Server-corrected "now". Every rule that touches time is handed this rather
+  // than reading a clock itself, so two devices a few hundred ms apart still
+  // agree on how fast an answer was.
+  const nowRef = useRef(() => 0);
+  nowRef.current = () => Date.now() + serverOffsetRef.current;
+
+  // Who the room is still waiting on: present, and in Lives mode not knocked
+  // out. Every gate below goes through this — an eliminated player will never
+  // submit, and counting them holds the reveal open exactly as a closed tab
+  // would, from a cause presence cannot see.
+  const liveIds = useCallback(
+    (game) => rules.livePlayerIds(game, rosterRef.current.activeIds),
+    [rosterRef]
+  );
+
+  // Opens the scoring window at the shared clip start, so speed measures the ear
+  // rather than whose audio buffered first. Every device may call it; openWindow
+  // is idempotent and the transaction aborts for the losers.
+  const openWindow = useCallback((at) =>
+    applyGame((game) => rules.openWindow(game, at)), [applyGame]);
+
   // --- Race ---
 
-  const buzz = useCallback(() => applyGame((game) => rules.buzz(game, myPlayerId)), [applyGame, myPlayerId]);
+  const buzz = useCallback(
+    () => applyGame((game) => rules.buzz(game, myPlayerId, nowRef.current())),
+    [applyGame, myPlayerId]
+  );
 
   const resolveBuzz = useCallback((question, guess) => applyGame((game) => {
     // Only the buzzer resolves, and only while still buzzed — guards a stale tap.
     if (game.phase !== 'buzzed' || game.buzzedBy !== myPlayerId) return { patch: {} };
     // Active roster: a wrong buzz should reveal once everyone *still here* is
     // locked out, not wait on players who have gone.
-    return rules.resolveBuzz(game, question, guess, rosterRef.current.active);
+    return rules.resolveBuzz(game, question, guess, rosterRef.current.active, nowRef.current());
   }), [applyGame, myPlayerId, rosterRef]);
 
-  const giveUp = useCallback(() => applyGame((game) => rules.giveUp(game)), [applyGame]);
+  const giveUp = useCallback(
+    () => applyGame((game) => rules.giveUp(game, liveIds(game))),
+    [applyGame, liveIds]
+  );
 
   // --- Simultaneous ---
 
   const submitAnswer = useCallback((question, text) => applyGame((game) =>
-    rules.submitOnlineAnswer(game, question, myPlayerId, text, rosterRef.current.activeIds)
-  ), [applyGame, myPlayerId, rosterRef]);
+    rules.submitOnlineAnswer(game, question, myPlayerId, text, liveIds(game), nowRef.current())
+  ), [applyGame, myPlayerId, liveIds]);
 
+  // The manual escape hatch, used when someone has wandered off. Charges nobody
+  // a life: it is reconciling a departure, and leaving the room should not also
+  // cost the people still in it.
   const revealNow = useCallback(() => applyGame((game) => rules.revealNow(game)), [applyGame]);
+
+  // The clock closing on its own, which is a different event and does charge —
+  // sitting out a question you were present for has to cost what guessing wrong
+  // costs, or silence is the winning move.
+  const expireQuestion = useCallback((question) => applyGame((game) =>
+    rules.expireQuestion(game, question, liveIds(game), nowRef.current())
+  ), [applyGame, liveIds]);
 
   // --- Advancement ---
 
@@ -276,6 +340,16 @@ export function useAniTuneRoom() {
   const iAmReady = Boolean(game?.ready?.[myPlayerId]);
   const isMyBuzz = game?.buzzedBy != null && game.buzzedBy === myPlayerId;
   const iHaveAnswered = Boolean(game?.answers?.[myPlayerId]);
+  const iAmOut = game != null && rules.isEliminated(game, myPlayerId);
+
+  // The shared countdown. Every device derives it from the same absolute
+  // deadlineAt, corrected by its own serverOffset, so nobody's bar is ahead of
+  // anyone else's — which matters, because this bar is what the speed bonus is
+  // being measured against.
+  const clock = useDeadline(game?.deadlineAt ?? null, {
+    offsetMs: core.serverOffset,
+    windowMs: game?.windowMs ?? null,
+  });
 
   // --- Departure reconciliation ----------------------------------------------
   //
@@ -309,23 +383,37 @@ export function useAniTuneRoom() {
     if ((view === 'round' || view === 'preparing') && active.length < 2) {
       once(`end:${view}`, () => endMatch());
     } else if (view === 'round' && g && g.phase !== 'finished') {
+      // Everyone the room can still be waiting on. In Lives this is smaller than
+      // the active roster: an eliminated player is present, watching, and will
+      // never answer, so counting them wedges the reveal exactly as a closed tab
+      // would — from a cause presence has no way to notice.
+      const live = rules.livePlayerIds(g, activeIds);
+
+      // The scoring window opens with the clip, not with the deal. The two are
+      // seconds apart online — every device has to buffer audio and unlock
+      // playback first — and scoring speed from the deal would measure whose
+      // connection was fastest rather than whose ear was.
+      if (g.clipStartAt != null && g.windowStartAt == null && g.phase !== 'revealed') {
+        once(`window:${g.index}`, () => openWindow(g.clipStartAt));
+      }
+
       // Only the buzzer can resolve their own buzz, so if they walk away the
       // clip stays paused for everyone else until the question is handed back.
       if (g.phase === 'buzzed' && g.buzzedBy && !activeIds.includes(g.buzzedBy)) {
         once(`release:${g.index}:${g.buzzedBy}`, () =>
-          applyGame((cur) => rules.releaseBuzz(cur, g.buzzedBy)));
+          applyGame((cur) => rules.releaseBuzz(cur, g.buzzedBy, nowRef.current())));
       }
 
-      // Everyone still here has locked in, but a departed player's empty slot
-      // would hold the reveal open — and nobody is rendering "Reveal now" once
-      // they've all answered.
-      if (g.mode !== rules.RACE && g.phase !== 'revealed'
-          && activeIds.length > 0 && activeIds.every((id) => g.answers?.[id])) {
-        once(`reveal:${g.index}:${activeIds.join(',')}`, () => revealNow());
+      // Everyone still in has locked in, but a departed or eliminated player's
+      // empty slot would hold the reveal open — and nobody is rendering "Reveal
+      // now" once they've all answered.
+      if (!rules.isRace(g.mode) && g.phase !== 'revealed'
+          && live.length > 0 && live.every((id) => g.answers?.[id])) {
+        once(`reveal:${g.index}:${live.join(',')}`, () => revealNow());
       }
 
       // Everyone still here is locked out, so nobody can answer this one.
-      if (g.mode === rules.RACE && g.phase === 'listening'
+      if (rules.isRace(g.mode) && g.phase === 'listening'
           && rules.everyoneLockedOut(active, g.lockedOut ?? [])) {
         once(`giveup:${g.index}:${activeIds.join(',')}`, () => giveUp());
       }
@@ -339,8 +427,28 @@ export function useAniTuneRoom() {
     }
   }, [
     roomCode, state, myPlayerId, roster, isHost, isPreparing,
-    once, applyGame, revealNow, giveUp, patchState, bestEffort, endMatch, setSyncError,
+    once, applyGame, revealNow, giveUp, openWindow, patchState, bestEffort, endMatch, setSyncError,
   ]);
+
+  // --- The clock running out -------------------------------------------------
+  //
+  // Separate from the reconciliation effect above because it is a different kind
+  // of event: that one repairs a room somebody left, this one is the ordinary
+  // end of an ordinary question. It is also the only gate in the app that closes
+  // without anyone doing anything.
+  //
+  // The one-shot key carries the question index *and* the phase. A race question
+  // can expire twice — the buzz window, then a buzzer's answer window — without
+  // the view or the index changing, and a key that named only the index would
+  // fire once and leave the room parked on a dead deadline forever. That is the
+  // trap CLAUDE.md describes for `once`: name whatever the thing is meant to
+  // happen once *per*.
+  const currentQuestion = state?.round?.[game?.index ?? 0] ?? null;
+  useEffect(() => {
+    if (state?.view !== 'round' || !game || game.phase === 'revealed' || game.phase === 'finished') return;
+    if (!clock.expired) return;
+    once(`expire:${game.index}:${game.phase}`, () => expireQuestion(currentQuestion));
+  }, [clock.expired, state?.view, game, currentQuestion, once, expireQuestion]);
 
   return {
     uid: core.uid, roomCode, myPlayerId,
@@ -365,7 +473,8 @@ export function useAniTuneRoom() {
     graceMs: core.graceMs,
     round: state?.round ?? null,
     game,
-    allReady, iAmReady, isMyBuzz, iHaveAnswered,
+    allReady, iAmReady, isMyBuzz, iHaveAnswered, iAmOut,
+    clock,
     startGame,
     markReady, setClipStart,
     buzz, resolveBuzz, giveUp,

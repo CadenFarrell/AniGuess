@@ -3,10 +3,12 @@ import TurnTracker from './TurnTracker';
 import QuestionLog from './QuestionLog';
 import PeekPanel from './PeekPanel';
 import WhoIsWhoPanel from './WhoIsWhoPanel';
+import TalkTurn from './TalkTurn';
 import { normalizeTitle } from '../../../shared/utils/ranking';
 import { isCorrectGuess as matchGuess } from '../utils/guessMatch';
-import { rankSuggestions } from '../utils/guessSuggest';
+import { rankSuggestions } from '../../../shared/utils/guessSuggest';
 import { buildWhoIsWho } from '../utils/whoIsWho';
+import { answerTrail } from '../utils/answerTrail';
 import { Avatar, Button, GhostButton, Input, Modal, Screen } from '../../../shared/ui';
 
 export default function GameScreen({
@@ -25,17 +27,21 @@ export default function GameScreen({
   timerEnabled,
   timerSeconds,
   sharedShowsOnly = true,
-  // Local "talk it out": questions and guesses are spoken, and the table
-  // answers with the buttons. Nothing is typed and nothing is logged.
+  // Local "talk it out": questions and guesses are spoken, and the table taps
+  // the outcome. Nothing is typed, and the whole turn is one tap.
   talkMode = false,
 }) {
   const [question, setQuestion] = useState('');
   const [guess, setGuess] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [activeIdx, setActiveIdx] = useState(-1);
+  // Flattening every show's cast on each turn is wasted work in talk mode,
+  // which never renders the suggestion list this feeds.
   const allChars = useMemo(
-    () => guesser.animeList.flatMap(a => a.characters.map(c => ({ name: c.name, series: a.title, imageUrl: c.imageUrl }))),
-    [guesser.animeList]
+    () => talkMode
+      ? []
+      : guesser.animeList.flatMap(a => a.characters.map(c => ({ name: c.name, series: a.title, imageUrl: c.imageUrl }))),
+    [guesser.animeList, talkMode]
   );
   const [mode, setMode] = useState('choose'); // choose | question | guess
   const [waitingForAnswer, setWaitingForAnswer] = useState(false);
@@ -68,10 +74,20 @@ export default function GameScreen({
     [players, assignments, lockedPositions]
   );
 
-  // Reset state when guesser changes (setState during render — React recommended pattern)
-  const [prevGuesserID, setPrevGuesserID] = useState(guesser.id);
-  if (prevGuesserID !== guesser.id) {
-    setPrevGuesserID(guesser.id);
+  // Talk mode's stand-in for the question log. The questions themselves are
+  // spoken and unrecorded, but the answers still carry the one thing the table
+  // asks the log for: how many questions this player has already burned.
+  const trail = useMemo(
+    () => talkMode ? answerTrail(questionLog) : [],
+    [talkMode, questionLog]
+  );
+
+  // Everything this component holds that belongs to one turn rather than to the
+  // game. Called from two places, and the second is not optional: the guesser
+  // only *changes* while somebody else is still unlocked, so once one player is
+  // left they take consecutive turns without this component re-rendering under
+  // a new id — and would inherit the stopped clock the last turn ended on.
+  const resetTurn = () => {
     setQuestion('');
     setGuess('');
     setSuggestions([]);
@@ -82,6 +98,13 @@ export default function GameScreen({
     setTurnOver(null);
     setTimeLeft(timerSeconds);
     setTimerActive(timerEnabled); // Start timer at the beginning of each turn
+  };
+
+  // Reset state when guesser changes (setState during render — React recommended pattern)
+  const [prevGuesserID, setPrevGuesserID] = useState(guesser.id);
+  if (prevGuesserID !== guesser.id) {
+    setPrevGuesserID(guesser.id);
+    resetTurn();
   }
 
   // Timer
@@ -115,24 +138,14 @@ export default function GameScreen({
     setWaitingForAnswer(true);
   };
 
-  // Talk mode has no question to submit, so there is nothing to stop the timer
-  // on: it runs while the question is being asked and stops on the answer,
-  // which is the same clock the typed path gives you.
-  const askAloud = () => {
-    setMode('choose');
-    setWaitingForAnswer(true);
-  };
-
   const answerQuestion = (answer) => {
     clearTimeout(timerRef.current);
-    setTimerActive(false);
-    setWaitingForAnswer(false);
     // No `text` in talk mode — the question was spoken and is not recorded, and
-    // an empty string would render as a blank row if the log ever came back.
+    // an empty string would render as a blank row in the typed-mode log.
     const logEntry = talkMode
       ? { id: crypto.randomUUID(), type: 'question', answer }
       : { id: crypto.randomUUID(), type: 'question', text: pendingQuestion, answer };
-    setPendingQuestion('');
+    resetTurn();
     onTurnComplete(logEntry);
   };
 
@@ -169,6 +182,12 @@ export default function GameScreen({
   // Talk mode's guess: said out loud, so the table rules on it rather than
   // matchGuess. A correct one still records the character's real name, because
   // CorrectGuessScreen and the round-end summary both read that text.
+  //
+  // A wrong one commits straight away rather than through the acknowledgement
+  // modal. That modal exists so a result doesn't vanish as the device changes
+  // hands — but at a talk-mode table the device isn't going anywhere and the
+  // whole table just watched the guess get judged, so it was a tap that told
+  // nobody anything.
   const judgeSpokenGuess = (correct) => {
     const logEntry = correct
       ? { id: crypto.randomUUID(), type: 'guess', text: character.name, correct: true }
@@ -178,15 +197,15 @@ export default function GameScreen({
       onCorrectGuess(logEntry);
     } else {
       clearTimeout(timerRef.current);
-      setTimerActive(false);
-      setTurnOver({ reason: 'wrong', logEntry });
+      resetTurn();
+      onWrongGuess(logEntry);
     }
   };
 
   // Commits the turn-ending action the player just acknowledged.
   const confirmTurnOver = () => {
     const { reason, logEntry } = turnOver;
-    setTurnOver(null);
+    resetTurn();
     if (reason === 'timer') onTurnComplete(logEntry);
     else onWrongGuess(logEntry);
   };
@@ -222,173 +241,137 @@ export default function GameScreen({
 
       <WhoIsWhoPanel entries={whoIsWho} gated />
 
-      {/* Action Area */}
-      {mode === 'choose' && !waitingForAnswer && (
-        <div className="mb-5 flex gap-4">
-          <Button
-            variant="info"
-            size="lg"
-            className="flex-1"
-            onClick={talkMode ? askAloud : () => setMode('question')}
-          >
-            ❓ Ask a Question
-          </Button>
-          <Button variant="primary" size="lg" className="flex-1" onClick={() => setMode('guess')}>
-            🎯 Submit Guess
-          </Button>
-        </div>
-      )}
-
-      {/* Unreachable in talk mode — askAloud jumps straight to the Yes/No card
-          rather than routing through a question to type. */}
-      {mode === 'question' && !talkMode && !waitingForAnswer && (
-        <div className="mb-5">
-          <Input
-            type="text"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && question.trim() && submitQuestion()}
-            placeholder="Type your yes/no question..."
-            aria-label="Your question"
-            autoFocus
-            className="mb-3 text-lg"
-          />
-          <div className="flex gap-3">
-            <GhostButton onClick={() => { setMode('choose'); setQuestion(''); }}>
-              ← Back
-            </GhostButton>
-            <Button
-              variant="info"
-              size="lg"
-              className="flex-1"
-              onClick={submitQuestion}
-              disabled={!question.trim()}
-            >
-              Ask ❓
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {mode === 'guess' && talkMode && (
-        <div className="mb-5">
-          <div className="card-pop p-6 text-center">
-            <div className="text-5xl">🗣️</div>
-            <p className="mt-3 font-display text-2xl font-extrabold text-white">
-              {guesser.name}, say your guess out loud
-            </p>
-            <p className="mt-2 text-base text-white/50">
-              Everyone else — did they get it?
-            </p>
-            <div className="mt-6 flex gap-4">
-              <Button
-                variant="success"
-                size="xl"
-                className="flex-1"
-                onClick={() => judgeSpokenGuess(true)}
-              >
-                ✅ Got it
+      {/* Action Area. Talk mode swaps the entire ask-or-guess choreography for
+          one card, rather than threading a flag through each screen below: the
+          spoken turn has no question to type, no guess to type and no verdict
+          to compute, so the only thing the two paths shared was the Yes/No
+          pair — and the typed path reads as it did before talk mode existed. */}
+      {talkMode ? (
+        <TalkTurn
+          guesserName={guesser.name}
+          onAnswer={answerQuestion}
+          onJudgeGuess={judgeSpokenGuess}
+          trail={trail}
+        />
+      ) : (
+        <>
+          {mode === 'choose' && !waitingForAnswer && (
+            <div className="mb-5 flex gap-4">
+              <Button variant="info" size="lg" className="flex-1" onClick={() => setMode('question')}>
+                ❓ Ask a Question
               </Button>
-              <Button
-                variant="danger"
-                size="xl"
-                className="flex-1"
-                onClick={() => judgeSpokenGuess(false)}
-              >
-                ❌ Nope
+              <Button variant="primary" size="lg" className="flex-1" onClick={() => setMode('guess')}>
+                🎯 Submit Guess
               </Button>
             </div>
-          </div>
-          <div className="mt-3">
-            <GhostButton onClick={() => setMode('choose')}>← Back</GhostButton>
-          </div>
-        </div>
-      )}
+          )}
 
-      {mode === 'guess' && !talkMode && (
-        <div className="mb-5">
-          <Input
-            type="text"
-            value={guess}
-            onChange={(e) => updateGuess(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'ArrowDown') { e.preventDefault(); setActiveIdx(i => Math.min(i + 1, suggestions.length - 1)); }
-              else if (e.key === 'ArrowUp') { e.preventDefault(); setActiveIdx(i => Math.max(i - 1, -1)); }
-              else if (e.key === 'Enter') { if (activeIdx >= 0) pickSuggestion(suggestions[activeIdx].name); else if (guess.trim()) submitGuess(); }
-              else if (e.key === 'Escape') setSuggestions([]);
-            }}
-            placeholder="Type your guess..."
-            aria-label="Your guess"
-            autoFocus
-            className="mb-3 text-lg"
-          />
-          {/* In-flow (not absolute) so the list never overlaps the Back/Guess buttons below. */}
-          {suggestions.length > 0 && (
-            <div className="mb-3 max-h-72 w-full overflow-y-auto overflow-x-hidden rounded-pop border-2 border-white/15 bg-surface">
-              {suggestions.map((s, i) => (
-                <div
-                  key={`${s.series}-${s.name}`}
-                  onMouseDown={() => pickSuggestion(s.name)}
-                  className={`flex cursor-pointer items-center gap-3 px-4 py-2
-                    ${i === activeIdx ? 'bg-pop-pink/30' : 'hover:bg-white/10'}`}
+          {mode === 'question' && !waitingForAnswer && (
+            <div className="mb-5">
+              <Input
+                type="text"
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && question.trim() && submitQuestion()}
+                placeholder="Type your yes/no question..."
+                aria-label="Your question"
+                autoFocus
+                className="mb-3 text-lg"
+              />
+              <div className="flex gap-3">
+                <GhostButton onClick={() => { setMode('choose'); setQuestion(''); }}>
+                  ← Back
+                </GhostButton>
+                <Button
+                  variant="info"
+                  size="lg"
+                  className="flex-1"
+                  onClick={submitQuestion}
+                  disabled={!question.trim()}
                 >
-                  <Avatar src={s.imageUrl} size="sm" />
-                  <div>
-                    <p className="text-sm font-semibold text-white">{s.name}</p>
-                    <p className="text-xs text-white/40">{s.series}</p>
-                  </div>
-                </div>
-              ))}
+                  Ask ❓
+                </Button>
+              </div>
             </div>
           )}
-          <div className="flex gap-3">
-            <GhostButton onClick={() => { setMode('choose'); setGuess(''); setSuggestions([]); }}>
-              ← Back
-            </GhostButton>
-            <Button
-              variant="primary"
-              size="lg"
-              className="flex-1"
-              onClick={submitGuess}
-              disabled={!guess.trim()}
-            >
-              Guess 🎯
-            </Button>
-          </div>
-        </div>
-      )}
 
-      {/* Yes / No buttons */}
-      {waitingForAnswer && (
-        <div className="mb-5">
-          {talkMode ? (
-            <p className="mb-4 text-center text-base text-white/60">
-              ❓ <span className="font-display text-lg font-extrabold text-white">
-                {guesser.name}, ask your yes/no question out loud
-              </span>
-            </p>
-          ) : (
-            <p className="mb-4 text-center text-base text-white/60">
-              ❓ <span className="font-display text-lg font-extrabold text-white">{pendingQuestion}</span>
-            </p>
+          {mode === 'guess' && (
+            <div className="mb-5">
+              <Input
+                type="text"
+                value={guess}
+                onChange={(e) => updateGuess(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'ArrowDown') { e.preventDefault(); setActiveIdx(i => Math.min(i + 1, suggestions.length - 1)); }
+                  else if (e.key === 'ArrowUp') { e.preventDefault(); setActiveIdx(i => Math.max(i - 1, -1)); }
+                  else if (e.key === 'Enter') { if (activeIdx >= 0) pickSuggestion(suggestions[activeIdx].name); else if (guess.trim()) submitGuess(); }
+                  else if (e.key === 'Escape') setSuggestions([]);
+                }}
+                placeholder="Type your guess..."
+                aria-label="Your guess"
+                autoFocus
+                className="mb-3 text-lg"
+              />
+              {/* In-flow (not absolute) so the list never overlaps the Back/Guess buttons below. */}
+              {suggestions.length > 0 && (
+                <div className="mb-3 max-h-72 w-full overflow-y-auto overflow-x-hidden rounded-pop border-2 border-white/15 bg-surface">
+                  {suggestions.map((s, i) => (
+                    <div
+                      key={`${s.series}-${s.name}`}
+                      onMouseDown={() => pickSuggestion(s.name)}
+                      className={`flex cursor-pointer items-center gap-3 px-4 py-2
+                        ${i === activeIdx ? 'bg-pop-pink/30' : 'hover:bg-white/10'}`}
+                    >
+                      <Avatar src={s.imageUrl} size="sm" />
+                      <div>
+                        <p className="text-sm font-semibold text-white">{s.name}</p>
+                        <p className="text-xs text-white/40">{s.series}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="flex gap-3">
+                <GhostButton onClick={() => { setMode('choose'); setGuess(''); setSuggestions([]); }}>
+                  ← Back
+                </GhostButton>
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="flex-1"
+                  onClick={submitGuess}
+                  disabled={!guess.trim()}
+                >
+                  Guess 🎯
+                </Button>
+              </div>
+            </div>
           )}
-          <p className="mb-4 text-center text-sm text-white/40">
-            Everyone else — answer this question
-          </p>
-          <div className="flex gap-4">
-            <Button variant="success" size="xl" className="flex-1" onClick={() => answerQuestion('Yes')}>
-              ✅ Yes
-            </Button>
-            <Button variant="danger" size="xl" className="flex-1" onClick={() => answerQuestion('No')}>
-              ❌ No
-            </Button>
-          </div>
-        </div>
-      )}
 
-      {/* Talk mode records nothing, so the log would be permanently empty. */}
-      {!talkMode && (
-        <QuestionLog title={`${guesser.name}'s Question Log`} entries={questionLog} />
+          {/* Yes / No buttons */}
+          {waitingForAnswer && (
+            <div className="mb-5">
+              <p className="mb-4 text-center text-base text-white/60">
+                ❓ <span className="font-display text-lg font-extrabold text-white">{pendingQuestion}</span>
+              </p>
+              <p className="mb-4 text-center text-sm text-white/40">
+                Everyone else — answer this question
+              </p>
+              <div className="flex gap-4">
+                <Button variant="success" size="xl" className="flex-1" onClick={() => answerQuestion('Yes')}>
+                  ✅ Yes
+                </Button>
+                <Button variant="danger" size="xl" className="flex-1" onClick={() => answerQuestion('No')}>
+                  ❌ No
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Talk mode's equivalent is the answer trail inside TalkTurn — a
+              spoken question has no text, so these rows would all be blank. */}
+          <QuestionLog title={`${guesser.name}'s Question Log`} entries={questionLog} />
+        </>
       )}
 
       {/* Turn-over acknowledgement — blocks until the device is handed on, so
@@ -401,17 +384,18 @@ export default function GameScreen({
           <h2 className="mb-3 font-display text-4xl font-extrabold text-white">
             {turnOver.reason === 'timer' ? "Time's up!" : 'Not quite!'}
           </h2>
-          {/* A spoken guess has no text to quote back — the check is on the
-              text, not on the reason, so talk mode simply drops this line. */}
-          {turnOver.reason === 'wrong' && turnOver.logEntry.text && (
+          {turnOver.reason === 'wrong' && (
             <p className="mb-3 text-xl text-white/60">
               <span className="font-bold text-white">&quot;{turnOver.logEntry.text}&quot;</span>{' '}
               isn&apos;t your character.
             </p>
           )}
           <p className="mb-10 text-lg text-white/50">{guesser.name}&apos;s turn is over.</p>
+          {/* Talk mode only ever reaches this modal on an expired timer — a
+              wrong guess commits on the tap that judged it. Nobody is passing
+              the device at that table, so the label says what is happening. */}
           <Button variant="primary" size="xl" fullWidth onClick={confirmTurnOver}>
-            Pass the device →
+            {talkMode ? 'Next player →' : 'Pass the device →'}
           </Button>
         </Modal>
       )}

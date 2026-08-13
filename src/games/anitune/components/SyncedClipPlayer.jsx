@@ -23,7 +23,12 @@ const MAX_LOAD_ATTEMPTS = 3;
 export default function SyncedClipPlayer({
   src,
   seconds = 10,
-  clipFraction = 0.4,
+  // Mid-range, matching ClipPlayer's own default. The two used to disagree —
+  // this defaulted to 0.4 while the host dealt 0.2–0.7 — which only ever showed
+  // up on a question that somehow arrived without a fraction, i.e. exactly when
+  // you would least want the two players to differ.
+  clipFraction = 0.45,
+  playbackRate = 1,
   clipStartAt = null,
   serverOffset = 0,
   paused = false,
@@ -111,6 +116,12 @@ export default function SyncedClipPlayer({
       audio.src = '';
     };
   }, [src, seconds, clipFraction]);
+
+  // Every device applies the same rate, so a shared start instant still means a
+  // shared musical position all the way through the clip.
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.playbackRate = playbackRate;
+  }, [playbackRate, state]);
 
   // The Ready tap: a real user gesture, so prime the element for the later,
   // gesture-less programmatic play() and report readiness to the room.

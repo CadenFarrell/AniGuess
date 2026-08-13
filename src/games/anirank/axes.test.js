@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { AXES, DEFAULT_AXIS_ID, getAxis, axesOfKind, promptFor, itemKey } from './axes';
+import {
+  AXES, DEFAULT_AXIS_ID, MAX_END_LABEL_LEN, MAX_PROMPT_LEN,
+  axesOfKind, axisForPool, customAxis, getAxis, isCustom, itemKey, needsEndLabels,
+  normalizeCustomPrompt, promptFor,
+} from './axes';
 import { trueOrder } from './rules';
 
 describe('the axis registry', () => {
@@ -108,6 +112,22 @@ describe('getAxis', () => {
     expect(getAxis('no-such-axis').id).toBe(DEFAULT_AXIS_ID);
     expect(getAxis(undefined).id).toBe(DEFAULT_AXIS_ID);
     expect(getAxis(null).id).toBe(DEFAULT_AXIS_ID);
+    // `custom: true` with nothing to hydrate from — a truncated write, or an
+    // entry that lost its text. Still has to name a mode.
+    expect(getAxis({ custom: true }).id).toBe(DEFAULT_AXIS_ID);
+  });
+
+  // The three shapes a spec arrives in. Callers pass whichever they are holding
+  // rather than tracking which one it is, which is the point of the polymorphism.
+  it('accepts an id, a saved prompt, an already-resolved axis, or an { id }', () => {
+    const saved = normalizeCustomPrompt({ text: 'best dressed' });
+    expect(getAxis('year').id).toBe('year');
+    expect(getAxis(saved).label).toBe('Best dressed');
+    expect(getAxis(getAxis('year'))).toBe(getAxis('year'));
+    expect(getAxis({ id: 'year' }).id).toBe('year');
+    // Idempotent on a hydrated custom axis too: it keeps its `text`, so it is
+    // still a valid spec.
+    expect(getAxis(getAxis(saved)).label).toBe('Best dressed');
   });
 });
 
@@ -125,6 +145,108 @@ describe('promptFor', () => {
   });
 });
 
+describe('custom prompts', () => {
+  const SAVED = normalizeCustomPrompt({
+    text: 'most likely to steal your food',
+    items: 'characters',
+  });
+
+  // The same contract the registry loop above asserts for every shipped axis.
+  // A hydrated prompt goes to exactly the same screens, so it has to satisfy it
+  // or the board renders with a missing end label or an unnamed mode.
+  it('hydrates into an axis the screens can read', () => {
+    const axis = customAxis(SAVED);
+    expect(axis.id).toBeTruthy();
+    expect(axis.label).toBeTruthy();
+    expect(axis.topLabel).toBeTruthy();
+    expect(axis.bottomLabel).toBeTruthy();
+    expect(axis.prompt).toBeTruthy();
+    expect(typeof axis.defaultBlind).toBe('boolean');
+    expect(['fact', 'opinion']).toContain(axis.kind);
+    expect(['shows', 'characters']).toContain(axis.items);
+  });
+
+  // The half of the contract deck.js relies on: no valueFor means the value
+  // filter is skipped and every show or character is eligible. A custom prompt
+  // that claimed one would deal an empty deck.
+  it('is an opinion axis with no valueFor, dealt open', () => {
+    const axis = customAxis(SAVED);
+    expect(axis.kind).toBe('opinion');
+    expect(axis.valueFor).toBeUndefined();
+    expect(axis.defaultBlind).toBe(false);
+    expect(isCustom(axis)).toBe(true);
+    expect(isCustom(getAxis('best'))).toBe(false);
+  });
+
+  it('frames the typed clause as a prompt about the subject', () => {
+    const line = promptFor(customAxis(SAVED), 'Caden');
+    expect(line).toContain('most likely to steal your food');
+    expect(line).toContain('Caden');
+    // The noun follows `items`, so the sentence reads about the pool actually
+    // being dealt rather than always saying "shows".
+    expect(line).toContain('characters');
+  });
+
+  // The online path in one assertion. The prompt is a FUNCTION, which cannot
+  // survive JSON — so what crosses RTDB is the stored shape, and every guest
+  // rebuilds the axis from it. Get this wrong and the host's prompt silently
+  // becomes Best → Worst on every other device in the room.
+  it('survives a JSON round-trip, which is how it reaches other devices', () => {
+    const overWire = JSON.parse(JSON.stringify(SAVED));
+    const there = getAxis(overWire);
+    const here = customAxis(SAVED);
+    expect(there.id).toBe(here.id);
+    expect(there.label).toBe(here.label);
+    expect(there.topLabel).toBe(here.topLabel);
+    expect(there.items).toBe(here.items);
+    expect(promptFor(there, 'Caden')).toBe(promptFor(here, 'Caden'));
+  });
+
+  it('resolves through itemKey the same way a built-in of that pool does', () => {
+    expect(itemKey(customAxis(SAVED), { id: 'anilist_1', name: 'Rem' }))
+      .toBe(itemKey(getAxis('favourites'), { id: 'anilist_2', name: 'rem' }));
+  });
+});
+
+describe('normalizeCustomPrompt', () => {
+  it('trims, collapses whitespace and truncates the prompt', () => {
+    expect(normalizeCustomPrompt({ text: '  most   likely  to win ' }).text)
+      .toBe('most likely to win');
+    expect(normalizeCustomPrompt({ text: 'x'.repeat(200) }).text)
+      .toHaveLength(MAX_PROMPT_LEN);
+  });
+
+  // The ends are rendered verbatim beside built-in labels that are all caps, and
+  // a blank one would leave the board with an unnamed end.
+  it('uppercases and truncates the end labels, defaulting when blank', () => {
+    const p = normalizeCustomPrompt({ text: 'a', topLabel: ' guilty ', bottomLabel: '' });
+    expect(p.topLabel).toBe('GUILTY');
+    expect(p.bottomLabel).toBe('LEAST');
+    expect(normalizeCustomPrompt({ text: 'a' }).topLabel).toBe('MOST');
+    expect(normalizeCustomPrompt({ text: 'a', topLabel: 'y'.repeat(50) }).topLabel)
+      .toHaveLength(MAX_END_LABEL_LEN);
+  });
+
+  it('coerces items to one of the two pools', () => {
+    expect(normalizeCustomPrompt({ text: 'a', items: 'characters' }).items).toBe('characters');
+    expect(normalizeCustomPrompt({ text: 'a', items: 'nonsense' }).items).toBe('shows');
+    expect(normalizeCustomPrompt({ text: 'a' }).items).toBe('shows');
+  });
+
+  // Runs on read as well as write, so this is what drops a junk saved entry
+  // rather than listing a nameless mode that renders a blank board.
+  it('returns null when there is no prompt left to save', () => {
+    expect(normalizeCustomPrompt({ text: '   ' })).toBe(null);
+    expect(normalizeCustomPrompt({})).toBe(null);
+    expect(normalizeCustomPrompt(null)).toBe(null);
+  });
+
+  it('keeps an existing id, so editing updates rather than duplicates', () => {
+    expect(normalizeCustomPrompt({ id: 'custom_abc', text: 'a' }).id).toBe('custom_abc');
+    expect(normalizeCustomPrompt({ text: 'a' }).id).toMatch(/^custom_/);
+  });
+});
+
 describe('itemKey', () => {
   it('identifies a character by folded name, not by id', () => {
     expect(itemKey(getAxis('favourites'), { id: 'anilist_1', name: 'Rem' }))
@@ -133,5 +255,63 @@ describe('itemKey', () => {
 
   it('identifies a show by its franchise id', () => {
     expect(itemKey(getAxis('year'), { id: 'cowboy bebop' })).toBe('cowboy bebop');
+  });
+});
+
+describe('axisForPool', () => {
+  // The move behind the Shows/Characters toggle. Kind is preserved on purpose:
+  // flipping pools must not also flip you from a factual question to an opinion.
+  it('keeps the kind and swaps the pool', () => {
+    expect(getAxis(axisForPool('best', 'characters'))).toMatchObject({ kind: 'opinion', items: 'characters' });
+    expect(getAxis(axisForPool('year', 'characters'))).toMatchObject({ kind: 'fact', items: 'characters' });
+    expect(getAxis(axisForPool('favourites', 'shows'))).toMatchObject({ kind: 'fact', items: 'shows' });
+    expect(getAxis(axisForPool('fight', 'shows'))).toMatchObject({ kind: 'opinion', items: 'shows' });
+  });
+
+  // Untouched rather than re-picked, so tapping the tab you are already on can
+  // never move you off a mode you deliberately chose.
+  it('hands the spec straight back when the pool already matches', () => {
+    expect(axisForPool('best', 'shows')).toBe('best');
+    const mine = { id: 'custom_1', custom: true, text: 'steals your food', items: 'characters' };
+    expect(axisForPool(mine, 'characters')).toBe(mine);
+  });
+
+  it('resolves a custom prompt into the other pool rather than getting stuck', () => {
+    const mine = { id: 'custom_1', custom: true, text: 'steals your food', items: 'shows' };
+    expect(getAxis(axisForPool(mine, 'characters')))
+      .toMatchObject({ kind: 'opinion', items: 'characters' });
+  });
+
+  // getAxis never returns undefined, and neither may this: a screen that cannot
+  // name its axis renders a blank board.
+  it('never returns something getAxis cannot resolve', () => {
+    for (const spec of [undefined, null, 'nonsense', {}]) {
+      for (const pool of ['shows', 'characters', 'junk']) {
+        expect(getAxis(axisForPool(spec, pool))).toBeTruthy();
+      }
+    }
+  });
+});
+
+describe('needsEndLabels', () => {
+  // A built-in opinion label already reads top-to-bottom ("Best → Worst"), so
+  // printing BEST → WORST underneath it is noise. This is the test that stops
+  // the two rules drifting: add an opinion axis whose label names a dimension
+  // instead of a direction and the picker would silently stop explaining it.
+  it('is false for every built-in opinion mode, whose label is already a direction', () => {
+    for (const axis of axesOfKind('opinion')) {
+      expect(needsEndLabels(axis), `${axis.id}`).toBe(false);
+      expect(axis.label, `${axis.id} label`).toContain('→');
+    }
+  });
+
+  it('is true for every fact mode, whose label names a dimension', () => {
+    for (const axis of axesOfKind('fact')) {
+      expect(needsEndLabels(axis), `${axis.id}`).toBe(true);
+    }
+  });
+
+  it('is true for a custom prompt, whose label is a clause', () => {
+    expect(needsEndLabels(customAxis({ text: 'steals your food' }))).toBe(true);
   });
 });

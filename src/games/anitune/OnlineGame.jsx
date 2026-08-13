@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAniTuneRoom } from './hooks/useAniTuneRoom';
-import { RACE } from './rules';
+import { isRace, hasLives, isEliminated, livePlayerIds } from './rules';
 import RoomSetup from '../../shared/components/RoomSetup';
 import { countShows } from '../../shared/utils/profileStats';
+import { formatPoints } from '../../shared/utils/deadline';
 import OnlineLobby from './components/OnlineLobby';
 import SyncedClipPlayer from './components/SyncedClipPlayer';
 import OnlineRaceRound from './components/OnlineRaceRound';
@@ -10,7 +11,7 @@ import OnlineSimultaneousRound from './components/OnlineSimultaneousRound';
 import QuestionReveal from './components/QuestionReveal';
 import AniTuneResults from './components/AniTuneResults';
 import WaitingScreen from '../aniguess/components/WaitingScreen';
-import { Backdrop, Badge, Banner, GhostButton, HubButton, Screen } from '../../shared/ui';
+import { Backdrop, Badge, Banner, GhostButton, HubButton, Screen, TimerBar } from '../../shared/ui';
 
 // The online view-router — the Firebase-backed counterpart to AniTuneRound's local
 // orchestration. Modelled on src/games/aniguess/OnlineGame.jsx: a shell() wraps
@@ -151,7 +152,13 @@ export default function OnlineGame({ onBack, onExit }) {
     if (!question) return shell(<WaitingScreen emoji="🎵" title="Loading clip…" />);
 
     const revealed = game.phase === 'revealed';
-    const isLast = game.index + 1 >= round.length;
+    const race = isRace(game.mode);
+    const lastManStanding = hasLives(game.mode);
+    // Lives can end a round before its questions run out, so "is this the last
+    // clip" is not just an index comparison: one survivor means it is.
+    const survivors = livePlayerIds(game, room.activeIds);
+    const isLast = game.index + 1 >= round.length
+      || (lastManStanding && room.players.length > 1 && survivors.length <= 1);
     const clipSeconds = room.settings?.clipSeconds ?? 10;
     const ranked = [...room.players].sort(
       (a, b) => (game.scores[b.id] || 0) - (game.scores[a.id] || 0)
@@ -166,13 +173,19 @@ export default function OnlineGame({ onBack, onExit }) {
               // Departed players keep their frozen score on the board, dimmed,
               // so the room can still see how the match stood when they went.
               const gone = room.departedIds.includes(p.id);
+              const out = lastManStanding && isEliminated(game, p.id);
               return (
                 <Badge
                   key={p.id}
-                  tone={p.id === game.buzzedBy ? 'purple' : 'neutral'}
-                  className={gone ? 'opacity-40' : ''}
+                  tone={out ? 'red' : p.id === game.buzzedBy ? 'purple' : 'neutral'}
+                  className={gone || out ? 'opacity-40' : ''}
                 >
-                  {p.name}{p.id === room.myPlayerId ? ' (you)' : ''} {game.scores[p.id] || 0}
+                  {p.name}{p.id === room.myPlayerId ? ' (you)' : ''} {formatPoints(game.scores[p.id] || 0)}
+                  {lastManStanding && (
+                    <span className="ml-1">
+                      {out ? '💀' : '♥'.repeat(Math.max(0, game.lives?.[p.id] ?? 0))}
+                    </span>
+                  )}
                   {gone && ' · left'}
                 </Badge>
               );
@@ -183,14 +196,15 @@ export default function OnlineGame({ onBack, onExit }) {
             Question {game.index + 1} of {round.length}
           </p>
           <h2 className="mb-6 text-center font-display text-3xl font-extrabold text-white">
-            {game.mode === RACE ? 'Buzz in 🔔' : 'Everyone guesses 🤫'}
+            {race ? 'Buzz in 🔔' : lastManStanding ? 'Last one standing 💀' : 'Everyone guesses 🤫'}
           </h2>
 
           <SyncedClipPlayer
             key={question.id}
             src={question.audioUrl}
             seconds={clipSeconds}
-            clipFraction={question.clipFraction ?? 0.4}
+            clipFraction={question.clipFraction ?? 0.45}
+            playbackRate={room.settings?.playbackRate ?? 1}
             clipStartAt={game.clipStartAt}
             serverOffset={room.serverOffset}
             paused={game.phase === 'buzzed'}
@@ -201,7 +215,19 @@ export default function OnlineGame({ onBack, onExit }) {
             onUnplayable={() => setClipDone(true)}
           />
 
-          {!revealed && game.mode === RACE && (
+          {/* Driven by the room's shared deadlineAt, corrected per device, so
+              nobody's bar runs ahead of the clock their speed is scored on. The
+              window is opened by the hook when clipStartAt lands, not here. */}
+          {!revealed && game.deadlineAt != null && (
+            <TimerBar
+              className="mt-4"
+              secondsLeft={room.clock.secondsLeft}
+              fraction={room.clock.fraction}
+              label={game.phase === 'buzzed' ? 'Time to answer' : 'Time to guess'}
+            />
+          )}
+
+          {!revealed && race && (
             <OnlineRaceRound
               players={room.activePlayers}
               questions={round}
@@ -217,7 +243,7 @@ export default function OnlineGame({ onBack, onExit }) {
             />
           )}
 
-          {!revealed && game.mode !== RACE && (
+          {!revealed && !race && (
             <OnlineSimultaneousRound
               players={room.activePlayers}
               questions={round}
@@ -225,6 +251,9 @@ export default function OnlineGame({ onBack, onExit }) {
               game={game}
               myPlayerId={room.myPlayerId}
               iHaveAnswered={room.iHaveAnswered}
+              iAmOut={room.iAmOut}
+              lives={lastManStanding ? game.lives : null}
+              eliminated={game.eliminated}
               clipStarted={clipStarted}
               onSubmit={(text) => room.submitAnswer(question, text)}
               onReveal={room.revealNow}
@@ -237,14 +266,12 @@ export default function OnlineGame({ onBack, onExit }) {
               mode={game.mode}
               players={room.players}
               answers={game.answers}
+              windowMs={game.windowMs}
+              lives={lastManStanding ? game.lives : null}
               onNext={room.advance}
               nextLabel={isLast ? 'See results →' : 'Next question →'}
             />
           )}
-
-          <div className="mt-6 text-center">
-            <GhostButton onClick={handleExitToHub}>← Leave game</GhostButton>
-          </div>
         </Screen>
       </>
     );
@@ -255,10 +282,16 @@ export default function OnlineGame({ onBack, onExit }) {
       <AniTuneResults
         players={room.players}
         scores={room.game.scores}
+        mode={room.game.mode}
+        lives={room.game.lives}
+        eliminated={room.game.eliminated}
+        round={room.round ?? []}
+        // game.index is the last question the room actually reached, which in
+        // Lives is short of the round it was dealt.
+        playedCount={(room.game.index ?? 0) + 1}
         departedIds={room.departedIds}
         roundSize={room.round?.length ?? Object.keys(room.game.scores).length}
         onPlayAgain={room.returnToLobby}
-        onExit={handleExitToHub}
       />
     );
   }

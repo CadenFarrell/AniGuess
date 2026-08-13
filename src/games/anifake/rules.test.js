@@ -50,10 +50,12 @@ describe('dealRoles', () => {
     // The fake holds a word and no character at all — the whole point of the
     // redesign. A character here would be the old face-up board's job.
     expect(secrets.a).toEqual({
-      forRound: 3, character: null, hint: 'Action', isFake: true,
+      forRound: 3, forDeal: 1, character: null, hint: 'Action', isFake: true,
+      discarded: null,
     });
     expect(secrets.b).toEqual({
-      forRound: 3, character: secret, hint: null, isFake: false,
+      forRound: 3, forDeal: 1, character: secret, hint: null, isFake: false,
+      discarded: null,
     });
     expect(secrets.c.character).toEqual(secret);
   });
@@ -114,8 +116,262 @@ describe('dealRoles', () => {
   });
 
   it('deals nothing at all rather than throwing on an empty pool or roster', () => {
-    expect(rules.dealRoles([], pool())).toEqual({ secrets: {}, fakeId: null, secret: null });
-    expect(rules.dealRoles(['a'], [])).toEqual({ secrets: {}, fakeId: null, secret: null });
+    const nothing = { secrets: {}, fakeId: null, secret: null, secretName: null, dealt: [] };
+    expect(rules.dealRoles([], pool())).toEqual(nothing);
+    expect(rules.dealRoles(['a'], [])).toEqual(nothing);
+  });
+
+  it('stamps the deal number, so a superseded card can be told from a current one', () => {
+    const { secrets } = rules.dealRoles(['a', 'b'], pool(), { round: 2, deal: 3 });
+    expect(Object.values(secrets).every((s) => s.forRound === 2 && s.forDeal === 3)).toBe(true);
+  });
+
+  it('reports the decoy as dealt too, not just the secret', () => {
+    // A re-deal excludes what it reports here. The decoy has to be in it: in
+    // decoy mode the fake really did hold that character, so promoting it to the
+    // next secret would have the table giving clues about someone one of them
+    // was privately holding a minute ago.
+    const { dealt, secret, secrets, fakeId } = rules.dealRoles(['a', 'b'], pool(), {
+      mode: 'decoy', rng: seq(0, 0.5, 0),
+    });
+    expect(dealt).toHaveLength(2);
+    expect(dealt).toContain(secret.id);
+    expect(dealt).toContain(secrets[fakeId].character.id);
+  });
+
+  it('reports only the secret as dealt in blind mode, where there is no decoy', () => {
+    const { dealt, secret } = rules.dealRoles(['a', 'b'], pool(), { mode: 'blind' });
+    expect(dealt).toEqual([secret.id]);
+  });
+
+  it('keeps a re-deal off the characters already in someone\'s hand', () => {
+    const two = pool(2);
+    const { secret } = rules.dealRoles(['a', 'b'], two, {
+      mode: 'blind', exclude: ['char 0'], rng: seq(0, 0),
+    });
+    // rng 0 would pick Char 0 unexcluded.
+    expect(secret.id).toBe('char 1');
+  });
+
+  it('keeps the pinned player as the fake while the character changes', () => {
+    // The rng says player index 0 every time, so an unpinned re-deal would make
+    // `a` the fake again and the test would pass for the wrong reason. 0.9 picks
+    // a different secret from 0.1, which is what makes this a re-DEAL.
+    const first = rules.dealRoles(['a', 'b', 'c'], pool(), {
+      mode: 'blind', deal: 1, rng: seq(0.5, 0.1),
+    });
+    expect(first.fakeId).toBe('b');
+
+    const second = rules.dealRoles(['a', 'b', 'c'], pool(), {
+      mode: 'blind', deal: 2, pinFake: first.fakeId, rng: seq(0, 0.9),
+    });
+    expect(second.fakeId).toBe('b');
+    expect(second.secret.id).not.toBe(first.secret.id);
+    // The role carries over intact, not just the id: a pinned fake still holds
+    // no character and still gets a hint off the NEW secret.
+    expect(second.secrets.b).toEqual({
+      forRound: 1, forDeal: 2, character: null, hint: 'Action', isFake: true,
+      discarded: null,
+    });
+    expect(second.secrets.a.character).toEqual(second.secret);
+  });
+
+  it('pins the fake in decoy mode too, where nobody knows the role moved', () => {
+    const first = rules.dealRoles(['a', 'b', 'c'], pool(), {
+      mode: 'decoy', deal: 1, rng: seq(0.5, 0.1, 0),
+    });
+    const second = rules.dealRoles(['a', 'b', 'c'], pool(), {
+      mode: 'decoy', deal: 2, pinFake: first.fakeId, rng: seq(0, 0.9, 0),
+    });
+    expect(second.fakeId).toBe(first.fakeId);
+    // Still told nothing, and still holding a character of their own.
+    expect(second.secrets[second.fakeId].isFake).toBe(false);
+    expect(second.secrets[second.fakeId].character)
+      .not.toEqual(second.secrets.a.character);
+  });
+
+  it('draws a fresh fake when the pinned player is not in this deal', () => {
+    // The pin rides a ref across a phase online and a prop locally, so neither
+    // guarantees the pinned player is still being dealt to. A stale pin must
+    // fall back rather than leave the round with a fake nobody is holding.
+    const { fakeId, secrets } = rules.dealRoles(['a', 'b'], pool(), {
+      mode: 'blind', pinFake: 'gone', rng: seq(0, 0.5),
+    });
+    expect(fakeId).toBe('a');
+    expect(secrets.a.isFake).toBe(true);
+  });
+
+  it('publishes the discards on every card in blind mode, the fake included', () => {
+    // The fake's copy is the entire point. The crew all saw the discarded
+    // character and the blind fake never did, so without it "everyone name the
+    // one we threw out" identifies them for free. See rules.js's note.
+    const { secrets, fakeId } = rules.dealRoles(['a', 'b', 'c'], pool(), {
+      mode: 'blind', deal: 2, discarded: ['Char 8'], rng: seq(0, 0.1),
+    });
+    expect(secrets[fakeId].isFake).toBe(true);
+    expect(Object.values(secrets).every((s) => s.discarded)).toBe(true);
+    expect(new Set(Object.values(secrets).map((s) => s.discarded.join()))).toEqual(
+      new Set(['Char 8'])
+    );
+  });
+
+  it('publishes no discards in decoy mode however many are passed', () => {
+    // The decoy fake discarded a DIFFERENT character, so one shared list would
+    // tell them their card differs — the same reason they get no hint.
+    const { secrets } = rules.dealRoles(['a', 'b'], pool(), {
+      mode: 'decoy', deal: 3, discarded: ['Char 8', 'Char 2'], rng: seq(0, 0.5, 0),
+    });
+    expect(Object.values(secrets).every((s) => s.discarded === null)).toBe(true);
+  });
+
+  it('publishes no discards on the first deal, where nothing has been thrown out', () => {
+    const { secrets } = rules.dealRoles(['a', 'b'], pool(), { mode: 'blind', deal: 1 });
+    expect(Object.values(secrets).every((s) => s.discarded === null)).toBe(true);
+  });
+
+  it('reports the secret by display name, for the caller to publish next deal', () => {
+    // `dealt` carries folded ids for exclusion; a discard goes on screen, so it
+    // needs the readable form. Same character, two spellings.
+    const { secret, secretName, dealt } = rules.dealRoles(['a', 'b'], pool(), {
+      mode: 'blind', rng: seq(0, 0.5),
+    });
+    expect(secretName).toBe('Char 8');
+    expect(secretName).toBe(secret.name);
+    expect(dealt).toEqual([secret.id]);
+  });
+
+  it('consumes the same rng draws whether or not the fake is pinned', () => {
+    // dealRoles draws in a fixed order (see the note at the top of this file),
+    // and pinning must not skip the fake's draw — a pinned deal would then take
+    // the SECRET's value out of the fake's slot and land on a different
+    // character than the same seed gives unpinned. Nothing else here would
+    // notice, which is why this test exists.
+    const draws = () => seq(0.5, 0.3, 0.7);
+    const loose = rules.dealRoles(['a', 'b', 'c'], pool(), { mode: 'decoy', rng: draws() });
+    const pinned = rules.dealRoles(['a', 'b', 'c'], pool(), {
+      mode: 'decoy', pinFake: 'c', rng: draws(),
+    });
+    expect(pinned.fakeId).toBe('c');
+    expect(loose.fakeId).not.toBe('c'); // the pin really did override a draw
+    expect(pinned.secret).toEqual(loose.secret);
+    expect(pinned.secrets[pinned.fakeId].character)
+      .toEqual(loose.secrets[loose.fakeId].character);
+  });
+});
+
+describe('the card check', () => {
+  const checking = (overrides = {}) => round({
+    check: { responded: {}, asked: false },
+    ...overrides,
+  });
+
+  it('opens the phase only when the table asked for it', () => {
+    expect(rules.startRound(['a'], { allowRedeal: true }).check).toEqual({
+      responded: {}, asked: false,
+    });
+    // Off means no node at all, which is also what a round dealt before this
+    // existed reads as — the whole backward-compatibility story.
+    expect(rules.startRound(['a']).check).toBeNull();
+    expect(rules.needsCheck(rules.startRound(['a']))).toBe(false);
+  });
+
+  it('starts every round on deal one, phase or no phase', () => {
+    expect(rules.startRound(['a'], { allowRedeal: true }).deal).toBe(1);
+    expect(rules.startRound(['a']).deal).toBe(1);
+  });
+
+  it('records that someone answered, never how', () => {
+    // THE anonymity assertion. In blind mode the fake holds no character, so a
+    // per-player record of who asked would make them bluff about a card they
+    // cannot see. This test fails the moment anyone adds one.
+    const confirmed = rules.respondToCheck(checking(), 'a', { asked: false }).patch;
+    const requested = rules.respondToCheck(checking(), 'b', { asked: true }).patch;
+
+    expect(Object.keys(confirmed.check).sort()).toEqual(['asked', 'responded']);
+    expect(Object.keys(requested.check).sort()).toEqual(['asked', 'responded']);
+    // Identical per-player values. The only difference between a confirmer and
+    // an asker anywhere in the round state is one shared boolean with no owner.
+    expect(confirmed.check.responded).toEqual({ a: true });
+    expect(requested.check.responded).toEqual({ b: true });
+    expect(requested.check.asked).toBe(true);
+  });
+
+  it('latches the request, so a later confirmation cannot clear it', () => {
+    let s = checking();
+    s = { ...s, ...rules.respondToCheck(s, 'a', { asked: true }).patch };
+    s = { ...s, ...rules.respondToCheck(s, 'b', { asked: false }).patch };
+    s = { ...s, ...rules.respondToCheck(s, 'c', { asked: false }).patch };
+    expect(s.check.asked).toBe(true);
+  });
+
+  it('takes each player\'s first answer and no other', () => {
+    // Same reason castVote is final: letting a confirmer switch after watching
+    // everyone else respond hands the last responder the decision alone.
+    let s = checking();
+    s = { ...s, ...rules.respondToCheck(s, 'a', { asked: false }).patch };
+    expect(rules.respondToCheck(s, 'a', { asked: true }).patch).toEqual({});
+    expect(s.check.asked).toBe(false);
+  });
+
+  it('is a no-op when the phase is off, so a stray tap cannot invent one', () => {
+    expect(rules.respondToCheck(round(), 'a', { asked: true }).patch).toEqual({});
+    expect(rules.applyRedeal(round(), 2).patch).toEqual({});
+  });
+
+  it('waits on the active roster only, so a closed tab cannot wedge it', () => {
+    const s = checking({ check: { responded: { a: true, b: true }, asked: false } });
+    expect(rules.everyoneChecked(s, ['a', 'b', 'c'])).toBe(false);
+    // c left; the gate clears itself rather than waiting forever.
+    expect(rules.everyoneChecked(s, ['a', 'b'])).toBe(true);
+    expect(rules.pendingCheckers(s, ['a', 'b', 'c'])).toEqual(['c']);
+    expect(rules.pendingCheckers(s, ['a', 'b'])).toEqual([]);
+  });
+
+  it('reads out the four ways the phase can stand', () => {
+    const ids = ['a', 'b', 'c'];
+    const all = { a: true, b: true, c: true };
+
+    expect(rules.checkOutcome(checking(), ids).next).toBeNull();
+    expect(rules.checkOutcome(checking({
+      check: { responded: all, asked: false },
+    }), ids).next).toBe('clues');
+    expect(rules.checkOutcome(checking({
+      check: { responded: all, asked: true },
+    }), ids).next).toBe('redeal');
+    // Asked for, but the cap is spent — the round starts anyway rather than
+    // looping. See MAX_DEALS.
+    expect(rules.checkOutcome(checking({
+      deal: rules.MAX_DEALS, check: { responded: all, asked: true },
+    }), ids).next).toBe('clues');
+  });
+
+  it('claims the next deal exactly once, so two hosts cannot both re-deal', () => {
+    const s = checking({ deal: 1, check: { responded: { a: true }, asked: true } });
+    const { patch } = rules.applyRedeal(s, 2);
+    expect(patch).toEqual({ deal: 2, check: { responded: {}, asked: false } });
+    // The loser of the race re-runs against the already-bumped state and aborts.
+    expect(rules.applyRedeal({ ...s, ...patch }, 2).patch).toEqual({});
+    // And nothing can skip a number or run past the cap.
+    expect(rules.applyRedeal(s, 3).patch).toEqual({});
+    expect(rules.applyRedeal(checking({ deal: rules.MAX_DEALS }), rules.MAX_DEALS + 1).patch)
+      .toEqual({});
+  });
+
+  it('reaches the clues within MAX_DEALS however stubbornly the table asks', () => {
+    // Structural termination, the property the runoff's cap note is about: a
+    // player asking every single time must not be able to loop the room.
+    const ids = ['a', 'b', 'c'];
+    let s = checking();
+    let deals = 1;
+    for (let guard = 0; guard < 20; guard += 1) {
+      for (const id of ids) s = { ...s, ...rules.respondToCheck(s, id, { asked: true }).patch };
+      const outcome = rules.checkOutcome(s, ids);
+      if (outcome.next !== 'redeal') break;
+      deals += 1;
+      s = { ...s, ...rules.applyRedeal(s, deals).patch };
+    }
+    expect(rules.checkOutcome(s, ids).next).toBe('clues');
+    expect(deals).toBe(rules.MAX_DEALS);
   });
 });
 
@@ -324,6 +580,164 @@ describe('voting', () => {
   });
 });
 
+describe('the runoff', () => {
+  // A 2–2 tie between a and c. Four players, because three cannot tie in a way a
+  // runoff could repeat: the two candidates are forced to vote for each other,
+  // so the third player always decides.
+  const tied = (extra = {}) => round({
+    order: ['a', 'b', 'c', 'd'],
+    votes: { a: 'c', b: 'c', c: 'a', d: 'a' },
+    ...extra,
+  });
+  const open = (votes = {}) => tied({ runoff: { candidates: ['a', 'c'], votes } });
+
+  it('opens on a tie, with exactly the tied names as candidates', () => {
+    const s = tied();
+    expect(rules.openRunoff(s).patch).toEqual({ runoff: { candidates: ['a', 'c'], votes: {} } });
+  });
+
+  it('opens a three-way runoff on a three-way tie', () => {
+    const s = round({ order: ['a', 'b', 'c', 'd'], votes: { a: 'b', b: 'c', c: 'd' } });
+    expect(rules.openRunoff(s).patch.runoff.candidates).toEqual(['b', 'c', 'd']);
+  });
+
+  it('does not open on a decisive ballot, on no votes, or a second time', () => {
+    expect(rules.openRunoff(round({ votes: { a: 'c', b: 'c' } })).patch).toEqual({});
+    expect(rules.openRunoff(round({ votes: {} })).patch).toEqual({});
+    expect(rules.openRunoff(round()).patch).toEqual({});
+    // The cap is the rule, not a caller's discipline: any device may fire this.
+    expect(rules.openRunoff(open()).patch).toEqual({});
+  });
+
+  it('reads the open ballot through currentBallot', () => {
+    expect(rules.currentBallot(tied())).toEqual({
+      isRunoff: false, candidates: ['a', 'b', 'c', 'd'], votes: { a: 'c', b: 'c', c: 'a', d: 'a' },
+    });
+    expect(rules.currentBallot(open({ b: 'a' }))).toEqual({
+      isRunoff: true, candidates: ['a', 'c'], votes: { b: 'a' },
+    });
+  });
+
+  it('takes the runoff vote on its own ballot, leaving the opening one intact', () => {
+    const s = open();
+    const after = { ...s, ...rules.castVote(s, 'b', 'a').patch };
+    expect(after.runoff).toEqual({ candidates: ['a', 'c'], votes: { b: 'a' } });
+    expect(after.votes).toEqual({ a: 'c', b: 'c', c: 'a', d: 'a' });
+    // Final per ballot, exactly as the opening vote is.
+    expect(rules.castVote(after, 'b', 'c').patch).toEqual({});
+  });
+
+  it('refuses a target who was not tied, and a candidate voting for themselves', () => {
+    const s = open();
+    expect(rules.castVote(s, 'b', 'd').patch).toEqual({});
+    // Everyone votes in the runoff, the tied players included — the self-vote
+    // guard is the whole of what stops a candidate voting themselves clear.
+    expect(rules.castVote(s, 'a', 'a').patch).toEqual({});
+    expect(rules.castVote(s, 'a', 'c').patch.runoff.votes).toEqual({ a: 'c' });
+  });
+
+  it('waits on the runoff ballot, not the one already closed', () => {
+    const s = open({ a: 'c' });
+    const all = ['a', 'b', 'c', 'd'];
+    // Everyone voted on the opening ballot; that must not read as done here.
+    expect(rules.everyoneVoted(s, all)).toBe(false);
+    expect(rules.pendingVoters(s, all)).toEqual(['b', 'c', 'd']);
+    expect(rules.everyoneVoted(s, ['a'])).toBe(true);
+  });
+});
+
+describe('voteOutcome', () => {
+  const tied = (runoff) => round({
+    order: ['a', 'b', 'c', 'd'], votes: { a: 'c', b: 'c', c: 'a', d: 'a' }, runoff,
+  });
+
+  it('takes a decisive opening ballot as the answer', () => {
+    const out = rules.voteOutcome(round({ votes: { a: 'c', b: 'c', c: 'a' } }));
+    expect(out.caught).toBe('c');
+    expect(out.needsRunoff).toBe(false);
+    expect(out.isRunoff).toBe(false);
+    expect(out.tiedOut).toBe(false);
+  });
+
+  it('asks for a runoff while the opening ballot is tied and none is open yet', () => {
+    const out = rules.voteOutcome(tied(null));
+    expect(out.caught).toBeNull();
+    expect(out.needsRunoff).toBe(true);
+    expect(out.candidates).toEqual(['a', 'c']);
+  });
+
+  it('stops asking once the runoff is open', () => {
+    // Otherwise every device would keep trying to open one that already exists.
+    expect(rules.voteOutcome(tied({ candidates: ['a', 'c'], votes: {} })).needsRunoff).toBe(false);
+  });
+
+  it('takes the runoff as the answer when it is decisive', () => {
+    const out = rules.voteOutcome(tied({ candidates: ['a', 'c'], votes: { a: 'c', b: 'c', d: 'a' } }));
+    expect(out.caught).toBe('c');
+    expect(out.isRunoff).toBe(true);
+    expect(out.tiedOut).toBe(false);
+    // The counts a tally renders are the ballot that decided, with the opening
+    // one kept alongside so the reveal can show what forced the runoff.
+    expect(out.counts).toEqual({ c: 2, a: 1 });
+    expect(out.firstCounts).toEqual({ c: 2, a: 2 });
+  });
+
+  it('catches nobody when the runoff ties as well — the fake walks', () => {
+    // Where "no ties" stops. A table that could not agree twice will not agree a
+    // third time, and looping would let two players wedge an online room.
+    const out = rules.voteOutcome(tied({ candidates: ['a', 'c'], votes: { a: 'c', c: 'a' } }));
+    expect(out.caught).toBeNull();
+    expect(out.tiedOut).toBe(true);
+    expect(out.needsRunoff).toBe(false);
+  });
+
+  it('asks for no runoff when nobody voted at all', () => {
+    const out = rules.voteOutcome(round({ votes: {} }));
+    expect(out.caught).toBeNull();
+    expect(out.needsRunoff).toBe(false);
+  });
+});
+
+describe('seating', () => {
+  const players = [{ id: 'a', name: 'Ann' }, { id: 'b', name: 'Bo' }, { id: 'c', name: 'Cy' }];
+
+  it('numbers players by the speaking order, not the roster order', () => {
+    // The whole point: the clue log and the ballot become the same list.
+    expect(rules.seating(round({ order: ['c', 'a', 'b'] }), players)).toEqual([
+      { id: 'c', name: 'Cy', seat: 1 },
+      { id: 'a', name: 'Ann', seat: 2 },
+      { id: 'b', name: 'Bo', seat: 3 },
+    ]);
+  });
+
+  it('keeps everyone their seat when a player drops off the roster', () => {
+    // Numbering the survivors would renumber every seat below the one who went,
+    // which is the exact shuffle seats exist to stop.
+    expect(rules.seating(round({ order: ['c', 'a', 'b'] }), [players[0], players[1]])).toEqual([
+      { id: 'a', name: 'Ann', seat: 2 },
+      { id: 'b', name: 'Bo', seat: 3 },
+    ]);
+  });
+
+  it('sorts a player who joined after the deal last, with no seat', () => {
+    const late = { id: 'z', name: 'Zed' };
+    expect(rules.seating(round({ order: ['a', 'b', 'c'] }), [...players, late])).toEqual([
+      { id: 'a', name: 'Ann', seat: 1 },
+      { id: 'b', name: 'Bo', seat: 2 },
+      { id: 'c', name: 'Cy', seat: 3 },
+      { id: 'z', name: 'Zed', seat: null },
+    ]);
+  });
+
+  it('survives an empty roster and a round with no order', () => {
+    expect(rules.seating(round({ order: ['a'] }), [])).toEqual([]);
+    // Everyone is "late" when there is no order to seat them by — the ballot
+    // still renders every row rather than coming back empty.
+    expect(rules.seating({}, players)).toEqual(players.map((p) => ({ ...p, seat: null })));
+    expect(rules.seating(undefined, undefined)).toEqual([]);
+  });
+});
+
 describe('revealCardFor', () => {
   it('folds the name into the key both devices will group by', () => {
     const dealt = { character: { name: 'Rem', series: 'Re:Zero', imageUrl: 'x' } };
@@ -436,6 +850,28 @@ describe('the steal', () => {
     expect(rules.submitSteal(stolen, 'Eren').patch).toEqual({});
   });
 
+  it('is offered to a fake caught in the runoff', () => {
+    // Read off the opening ballot alone this is false, and a whole screen the
+    // fake is owed never appears.
+    const s = round({
+      mode: 'blind',
+      votes: { a: 'c', b: 'd' },
+      runoff: { candidates: ['c', 'd'], votes: { a: 'c', b: 'c' } },
+    });
+    expect(rules.needsSteal(s, 'c')).toBe(true);
+    // The one the runoff cleared does not get one.
+    expect(rules.needsSteal(s, 'd')).toBe(false);
+  });
+
+  it('is not offered when the runoff tied as well', () => {
+    const s = round({
+      mode: 'blind',
+      votes: { a: 'c', b: 'd' },
+      runoff: { candidates: ['c', 'd'], votes: { a: 'c', b: 'd' } },
+    });
+    expect(rules.needsSteal(s, 'c')).toBe(false);
+  });
+
   it('refuses an empty guess and tidies a messy one', () => {
     const s = round();
     expect(rules.submitSteal(s, '   ').patch).toEqual({});
@@ -482,6 +918,37 @@ describe('scoreRound', () => {
 
   it('pays the fake 2 when the vote ties', () => {
     const s = round({ mode: 'blind', votes: { a: 'b', b: 'a' } });
+    expect(rules.scoreRound(s, truth)).toEqual({ c: 2 });
+  });
+
+  it('pays a crew member who named the fake on either ballot, once', () => {
+    const s = round({
+      mode: 'blind',
+      votes: { a: 'c', b: 'd' },
+      runoff: { candidates: ['c', 'd'], votes: { a: 'c', b: 'c' } },
+    });
+    // a had the fake on both ballots and is paid once, not twice; b only found
+    // them in the runoff and is paid the same — the runoff caught c, so no +2.
+    expect(rules.scoreRound(s, truth)).toEqual({ a: 1, b: 1 });
+  });
+
+  it('still pays a crew member whose opening vote the runoff left behind', () => {
+    // The runoff opened on two names that do not include the fake, so the table
+    // was always going to accuse the wrong person — but a named them first.
+    const s = round({
+      mode: 'blind',
+      votes: { a: 'c', b: 'd', d: 'b' },
+      runoff: { candidates: ['b', 'd'], votes: { a: 'b', b: 'd', d: 'b' } },
+    });
+    expect(rules.scoreRound(s, truth)).toEqual({ a: 1, c: 2 });
+  });
+
+  it('pays the fake 2 when the runoff ties as well', () => {
+    const s = round({
+      mode: 'blind',
+      votes: { a: 'b', b: 'a' },
+      runoff: { candidates: ['a', 'b'], votes: { a: 'b', b: 'a' } },
+    });
     expect(rules.scoreRound(s, truth)).toEqual({ c: 2 });
   });
 

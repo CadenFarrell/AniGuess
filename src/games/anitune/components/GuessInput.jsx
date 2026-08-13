@@ -1,9 +1,17 @@
 import { useState } from 'react';
 import { suggestTitles } from '../utils/titleMatch';
-import { Button, Input } from '../../../shared/ui';
+import { Button, Combobox } from '../../../shared/ui';
 
 // The title entry field, shared by both modes. Owns its own draft text so the
 // round state only ever sees a submitted answer.
+//
+// The typeahead shell is shared/ui/Combobox — keyboard handling, the highlight,
+// and the ARIA combobox roles this file used to be missing. Combobox's own
+// header named this component as one of the three hand-rolled copies it was
+// extracted to replace; AniGuess's two were converted at the time and this one
+// was not, so until now the same arcade answered to two different keyboards
+// depending on which game you were in. Ranking stays here, as it does for
+// AniGuess: this one ranks titles.
 //
 // `masked` is for pass-and-play, where the rest of the table is looking at the
 // same screen: the text is hidden AND the suggestion list is suppressed, since a
@@ -17,74 +25,54 @@ export default function GuessInput({
   placeholder = 'Which anime is this?',
   submitLabel = 'Guess 🎯',
   skipLabel,
+  disabled = false,
   onSubmit,
   onSkip,
 }) {
   const [guess, setGuess] = useState('');
   const [suggestions, setSuggestions] = useState([]);
-  const [activeIdx, setActiveIdx] = useState(-1);
 
   const updateGuess = (value) => {
     setGuess(value);
     setSuggestions(masked ? [] : suggestTitles(questions, value));
-    setActiveIdx(-1);
-  };
-
-  const pickSuggestion = (title) => {
-    setGuess(title);
-    setSuggestions([]);
-    setActiveIdx(-1);
   };
 
   const submit = () => {
-    if (!guess.trim()) return;
+    if (!guess.trim() || disabled) return;
     setSuggestions([]);
     onSubmit(guess);
   };
 
   return (
     <div>
-      <Input
-        type={masked ? 'password' : 'text'}
+      <Combobox
         value={guess}
-        onChange={(e) => updateGuess(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'ArrowDown') { e.preventDefault(); setActiveIdx((i) => Math.min(i + 1, suggestions.length - 1)); }
-          else if (e.key === 'ArrowUp') { e.preventDefault(); setActiveIdx((i) => Math.max(i - 1, -1)); }
-          else if (e.key === 'Enter') { if (activeIdx >= 0) pickSuggestion(suggestions[activeIdx].title); else submit(); }
-          else if (e.key === 'Escape') setSuggestions([]);
-        }}
+        onChange={updateGuess}
+        suggestions={suggestions}
+        onSelect={(s) => { setGuess(s.title); setSuggestions([]); }}
+        onSubmit={submit}
+        optionKey={(s) => s.title}
+        renderOption={(s) => (
+          <div className="min-w-0">
+            <p className="truncate text-base font-bold text-white">{s.title}</p>
+            {s.alt && s.alt !== s.title && (
+              <p className="truncate text-sm text-white/40">{s.alt}</p>
+            )}
+          </div>
+        )}
+        type={masked ? 'password' : 'text'}
         placeholder={placeholder}
-        aria-label={placeholder}
+        ariaLabel={placeholder}
         autoFocus
-        autoComplete="off"
-        className="mb-3 text-lg"
+        className="mb-3"
       />
-
-      {/* In-flow, not absolute — an overlay here would swallow the first
-          click aimed at the submit button below. */}
-      {suggestions.length > 0 && (
-        <div className="mb-3 w-full overflow-hidden rounded-pop-sm border-2 border-ink bg-surface-2">
-          {suggestions.map((s, i) => (
-            <div
-              key={s.title}
-              onMouseDown={() => pickSuggestion(s.title)}
-              className={`cursor-pointer px-4 py-2 ${
-                i === activeIdx ? 'bg-pop-pink/30' : 'hover:bg-white/10'
-              }`}
-            >
-              <p className="text-base font-bold text-white">{s.title}</p>
-              {s.alt && s.alt !== s.title && <p className="text-sm text-white/40">{s.alt}</p>}
-            </div>
-          ))}
-        </div>
-      )}
 
       <div className="flex gap-3">
         {onSkip && (
           <Button
             variant="neutral"
             size="lg"
+            disabled={disabled}
             onClick={() => { setSuggestions([]); onSkip(); }}
           >
             {skipLabel || 'Skip'}
@@ -95,7 +83,7 @@ export default function GuessInput({
           size="lg"
           fullWidth
           onClick={submit}
-          disabled={!guess.trim()}
+          disabled={disabled || !guess.trim()}
         >
           {submitLabel}
         </Button>

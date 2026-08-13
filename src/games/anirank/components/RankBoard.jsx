@@ -1,4 +1,5 @@
 import { Badge, Button, Card } from '../../../shared/ui';
+import { railTone } from '../utils/rail';
 
 // The ten slots. Shared by local and online play, and by both ways a round can
 // be dealt — it renders one board and reports which slot was tapped, and knows
@@ -34,13 +35,9 @@ import { Badge, Button, Card } from '../../../shared/ui';
 // Picking a card up deliberately does NOT remove it from the board: the board
 // stays full, so the lock-in button does not flicker off every time someone
 // reconsiders a slot.
-// The rail's steps. Discrete blocks rather than a CSS gradient: there are no
-// gradients anywhere in this app, and knocking one accent back by opacity is how
-// the palette already renders a step down (see aniguess's Leaderboard, where
-// bronze is a faded amber because there is no brown token).
-const RAIL = ['bg-pop-amber', 'bg-pop-amber/60', 'bg-pop-amber/30', 'bg-pop-amber/10'];
-const railTone = (i, size) =>
-  RAIL[Math.min(RAIL.length - 1, Math.floor((i / Math.max(size, 1)) * RAIL.length))];
+// The rail's steps live in ../utils/rail.js: the reveal redraws the same board
+// to explain the score, and a second copy of the ladder would be free to drift
+// out of step with this one.
 
 // One end of the board: the slot number and what the axis calls that end. Both
 // halves matter — the number alone doesn't say which end is better, and the

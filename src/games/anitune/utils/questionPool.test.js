@@ -1,9 +1,17 @@
 import { describe, it, expect } from 'vitest';
 import {
-  getEligibleAnimeList, hasSharedAnime, pickAudioForTheme, buildQuestionPool, shuffle, pickRound,
+  getEligibleAnimeList, eligibleEntries, hasSharedAnime, pickAudioForTheme, buildQuestionPool,
+  shuffle, pickRound, yearRangeIsOpen, YEAR_MIN, YEAR_MAX,
 } from './questionPool';
 
 const player = (id, titles) => ({ id, animeList: titles.map((t) => ({ title: t })) });
+// A list whose entries carry the stats a modern import stores.
+const richPlayer = (id, entries) => ({ id, animeList: entries });
+const show = (title, { popularity, year } = {}) => ({
+  title,
+  ...(popularity == null ? {} : { popularity }),
+  ...(year == null ? {} : { startDate: { year, month: 4, day: 1 } }),
+});
 
 // A deterministic rng so the shuffle-dependent helpers are testable at all.
 const seeded = (seed) => () => {
@@ -56,6 +64,100 @@ describe('hasSharedAnime', () => {
   });
 });
 
+describe('eligibleEntries — owners', () => {
+  it('reports which players supplied each show', () => {
+    const players = [player('a', ['Bleach', 'Naruto']), player('b', ['Naruto'])];
+    const out = eligibleEntries(players, { sharedSongsOnly: false });
+    expect(out.find((e) => e.anime.title === 'Naruto').owners.sort()).toEqual(['a', 'b']);
+    expect(out.find((e) => e.anime.title === 'Bleach').owners).toEqual(['a']);
+  });
+
+  it('credits both players when they spelled the title differently', () => {
+    const players = [player('a', ['Cowboy Bebop']), player('b', ['  cowboy bebop '])];
+    expect(eligibleEntries(players)[0].owners.sort()).toEqual(['a', 'b']);
+  });
+});
+
+describe('eligibleEntries — the year dial', () => {
+  const players = () => [richPlayer('a', [
+    show('Old', { year: 1998 }),
+    show('New', { year: 2020 }),
+    show('Undated'),
+  ])];
+
+  it('is open at the sentinel bounds', () => {
+    expect(yearRangeIsOpen(YEAR_MIN, YEAR_MAX)).toBe(true);
+    expect(yearRangeIsOpen(1990, YEAR_MAX)).toBe(false);
+    expect(yearRangeIsOpen(YEAR_MIN, 2010)).toBe(false);
+  });
+
+  // While the dial is untouched a show with no stored date is perfectly
+  // playable, and dropping it would quietly gut a pre-stats profile.
+  it('keeps undated shows while the range is untouched', () => {
+    const titles = getEligibleAnimeList(players(), { sharedSongsOnly: false }).map((a) => a.title);
+    expect(titles.sort()).toEqual(['New', 'Old', 'Undated']);
+  });
+
+  it('drops what falls outside a narrowed range, undated shows included', () => {
+    const titles = getEligibleAnimeList(players(), { sharedSongsOnly: false, yearFrom: 2010 })
+      .map((a) => a.title);
+    expect(titles).toEqual(['New']);
+  });
+
+  // AniList uses placeholder dates below 1900; treating one as a real year would
+  // put a 2019 show in the 1800s.
+  it('treats a placeholder date as undated', () => {
+    const one = [richPlayer('a', [show('Bogus', { year: 1 })])];
+    expect(getEligibleAnimeList(one, { sharedSongsOnly: false, yearFrom: 1990 })).toEqual([]);
+  });
+});
+
+describe('eligibleEntries — the popularity dial', () => {
+  const measured = [richPlayer('a', [
+    show('Tiny', { popularity: 100 }),
+    show('Mid', { popularity: 5000 }),
+    show('Huge', { popularity: 900000 }),
+    show('Bigger', { popularity: 400000 }),
+  ])];
+
+  // Nearest-rank, and the comparison is `>=` the quantile element, so "the more
+  // popular half" of four keeps the median itself — the same inclusive rule
+  // AniFake's fame floor uses.
+  it('narrows a measured pool', () => {
+    const titles = getEligibleAnimeList(measured, { sharedSongsOnly: false, popularity: 'known' })
+      .map((a) => a.title);
+    expect(titles.sort()).toEqual(['Bigger', 'Huge', 'Mid']);
+    expect(getEligibleAnimeList(measured, { sharedSongsOnly: false, popularity: 'iconic' })
+      .map((a) => a.title).sort()).toEqual(['Bigger', 'Huge']);
+  });
+
+  // The AniRank release-year bug, guarded at the level that matters: a profile
+  // imported before the stats existed must play a normal round.
+  it('leaves a pool it cannot measure completely alone', () => {
+    const unmeasured = [richPlayer('a', [show('A'), show('B'), show('C')])];
+    const titles = getEligibleAnimeList(unmeasured, { sharedSongsOnly: false, popularity: 'iconic' })
+      .map((a) => a.title);
+    expect(titles.sort()).toEqual(['A', 'B', 'C']);
+  });
+
+  it('keeps owners attached through the filter', () => {
+    const two = [
+      richPlayer('a', [
+        show('Huge', { popularity: 900000 }),
+        show('Tiny', { popularity: 1 }),
+        show('Tinier', { popularity: 2 }),
+        show('Tiniest', { popularity: 3 }),
+      ]),
+      richPlayer('b', [show('Huge', { popularity: 900000 })]),
+    ];
+    const out = eligibleEntries(two, { sharedSongsOnly: false, popularity: 'iconic' });
+    // The filter really ran — the two least popular are gone...
+    expect(out.map((e) => e.anime.title)).not.toContain('Tiny');
+    // ...and the survivor still knows whose lists it came from.
+    expect(out.find((e) => e.anime.title === 'Huge').owners.sort()).toEqual(['a', 'b']);
+  });
+});
+
 describe('pickAudioForTheme', () => {
   const video = (link) => ({ audio: { link } });
   const entry = (props) => ({ version: 1, spoiler: false, nsfw: false, videos: [video('v1')], ...props });
@@ -70,17 +172,23 @@ describe('pickAudioForTheme', () => {
     expect(pickAudioForTheme(theme).link).toBe('v?');
   });
 
-  it('skips spoiler and NSFW entries, because a quiz shows these unprompted', () => {
-    const theme = { animethemeentries: [entry({ spoiler: true, videos: [video('spoil')] }), entry({ version: 2, videos: [video('safe')] })] };
-    expect(pickAudioForTheme(theme).link).toBe('safe');
-
-    const nsfw = { animethemeentries: [entry({ nsfw: true, videos: [video('nsfw')] })] };
-    expect(pickAudioForTheme(nsfw)).toBe(null);
+  // The flags describe the entry's VIDEO, and this game plays only audio — see
+  // the long note on pickAudioForTheme. Measured over 71 real themes, filtering
+  // on them dropped 8 to no song at all (Kill la Kill's "Sirius" among them) and
+  // changed which audio file was picked in zero cases. It could only subtract.
+  it('ignores the video-only spoiler and NSFW flags', () => {
+    const theme = {
+      animethemeentries: [
+        entry({ spoiler: true, videos: [video('v1')] }),
+        entry({ version: 2, videos: [video('v2')] }),
+      ],
+    };
+    expect(pickAudioForTheme(theme).link).toBe('v1');
   });
 
-  it('allows them back in when explicitly asked', () => {
-    const theme = { animethemeentries: [entry({ spoiler: true, videos: [video('spoil')] })] };
-    expect(pickAudioForTheme(theme, { allowSpoilers: true }).link).toBe('spoil');
+  it('still yields a song when every entry is flagged', () => {
+    const nsfw = { animethemeentries: [entry({ nsfw: true, spoiler: true, videos: [video('song')] })] };
+    expect(pickAudioForTheme(nsfw).link).toBe('song');
   });
 
   it('falls through an entry whose videos carry no audio link', () => {
@@ -141,6 +249,45 @@ describe('buildQuestionPool', () => {
   it('gives each question an id unique to its anime and theme', () => {
     expect(buildQuestionPool(one).map((q) => q.id)).toEqual(['cowboy-bebop:OP1', 'cowboy-bebop:ED1']);
   });
+
+  it('carries the reveal trivia through: artists, cover, year, owners', () => {
+    const withExtras = [{
+      entry: { title: 'Cowboy Bebop', coverImageUrl: 'cover.jpg' },
+      resolved: resolved('cowboy-bebop', 'Cowboy Bebop', 1998),
+      themes: [{
+        type: 'OP',
+        slug: 'OP1',
+        sequence: 1,
+        song: { title: 'Tank!', artists: [{ name: 'The Seatbelts' }, { name: 'Mai Yamane' }] },
+        animethemeentries: [audioEntry],
+      }],
+      owners: ['ana', 'ben'],
+    }];
+    const [q] = buildQuestionPool(withExtras);
+    expect(q.artists).toEqual(['The Seatbelts', 'Mai Yamane']);
+    expect(q.coverImageUrl).toBe('cover.jpg');
+    expect(q.year).toBe(1998);
+    expect(q.owners).toEqual(['ana', 'ben']);
+  });
+
+  // A lot of older AnimeThemes entries have no artist rows at all; the reveal
+  // renders this list, so it must be an array either way.
+  it('gives a song with no credited artists an empty list, not null', () => {
+    expect(buildQuestionPool(one)[0].artists).toEqual([]);
+  });
+
+  it('falls back to the profile’s own date when AnimeThemes has none', () => {
+    const [q] = buildQuestionPool([{
+      entry: { title: 'X', startDate: { year: 2007 } },
+      resolved: { slug: 'x', name: 'X', year: null },
+      themes: [theme('OP', 'OP1')],
+    }]);
+    expect(q.year).toBe(2007);
+  });
+
+  it('defaults owners to an empty list for callers that do not track them', () => {
+    expect(buildQuestionPool(one)[0].owners).toEqual([]);
+  });
 });
 
 describe('shuffle', () => {
@@ -186,5 +333,23 @@ describe('pickRound', () => {
 
   it('handles an empty pool', () => {
     expect(pickRound([], { count: 10 })).toEqual([]);
+  });
+
+  // Local play used to let ClipPlayer roll its own offset on every mount, so a
+  // replay could land somewhere else and the sample-point setting had nowhere to
+  // take effect. The clip is a property of the question now.
+  it('stamps every question with a clip offset', () => {
+    const round = pickRound(others, { count: 5, rng: seeded(11) });
+    expect(round.every((x) => Number.isFinite(x.clipFraction))).toBe(true);
+  });
+
+  it('honours the sample point', () => {
+    expect(pickRound(others, { count: 5, samplePoint: 'start', rng: seeded(1) })
+      .every((x) => x.clipFraction === 0)).toBe(true);
+    expect(pickRound(others, { count: 5, samplePoint: 'middle', rng: seeded(1) })
+      .every((x) => x.clipFraction === 0.5)).toBe(true);
+    // Random stays clear of the leading silence a theme usually opens with.
+    expect(pickRound(others, { count: 5, samplePoint: 'random', rng: seeded(1) })
+      .every((x) => x.clipFraction >= 0.2 && x.clipFraction <= 0.7)).toBe(true);
   });
 });

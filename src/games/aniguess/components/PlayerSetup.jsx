@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import { useProfileStore } from '../../../shared/context/profileContext';
 import { useWins } from '../../../shared/hooks/useWins';
+import { useGamePrefs } from '../../../shared/hooks/useGamePrefs';
 import { normalizeTitle } from '../../../shared/utils/ranking';
 import ProfilePicker from '../../../shared/components/ProfilePicker';
+import SettingsFooter from '../../../shared/components/SettingsFooter';
+import { DEFAULT_PREFS, POSITIONS } from '../prefs';
 import {
-  Backdrop, Badge, Banner, Button, Card, CardRow, Checkbox, Input, Modal, Screen, Wordmark,
+  Backdrop, Badge, Banner, Button, Card, CardRow, Checkbox, Modal, NumberInput, Screen,
+  Wordmark,
 } from '../../../shared/ui';
 import {
   DndContext,
@@ -64,17 +68,36 @@ function SortablePlayer({ player, isYou, onRemove, onGoToList }) {
   );
 }
 
-export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayersChange }) {
+export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayersChange, onBack }) {
   const { activeId } = useProfileStore();
   const { getWins, resetWins } = useWins();
   const [showPicker, setShowPicker] = useState(false);
   const [showWins, setShowWins] = useState(false);
-  const [twoStepRandom, setTwoStepRandom] = useState(false);
-  const [timerEnabled, setTimerEnabled] = useState(false);
-  const [sharedShowsOnly, setSharedShowsOnly] = useState(true);
-  const [talkMode, setTalkMode] = useState(false);
-  const [timerSeconds, setTimerSeconds] = useState(60);
-  const [pointsPerPosition, setPointsPerPosition] = useState([3, 2, 1, 0]);
+  // Seeded from whatever this device last started a game with, not from the
+  // literal defaults — see shared/hooks/useGamePrefs.js.
+  const { prefs, savePrefs, resetPrefs } = useGamePrefs('aniguess', DEFAULT_PREFS);
+  const [twoStepRandom, setTwoStepRandom] = useState(prefs.twoStepRandom);
+  const [timerEnabled, setTimerEnabled] = useState(prefs.timerEnabled);
+  const [sharedShowsOnly, setSharedShowsOnly] = useState(prefs.sharedShowsOnly);
+  const [talkMode, setTalkMode] = useState(prefs.talkMode);
+  const [timerSeconds, setTimerSeconds] = useState(prefs.timerSeconds);
+  const [pointsPerPosition, setPointsPerPosition] = useState(prefs.pointsPerPosition);
+
+  const settings = {
+    timerEnabled, timerSeconds, pointsPerPosition, sharedShowsOnly, twoStepRandom, talkMode,
+  };
+
+  const applyDefaults = () => {
+    setTwoStepRandom(DEFAULT_PREFS.twoStepRandom);
+    setTimerEnabled(DEFAULT_PREFS.timerEnabled);
+    setSharedShowsOnly(DEFAULT_PREFS.sharedShowsOnly);
+    setTalkMode(DEFAULT_PREFS.talkMode);
+    setTimerSeconds(DEFAULT_PREFS.timerSeconds);
+    // Copied, not shared — updatePoints edits a clone today, but handing module
+    // state straight into a setter is a trap waiting for the next edit.
+    setPointsPerPosition([...DEFAULT_PREFS.pointsPerPosition]);
+    resetPrefs();
+  };
 
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -88,9 +111,11 @@ export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayer
     }
   };
 
-  const updatePoints = (i, val) => {
+  // NumberInput hands over an already-parsed, already-clamped number, so this
+  // no longer parses anything — it only writes the slot.
+  const updatePoints = (i, n) => {
     const updated = [...pointsPerPosition];
-    updated[i] = parseInt(val) || 0;
+    updated[i] = n;
     setPointsPerPosition(updated);
   };
 
@@ -115,7 +140,7 @@ export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayer
   return (
     <>
       <Backdrop />
-      <Screen width="md">
+      <Screen width="md" onBack={onBack}>
         <div className="mb-10 text-center">
           <Wordmark tone="pink">AniGuess</Wordmark>
           <p className="mt-5 text-lg text-white/60">The anime character guessing game</p>
@@ -235,57 +260,63 @@ export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayer
             className="mb-2"
           />
           <p className="mb-5 ml-10 text-base text-white/50">
-            Ask your questions and say your guess out loud — the table answers with the
-            buttons. Nothing is typed and nothing is logged, so there is no question
-            history to look back at.
+            Ask your questions and say your guess out loud — the table taps what happened
+            and the turn passes on that one tap. Nothing is typed, so instead of a question
+            history you get a running ✅/❌ trail of each player&apos;s answers.
           </p>
 
           {timerEnabled && (
             <div className="mb-5 flex items-center gap-3 text-lg text-white/70">
               <span>Seconds:</span>
-              <Input
-                type="number"
+              {/* Steps by 15 — 30 to 300 in ones is 270 presses. */}
+              <NumberInput
+                size="sm"
                 value={timerSeconds}
                 min={30}
                 max={300}
-                aria-label="Timer seconds"
-                onChange={(e) => setTimerSeconds(parseInt(e.target.value) || 60)}
-                className="w-24 px-2 text-center text-lg"
+                step={15}
+                ariaLabel="Timer seconds"
+                onChange={setTimerSeconds}
+                className="w-44"
               />
             </div>
           )}
 
           <div>
-            <p className="mb-3 text-base text-white/70">Points per position:</p>
-            <div className="flex gap-4">
-              {['🥇', '🥈', '🥉', 'Rest'].map((label, i) => (
-                <div key={label} className="flex flex-col items-center gap-2">
-                  <span className="text-lg">{label}</span>
-                  <Input
-                    type="number"
-                    value={pointsPerPosition[i]}
-                    min={0}
-                    aria-label={`Points for ${label}`}
-                    onChange={(e) => updatePoints(i, e.target.value)}
-                    className="w-16 px-2 text-center text-lg"
-                  />
-                </div>
-              ))}
-            </div>
+            <p className="mb-1 text-base text-white/70">Points per position:</p>
+            {/* One per row rather than four across. Four steppers sharing a row
+                left the number narrower than either of its own buttons, and the
+                online lobby's max-w-md card had no width for them at all. */}
+            {POSITIONS.map(({ icon, label }, i) => (
+              <CardRow key={label}>
+                <span className="text-white/80">
+                  <span className="mr-2 text-lg">{icon}</span>
+                  {label}
+                </span>
+                <NumberInput
+                  size="sm"
+                  value={pointsPerPosition[i]}
+                  min={0}
+                  max={99}
+                  ariaLabel={`Points for ${label}`}
+                  onChange={(n) => updatePoints(i, n)}
+                  className="w-40 flex-shrink-0"
+                />
+              </CardRow>
+            ))}
           </div>
+
+          <SettingsFooter values={settings} defaults={DEFAULT_PREFS} onReset={applyDefaults} />
         </Card>
 
         <Button
           variant="primary"
           size="xl"
           fullWidth
-          onClick={() => onStartGame({
-            players,
-            settings: {
-              timerEnabled, timerSeconds, pointsPerPosition, sharedShowsOnly, twoStepRandom,
-              talkMode,
-            },
-          })}
+          onClick={() => {
+            savePrefs(settings);
+            onStartGame({ players, settings });
+          }}
           disabled={!canStart}
         >
           🎮 Start Game

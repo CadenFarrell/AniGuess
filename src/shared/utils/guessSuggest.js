@@ -1,13 +1,14 @@
 // Romanized titles and names are full of ō / ū / ā, and nobody types those —
 // fold them so "Jujutsu" finds "Jūjutsu". Series titles want the same treatment
 // as character names, so this is characterNameKey under a local alias.
-import { characterNameKey as normalize } from '../../../shared/utils/character';
+import { characterNameKey as normalize } from './character';
 
-// Ranking for the guess-box autocomplete, shared by the local GameScreen and
-// the online OnlineGameScreen so both order results identically. Pure, like
-// its sibling guessMatch.js — this only decides what the dropdown SHOWS.
-// Whether a submitted guess is correct is guessMatch.isCorrectGuess's job and
-// is deliberately unaffected by anything here.
+// Ranking for every character typeahead in the arcade — AniGuess's two guess
+// screens and AniFake's steal box — so they all order results identically.
+// Pure: this only decides what the dropdown SHOWS. Whether a submitted answer
+// is correct belongs to each game's own rules (aniguess/utils/guessMatch.js's
+// isCorrectGuess, anifake/rules.js's stealIsCorrect) and is deliberately
+// unaffected by anything here.
 
 const startsWithWord = (text, q) =>
   text.split(/[\s,.:;!?'"()\-_/]+/).some((w) => w.startsWith(q));

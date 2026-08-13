@@ -1,32 +1,34 @@
 import { useEffect, useRef, useState } from 'react';
 import { useProfileStore } from '../../../shared/context/profileContext';
 import AniListImport from '../../../shared/components/AniListImport';
+import SettingsFooter from '../../../shared/components/SettingsFooter';
+import { useGamePrefs } from '../../../shared/hooks/useGamePrefs';
 import { profileFingerprint } from '../../../shared/utils/profileStats';
-import { getEligibleAnimeList } from '../utils/questionPool';
-import { RACE, SIMULTANEOUS } from '../rules';
+import AniTuneSettings from './AniTuneSettings';
+import { eligibleCount } from '../utils/questionPool';
+import { DEFAULT_PREFS } from '../prefs';
 import {
-  Backdrop, Badge, Banner, Button, Card, CardRow, Checkbox, Field, Input, Screen, Wordmark,
+  Backdrop, Badge, Banner, Button, Card, CardRow, Screen, Wordmark,
 } from '../../../shared/ui';
 
-const MODES = [
-  { id: RACE, icon: '🔔', label: 'Race', blurb: 'First correct answer takes the point. Miss and you’re out for that song.' },
-  { id: SIMULTANEOUS, icon: '🤫', label: 'Everyone guesses', blurb: 'Everyone answers at once on their own device. Everyone who gets it right scores.' },
-];
-
 // The online lobby. Mirrors src/games/aniguess/components/OnlineLobby.jsx (room
-// code to share, live player list, start), but the settings are AniTune's — mode,
-// shared-songs, OP/ED, round size, clip length — lifted from AniTuneSetup. Whoever
-// presses Start prepares the round and their settings apply to everyone.
+// code to share, live player list, start), but the settings are AniTune's, and
+// they are now the same component AniTuneSetup renders rather than a hand-kept
+// copy of it — the two offer an identical set, and at seventeen options a copy is
+// a promise to drift. Whoever presses Start prepares the round and their settings
+// apply to everyone.
 export default function OnlineLobby({ room }) {
   const { activeProfile, saveProfile } = useProfileStore();
-  const [mode, setMode] = useState(RACE);
-  const [sharedSongsOnly, setSharedSongsOnly] = useState(true);
-  const [includeOpenings, setIncludeOpenings] = useState(true);
-  const [includeEndings, setIncludeEndings] = useState(true);
-  const [roundSize, setRoundSize] = useState(10);
-  const [clipSeconds, setClipSeconds] = useState(10);
+  // One saved set shared with AniTuneSetup, which offers the same options.
+  const { prefs, savePrefs, resetPrefs } = useGamePrefs('anitune', DEFAULT_PREFS);
+  const [settings, setSettings] = useState(prefs);
   // null | 'pick' | 'refresh' — see ListManager, which uses the same shape.
   const [importMode, setImportMode] = useState(null);
+
+  const applyDefaults = () => {
+    setSettings(DEFAULT_PREFS);
+    resetPrefs();
+  };
 
   const players = room.players ?? [];
   const me = players.find((p) => p.id === room.myPlayerId) ?? null;
@@ -53,17 +55,16 @@ export default function OnlineLobby({ room }) {
 
   const showCount = (p) => (p.animeList || []).length;
   const everyoneHasShows = active.every((p) => showCount(p) > 0);
-  const eligible = getEligibleAnimeList(active, { sharedSongsOnly });
+  const eligible = eligibleCount(active, settings);
   const canStart =
     active.length >= 2 &&
     everyoneHasShows &&
-    eligible.length > 0 &&
-    (includeOpenings || includeEndings);
+    eligible > 0 &&
+    (settings.includeOpenings || settings.includeEndings);
 
   const handleStart = () => {
-    room.startGame({
-      mode, sharedSongsOnly, includeOpenings, includeEndings, roundSize, clipSeconds,
-    });
+    savePrefs(settings);
+    room.startGame(settings);
   };
 
   return (
@@ -151,93 +152,38 @@ export default function OnlineLobby({ room }) {
         )}
 
         {room.isHost && (<>
-        {/* Mode picker — same two blocks as local setup. */}
-        <div className="mb-6 grid gap-3 sm:grid-cols-2">
-          {MODES.map((m) => {
-            const selected = mode === m.id;
-            return (
-              <button
-                key={m.id}
-                onClick={() => setMode(m.id)}
-                aria-pressed={selected}
-                className={`focus-pop rounded-pop border-2 p-4 text-left transition-colors
-                  ${selected
-                    ? 'border-pop-blue bg-pop-blue/15'
-                    : 'border-white/15 bg-surface hover:border-white/30'}`}
-              >
-                <span className="text-2xl">{m.icon}</span>
-                <p className="mt-1 font-display text-lg font-extrabold text-white">{m.label}</p>
-                <p className="mt-1 text-sm text-white/50">{m.blurb}</p>
-              </button>
-            );
-          })}
-        </div>
+        <AniTuneSettings
+          players={active}
+          values={settings}
+          onChange={(patch) => setSettings((s) => ({ ...s, ...patch }))}
+        />
 
-        <Card title="⚙️ Settings" padding="lg" className="mb-6">
-          <Checkbox
-            label="Shared songs only"
-            checked={sharedSongsOnly}
-            onChange={(e) => setSharedSongsOnly(e.target.checked)}
-            className="mb-2"
-          />
-          <p className="mb-5 ml-10 text-base text-white/50">
-            Only use shows <em>everyone</em> has on their list, so nobody is guessing blind.
-          </p>
-
-          <div className="mb-5 flex flex-wrap gap-x-8 gap-y-3">
-            <Checkbox
-              label="Openings"
-              checked={includeOpenings}
-              onChange={(e) => setIncludeOpenings(e.target.checked)}
-            />
-            <Checkbox
-              label="Endings"
-              checked={includeEndings}
-              onChange={(e) => setIncludeEndings(e.target.checked)}
-            />
-          </div>
-
-          <div className="flex gap-4">
-            <Field label="Questions" htmlFor="anitune-online-round-size" className="flex-1">
-              <Input
-                id="anitune-online-round-size"
-                type="number"
-                min={1}
-                max={50}
-                value={roundSize}
-                onChange={(e) => setRoundSize(Math.max(1, parseInt(e.target.value) || 1))}
-                className="text-lg"
-              />
-            </Field>
-            <Field label="Clip length (s)" htmlFor="anitune-online-clip-seconds" className="flex-1">
-              <Input
-                id="anitune-online-clip-seconds"
-                type="number"
-                min={3}
-                max={30}
-                value={clipSeconds}
-                onChange={(e) => setClipSeconds(Math.max(3, parseInt(e.target.value) || 3))}
-                className="text-lg"
-              />
-            </Field>
-          </div>
-          <p className="mt-4 text-sm text-white/30">
+        <div className="mb-6">
+          <p className="text-sm text-white/30">
             You&apos;re the host — your settings apply to everyone.
           </p>
-        </Card>
+          <SettingsFooter values={settings} defaults={DEFAULT_PREFS} onReset={applyDefaults} />
+        </div>
+
+        {active.length >= 2 && (
+          <p className="mb-4 text-center text-base text-white/50">
+            {eligible} show{eligible === 1 ? '' : 's'} in play
+            {settings.sharedSongsOnly && ' (shared by everyone)'}
+          </p>
+        )}
 
         {active.length >= 2 && !everyoneHasShows && (
           <Banner tone="warning" className="mb-4">
             ⚠️ Every player needs an anime list before you can start.
           </Banner>
         )}
-        {active.length >= 2 && everyoneHasShows && sharedSongsOnly && eligible.length === 0 && (
+        {active.length >= 2 && everyoneHasShows && settings.sharedSongsOnly && eligible === 0 && (
           <Banner tone="warning" className="mb-4">
             ⚠️ No anime titles overlap between players — turn off &quot;Shared songs only&quot; or
             import matching titles.
           </Banner>
         )}
-        {active.length >= 2 && !includeOpenings && !includeEndings && (
+        {active.length >= 2 && !settings.includeOpenings && !settings.includeEndings && (
           <Banner tone="warning" className="mb-4">
             ⚠️ Pick openings, endings, or both.
           </Banner>

@@ -12,7 +12,7 @@ import { useGameSession } from './hooks/useGameSession';
 import { useGameFlow, RESUMABLE_VIEWS } from './hooks/useGameFlow';
 import { Button, GhostButton, HubButton, Modal } from '../../shared/ui';
 
-function App({ onExit }) {
+function App({ onExit, onBack }) {
   const [view, setView] = useState('setup');
   const [listManagerProfile, setListManagerProfile] = useState(null);
   const [listManagerOrigin, setListManagerOrigin] = useState('setup');
@@ -87,7 +87,7 @@ function App({ onExit }) {
       )}
 
       {view === 'setup' && (
-        <PlayerSetup onStartGame={handleStartGame} onGoToList={handleGoToList} players={setupPlayers} onPlayersChange={setSetupPlayers} />
+        <PlayerSetup onStartGame={handleStartGame} onGoToList={handleGoToList} players={setupPlayers} onPlayersChange={setSetupPlayers} onBack={onBack} />
       )}
 
       {view === 'listManager' && (
@@ -116,6 +116,9 @@ function App({ onExit }) {
             key={listManagerProfile?.id}
             profile={listManagerProfile}
             onProfileUpdated={handleProfileUpdated}
+            // The header row above already clears the fixed HubButton, so this
+            // body only needs a small gap beneath it.
+            className="pt-4"
           />
         </>
       )}

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { eligibleItems, buildDeck } from './deck';
-import { getAxis } from '../axes';
+import { eligibleItems, buildDeck, opinionPoolCounts } from './deck';
+import { getAxis, normalizeCustomPrompt } from '../axes';
 
 const YEAR = getAxis('year');
 const RATED = getAxis('rated');
@@ -132,6 +132,44 @@ describe('eligibleItems — per-axis eligibility', () => {
     });
     expect(out).toHaveLength(2);
     expect(out.every((s) => s.value === null)).toBe(true);
+  });
+
+  // A prompt someone wrote is an opinion axis and nothing more, so it draws the
+  // same cards a shipped one does. If it ever stopped doing so, the picker's
+  // count badge — which reuses the pool numbers below — would start lying.
+  it('deals a custom prompt exactly like a built-in opinion axis', () => {
+    const list = [player('a', [
+      anime('A', null, { characters: [char('Ichigo', null)] }),
+      anime('B', null, { characters: [char('Rukia', 800)] }),
+    ])];
+    const custom = normalizeCustomPrompt({ text: 'best dressed', items: 'characters' });
+    const out = eligibleItems(list, { axis: custom, sharedOnly: false });
+
+    // Both characters, including the one with no favourites count — the value
+    // filter is skipped entirely, which is what having no valueFor buys.
+    expect(out.map((c) => c.title).sort()).toEqual(['Ichigo', 'Rukia']);
+    expect(out.every((c) => c.value === null)).toBe(true);
+  });
+});
+
+describe('opinionPoolCounts', () => {
+  // The setup screens badge every custom prompt with a card count. Every prompt
+  // over the same pool has the same count, so these two numbers stand in for all
+  // of them rather than re-walking every list once per saved prompt.
+  it('counts each pool once, matching what a prompt over it would deal', () => {
+    const players = [player('a', [
+      anime('A', null, { characters: [char('Ichigo', 900), char('Rukia', 800)] }),
+      anime('B', null, { characters: [char('Eren', 500)] }),
+    ])];
+    const pools = opinionPoolCounts(players, { sharedOnly: false });
+
+    expect(pools.shows).toBe(2);
+    expect(pools.characters).toBe(3);
+    for (const items of ['shows', 'characters']) {
+      const prompt = normalizeCustomPrompt({ text: 'best dressed', items });
+      expect(eligibleItems(players, { axis: prompt, sharedOnly: false }))
+        .toHaveLength(pools[items]);
+    }
   });
 });
 

@@ -4,12 +4,22 @@
 import { resolveAnimeEntry } from './resolveAnime';
 import { fetchAnimeThemes } from './animethemesClient';
 import { storage } from '../../../shared/services/storage';
-import { getEligibleAnimeList, buildQuestionPool, pickRound } from '../utils/questionPool';
+import {
+  eligibleEntries, buildQuestionPool, pickRound, DEFAULT_SAMPLE_POINT, YEAR_MIN, YEAR_MAX,
+} from '../utils/questionPool';
+import { DEFAULT_POPULARITY_ID } from '../utils/popularity';
 
 // Themes change rarely, so cache them per slug and skip the round trip on
 // later games. Separate from the resolution cache: that one maps titles to
 // slugs, this one holds the payload.
-const THEME_CACHE_KEY = 'anitune_theme_cache';
+//
+// The key is versioned because the cached value is a *shape*, not just data. A
+// 14-day TTL means widening the API include — artists, most recently — would
+// otherwise reach nobody who had played in the past fortnight: they would get
+// the new reveal with none of the new fields in it, which looks like the feature
+// silently not working. Bump the suffix whenever fetchAnimeThemes' include
+// changes.
+const THEME_CACHE_KEY = 'anitune_theme_cache_v2';
 const THEME_CACHE_TTL_MS = 1000 * 60 * 60 * 24 * 14; // 14 days
 
 function loadThemeCache() {
@@ -45,14 +55,22 @@ export async function prepareQuestions(players, {
   sharedSongsOnly = true,
   includeOpenings = true,
   includeEndings = true,
-  allowSpoilers = false,
-  allowNsfw = false,
+  popularity = DEFAULT_POPULARITY_ID,
+  yearFrom = YEAR_MIN,
+  yearTo = YEAR_MAX,
+  samplePoint = DEFAULT_SAMPLE_POINT,
   roundSize = 10,
   maxPerAnime = 2,
   signal,
   onProgress,
 } = {}) {
-  const eligible = getEligibleAnimeList(players, { sharedSongsOnly });
+  // Every pool filter is applied here, before a single request goes out — the
+  // dials narrow what gets resolved, so a tight setting also makes the first
+  // run dramatically faster rather than fetching everything and discarding most
+  // of it.
+  const entries = eligibleEntries(players, {
+    sharedSongsOnly, popularity, yearFrom, yearTo,
+  });
 
   const resolvedAnime = [];
   const unresolved = [];
@@ -61,42 +79,40 @@ export async function prepareQuestions(players, {
   // Stage 1 — map each title onto an AnimeThemes anime.
   let done = 0;
   const resolutions = [];
-  for (const entry of eligible) {
+  for (const { anime: entry, owners } of entries) {
     let resolved = null;
     try {
       resolved = await resolveAnimeEntry(entry, { signal });
     } catch (err) {
       if (err.name === 'AbortError') throw err;
     }
-    if (resolved) resolutions.push({ entry, resolved });
+    if (resolved) resolutions.push({ entry, resolved, owners });
     else unresolved.push(entry);
     done += 1;
-    onProgress?.({ phase: 'resolving', done, total: eligible.length, entry });
+    onProgress?.({ phase: 'resolving', done, total: entries.length, entry });
   }
 
   // Stage 2 — pull each match's themes.
   done = 0;
-  for (const { entry, resolved } of resolutions) {
+  for (const { entry, resolved, owners } of resolutions) {
     let themes = [];
     try {
       themes = await getThemes(resolved.slug, { signal });
     } catch (err) {
       if (err.name === 'AbortError') throw err;
     }
-    if (themes.length) resolvedAnime.push({ entry, resolved, themes });
+    if (themes.length) resolvedAnime.push({ entry, resolved, themes, owners });
     else themeless.push(entry);
     done += 1;
     onProgress?.({ phase: 'themes', done, total: resolutions.length, entry });
   }
 
-  const questions = buildQuestionPool(resolvedAnime, {
-    includeOpenings, includeEndings, allowSpoilers, allowNsfw,
-  });
+  const questions = buildQuestionPool(resolvedAnime, { includeOpenings, includeEndings });
 
   return {
     questions,
-    round: pickRound(questions, { count: roundSize, maxPerAnime }),
-    eligible,
+    round: pickRound(questions, { count: roundSize, maxPerAnime, samplePoint }),
+    eligible: entries.map((e) => e.anime),
     unresolved,
     themeless,
   };

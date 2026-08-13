@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useProfileStore } from '../../../shared/context/profileContext';
 import AniListImport from '../../../shared/components/AniListImport';
+import SettingsFooter from '../../../shared/components/SettingsFooter';
+import { useGamePrefs } from '../../../shared/hooks/useGamePrefs';
 import { profileFingerprint } from '../../../shared/utils/profileStats';
 import AxisPicker from './AxisPicker';
-import { eligibleItems } from '../utils/deck';
-import { AXES, DEFAULT_AXIS_ID, getAxis } from '../axes';
+import { useCustomPrompts } from '../hooks/useCustomPrompts';
+import { eligibleItems, opinionPoolCounts } from '../utils/deck';
+import { DEFAULT_PREFS, axisIdOf, resolveSavedAxis } from '../prefs';
+import { AXES, getAxis } from '../axes';
 import { BOARD_SIZE } from '../rules';
 import {
   Backdrop, Badge, Banner, Button, Card, CardRow, Checkbox, Screen, Wordmark,
@@ -14,17 +18,37 @@ import {
 // host-only settings and Start.
 export default function OnlineLobby({ room }) {
   const { activeProfile, saveProfile } = useProfileStore();
-  const [sharedOnly, setSharedOnly] = useState(true);
-  const [axisId, setAxisId] = useState(DEFAULT_AXIS_ID);
-  const [scoring, setScoring] = useState(true);
-  const [blind, setBlind] = useState(() => getAxis(DEFAULT_AXIS_ID).defaultBlind);
+  // Prompts before the axis state: only an id is remembered, and turning that
+  // back into a spec means looking it up among them. Same order as AniRankSetup.
+  const { prompts, savePrompt, deletePrompt } = useCustomPrompts();
+  const { prefs, savePrefs, resetPrefs } = useGamePrefs('anirank', DEFAULT_PREFS);
+  const [sharedOnly, setSharedOnly] = useState(prefs.sharedOnly);
+  // An axis SPEC — a string for a built-in, the stored prompt object for a
+  // custom one. The object is the whole point online: a guest has never seen the
+  // host's prompt text, so the definition has to ride into the room with it.
+  const savedAxis = resolveSavedAxis(prefs.axisId, prompts);
+  const [axis, setAxis] = useState(savedAxis);
+  const [scoring, setScoring] = useState(prefs.scoring);
+  // Saved `blind` only counts if the axis came back too — see AniRankSetup.
+  const [blind, setBlind] = useState(
+    () => (axisIdOf(savedAxis) === prefs.axisId ? prefs.blind : getAxis(savedAxis).defaultBlind)
+  );
   const [importMode, setImportMode] = useState(null); // null | 'pick' | 'refresh'
 
   // Picking a mode resets how it is dealt to that mode's default — see the same
   // handler in AniRankSetup.
-  const handleAxisChange = (id) => {
-    setAxisId(id);
-    setBlind(getAxis(id).defaultBlind);
+  const handleAxisChange = (spec) => {
+    setAxis(spec);
+    setBlind(getAxis(spec).defaultBlind);
+  };
+
+  const remembered = { sharedOnly, scoring, blind, axisId: axisIdOf(axis) };
+
+  const applyDefaults = () => {
+    setSharedOnly(DEFAULT_PREFS.sharedOnly);
+    setScoring(DEFAULT_PREFS.scoring);
+    handleAxisChange(DEFAULT_PREFS.axisId);
+    resetPrefs();
   };
 
   const players = room.players ?? [];
@@ -51,15 +75,22 @@ export default function OnlineLobby({ room }) {
   const showCount = (p) => (p.animeList || []).length;
   const everyoneHasShows = active.every((p) => showCount(p) > 0);
 
-  const axis = getAxis(axisId);
-  const noun = axis.items === 'characters' ? 'characters' : 'shows';
+  const resolved = getAxis(axis);
+  const noun = resolved.items === 'characters' ? 'characters' : 'shows';
   // Counted for every axis so the picker can show which modes this room can
   // actually play — a fact axis reads 0 until someone re-imports their list.
-  const counts = useMemo(() => Object.fromEntries(
-    AXES.map((a) => [a.id, eligibleItems(active, { axis: a, sharedOnly }).length])
-  ), [active, sharedOnly]);
+  // Custom prompts share two pool counts; see the same memo in AniRankSetup.
+  const counts = useMemo(() => {
+    const pools = opinionPoolCounts(active, { sharedOnly });
+    return {
+      ...Object.fromEntries(
+        AXES.map((a) => [a.id, eligibleItems(active, { axis: a, sharedOnly }).length])
+      ),
+      ...Object.fromEntries(prompts.map((p) => [p.id, pools[p.items]])),
+    };
+  }, [active, sharedOnly, prompts]);
 
-  const eligible = counts[axis.id] ?? 0;
+  const eligible = counts[resolved.id] ?? 0;
   const enough = eligible >= BOARD_SIZE;
   const canStart = active.length >= 2 && everyoneHasShows && enough;
 
@@ -143,9 +174,12 @@ export default function OnlineLobby({ room }) {
         {room.isHost && (
           <>
             <AxisPicker
-              value={axisId}
+              value={axis}
               onChange={handleAxisChange}
               counts={active.length ? counts : undefined}
+              prompts={prompts}
+              onSavePrompt={savePrompt}
+              onDeletePrompt={deletePrompt}
             />
 
             <Card title="⚙️ Settings" padding="lg" className="mb-6">
@@ -185,6 +219,8 @@ export default function OnlineLobby({ room }) {
               <p className="mt-4 text-sm text-white/30">
                 You&apos;re the host — your settings apply to everyone.
               </p>
+
+              <SettingsFooter values={remembered} defaults={DEFAULT_PREFS} onReset={applyDefaults} />
             </Card>
 
             {active.length >= 2 && !everyoneHasShows && (
@@ -195,7 +231,7 @@ export default function OnlineLobby({ room }) {
             {active.length >= 2 && everyoneHasShows && !enough && (
               <Banner tone="warning" className="mb-4">
                 ⚠️ Need {BOARD_SIZE} {noun} to fill a board — found {eligible}.
-                {axis.kind === 'fact'
+                {resolved.kind === 'fact'
                   ? ' This mode needs AniList stats that older saved profiles don’t carry — everyone should refresh their list above.'
                   : sharedOnly ? ` Turn off “Shared ${noun} only”, or import matching titles.` : ''}
               </Banner>
@@ -205,7 +241,10 @@ export default function OnlineLobby({ room }) {
               variant="primary"
               size="xl"
               fullWidth
-              onClick={() => room.startGame({ sharedOnly, axisId, scoring, blind })}
+              onClick={() => {
+                savePrefs(remembered);
+                room.startGame({ sharedOnly, axis, scoring, blind });
+              }}
               disabled={!canStart}
             >
               🎮 Start Game

@@ -11,6 +11,28 @@ import { Avatar, Card } from '../../../shared/ui';
 // Decoy mode never reaches the fake branch: nobody is told they are the fake,
 // so the fake sees an ordinary character card and has no idea it differs from
 // everyone else's. That is the mode, not an oversight.
+// What earlier deals of this round threw away. Rendered on the fake's card and
+// on everyone else's alike — that symmetry IS the feature, not a convenience.
+// The crew all saw the discarded character and the blind fake never did, so
+// without this "name the one we threw out" is a free, unbeatable fake-detector.
+// See the `discarded` note in rules.dealRoles.
+//
+// Kept in compact too, deliberately: the clue phase is exactly when a table
+// would try that question, so a line that vanishes once the clues start would
+// disarm nothing.
+//
+// The "not the answer" half is load-bearing copy. Absent it, a fake holding no
+// character sees a character name on their card and reads it as theirs.
+function Discarded({ names, compact }) {
+  if (!names?.length) return null;
+  return (
+    <p className={`${compact ? 'mt-2' : 'mt-4'} text-sm text-white/40`}>
+      Thrown out this round: <span className="text-white/60">{names.join(', ')}</span> —
+      not the answer.
+    </p>
+  );
+}
+
 export default function SecretCard({ card, compact = false }) {
   if (!card) {
     return (
@@ -51,6 +73,8 @@ export default function SecretCard({ card, compact = false }) {
           You don&apos;t know the character. Listen to the clues, bluff one of your own,
           and don&apos;t get voted out.
         </p>
+
+        <Discarded names={card.discarded} compact={compact} />
       </Card>
     );
   }
@@ -80,6 +104,8 @@ export default function SecretCard({ card, compact = false }) {
           <p className="truncate text-white/50">{character.series}</p>
         </div>
       </div>
+
+      <Discarded names={card.discarded} compact={compact} />
     </Card>
   );
 }

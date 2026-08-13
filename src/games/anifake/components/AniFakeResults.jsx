@@ -1,9 +1,78 @@
-import { stealIsCorrect, tallyVotes } from '../rules';
+import { stealIsCorrect, voteOutcome } from '../rules';
 import { getMode } from '../modes';
 import { computeRankedPlayers, getPositionEmoji } from '../../../shared/utils/ranking';
 import {
-  Avatar, Backdrop, Badge, Banner, Button, Card, CardRow, GhostButton, Screen, Wordmark,
+  Avatar, Backdrop, Badge, Banner, Button, Card, CardRow, Screen, Wordmark,
 } from '../../../shared/ui';
+
+/**
+ * One ballot, grouped by who was ACCUSED rather than by who voted.
+ *
+ * The old list was one row per voter reading "Ann → Cy", which left the table
+ * adding the counts up in their heads to find out what actually happened. The
+ * outcome is what this card exists to say, so the count leads and the voters are
+ * the detail underneath. Safe to show in full here and nowhere earlier: the
+ * vote has closed, which is the whole reason VoteScreen shows none of it.
+ */
+function Ballot({ votes = {}, counts = {}, caught, fakeId, players, departedIds = [] }) {
+  const cast = Object.keys(votes).length;
+  const playerOf = (id) => players.find((p) => p.id === id) ?? null;
+  const nameOf = (id) => playerOf(id)?.name ?? id;
+  // Sorted by count, then by seat so an equal pair does not swap order between
+  // the two ballots of the same round.
+  const accused = Object.keys(counts).sort(
+    (a, b) => counts[b] - counts[a] || (playerOf(a)?.seat ?? 99) - (playerOf(b)?.seat ?? 99)
+  );
+  const silent = players.filter((p) => !votes[p.id]);
+
+  if (!cast) return <p className="text-white/40">Nobody voted.</p>;
+
+  return (
+    <div className="flex flex-col gap-4">
+      {accused.map((id) => {
+        const n = counts[id];
+        const isCaught = id === caught;
+        return (
+          <div key={id} className={departedIds.includes(id) ? 'opacity-40' : ''}>
+            <div className="flex items-center gap-2">
+              <span className="w-6 flex-shrink-0 text-center font-display text-sm
+                font-extrabold text-white/30">
+                {playerOf(id)?.seat ?? '–'}
+              </span>
+              <span className="min-w-0 flex-1 truncate font-display text-lg font-extrabold text-white">
+                {id === fakeId && <span title="The fake">🕵️ </span>}
+                {nameOf(id)}
+              </span>
+              <Badge tone={isCaught ? 'red' : 'neutral'}>
+                {n} {n === 1 ? 'vote' : 'votes'}
+              </Badge>
+            </div>
+            {/* The bar is the tally made readable at a glance — red only for the
+                one the ballot landed on, so a tie shows two neutral bars of
+                equal length and says "nobody" without needing a caption. */}
+            <div className="mt-1.5 ml-8 h-2 overflow-hidden rounded-pop-sm bg-white/10">
+              <div
+                className={`h-full rounded-pop-sm ${isCaught ? 'bg-pop-red' : 'bg-white/30'}`}
+                style={{ width: `${(n / cast) * 100}%` }}
+              />
+            </div>
+            <p className="mt-1 ml-8 truncate text-sm text-white/40">
+              {Object.entries(votes)
+                .filter(([, target]) => target === id)
+                .map(([voter]) => nameOf(voter))
+                .join(', ')}
+            </p>
+          </div>
+        );
+      })}
+      {silent.length > 0 && (
+        <p className="text-sm text-white/30">
+          Didn&apos;t vote: {silent.map((p) => p.name).join(', ')}
+        </p>
+      )}
+    </div>
+  );
+}
 
 // The reveal. Everything here is derived from the published cards
 // (rules.deriveTruth) rather than from an answer key anyone was trusted to
@@ -30,11 +99,16 @@ export default function AniFakeResults({
   totalScores = {},
   departedIds = [],
   onPlayAgain,
-  onExit,
   playAgainLabel = '🔁 New round',
+  // onBack is local-only: online "again" returns to the lobby, and there is no
+  // local setup to go back to. Screen omits the row when it is undefined.
+  onBack,
 }) {
   const mode = getMode(game?.mode);
-  const { counts, caught } = tallyVotes(game?.votes);
+  // Across both ballots. `counts` is whichever one decided; `firstCounts` is the
+  // opening vote, kept so a runoff round can show what forced it.
+  const { counts, firstCounts, caught, isRunoff, tiedOut } = voteOutcome(game);
+  const anyVotes = Object.keys(game?.votes ?? {}).length > 0;
   const scored = Boolean(fakeId);
   const fake = players.find((p) => p.id === fakeId) ?? null;
   const ranked = computeRankedPlayers(players, totalScores);
@@ -51,7 +125,7 @@ export default function AniFakeResults({
   return (
     <>
       <Backdrop />
-      <Screen width="md">
+      <Screen width="md" onBack={onBack} backLabel="← Back to setup">
         <Wordmark tone="teal" size="md" level={2} className="mb-2">🕵️ Reveal</Wordmark>
         <p className="mb-8 text-center text-base text-white/50">{mode.label}</p>
 
@@ -70,10 +144,16 @@ export default function AniFakeResults({
             </p>
             <p className="mt-2 text-lg text-white/60">
               {caught === fakeId
-                ? 'Caught.'
+                ? (isRunoff ? 'Caught — in the runoff.' : 'Caught.')
                 : caught
-                  ? `The table accused ${nameOf(caught)} instead — the fake walks.`
-                  : 'The vote tied, so nobody was accused — the fake walks.'}
+                  ? `The table accused ${nameOf(caught)}${isRunoff ? ' in the runoff' : ''} instead — the fake walks.`
+                  : tiedOut
+                    // The floor the runoff stops at, said plainly so it reads as
+                    // the rule rather than as the game losing the vote.
+                    ? 'It tied again in the runoff, so nobody was accused — the fake walks.'
+                    : anyVotes
+                      ? 'The vote tied, so nobody was accused — the fake walks.'
+                      : 'Nobody voted, so nobody was accused — the fake walks.'}
             </p>
             {/* A correct guess is named properly rather than echoed back: the
                 steal stores what they typed, and "they named makima correctly"
@@ -148,28 +228,33 @@ export default function AniFakeResults({
           </Card>
         )}
 
-        <Card title="The vote" padding="lg" className="mb-6">
-          {players.map((p) => {
-            const votedFor = game?.votes?.[p.id];
-            const gone = departedIds.includes(p.id);
-            return (
-              <CardRow key={p.id} className={gone ? 'opacity-40' : ''}>
-                <span className="min-w-0 flex-1 truncate text-white">
-                  {p.id === fakeId && <span title="The fake">🕵️ </span>}
-                  {p.name}
-                </span>
-                <span className="text-white/50">
-                  {votedFor ? `→ ${nameOf(votedFor)}` : 'didn’t vote'}
-                </span>
-                {(counts[p.id] ?? 0) > 0 && (
-                  <Badge tone={p.id === caught ? 'red' : 'neutral'}>
-                    {counts[p.id]} {counts[p.id] === 1 ? 'vote' : 'votes'}
-                  </Badge>
-                )}
-              </CardRow>
-            );
-          })}
+        {/* Both ballots, in the order they happened, so the round reads as the
+            story it was rather than as a single number nobody can source. */}
+        <Card title={isRunoff ? 'The opening vote' : 'The vote'} padding="lg" className="mb-6">
+          <Ballot
+            votes={game?.votes}
+            counts={firstCounts}
+            // Nobody was caught on this ballot if it went to a runoff — leaving
+            // `caught` in would paint the runoff's loser red on the wrong chart.
+            caught={isRunoff ? null : caught}
+            fakeId={fakeId}
+            players={players}
+            departedIds={departedIds}
+          />
         </Card>
+
+        {isRunoff && (
+          <Card title="The runoff" padding="lg" className="mb-6">
+            <Ballot
+              votes={game?.runoff?.votes}
+              counts={counts}
+              caught={caught}
+              fakeId={fakeId}
+              players={players}
+              departedIds={departedIds}
+            />
+          </Card>
+        )}
 
         <Card title="Standings" padding="lg" className="mb-6">
           {ranked.map((p) => (
@@ -193,9 +278,6 @@ export default function AniFakeResults({
         <Button variant="primary" size="xl" fullWidth onClick={onPlayAgain}>
           {playAgainLabel}
         </Button>
-        <div className="mt-4 text-center">
-          <GhostButton onClick={onExit}>← Back to hub</GhostButton>
-        </div>
       </Screen>
     </>
   );

@@ -4,7 +4,13 @@ import { normalizeTitle } from '../utils/ranking';
 import AniListImport from './AniListImport';
 import { Button, Field, Input, Select } from '../ui';
 
-export default function ListManager({ profile, onProfileUpdated }) {
+// `className` carries the top padding, because the two callers genuinely differ:
+// AniGuess renders its own back/player-switcher header above this and needs only
+// a small gap (`pt-4`), while the hub renders nothing but the fixed 🏠 Hub button
+// and needs to clear it (`pt-16`). It is a prop rather than a baked-in default
+// plus an override because two conflicting Tailwind `pt-` utilities on one element
+// resolve by CSS source order, not by the order they appear in the attribute.
+export default function ListManager({ profile, onProfileUpdated, className = '' }) {
   // Through the store, not useProfile directly: an edit here has to reach the
   // hub's profile chip and any game holding the same profile, which a bare
   // localStorage write does not do.
@@ -95,10 +101,9 @@ export default function ListManager({ profile, onProfileUpdated }) {
   }
 
   return (
-    // Not a <Screen>: LocalGame renders its own back/player-switcher header just
-    // above this (and that header already clears the fixed HubButton), so this
-    // body only needs a small gap beneath it.
-    <div className="mx-auto min-h-screen max-w-2xl px-5 pb-8 pt-4 sm:px-6">
+    // Not a <Screen>: the head-room above this body is the caller's call — see
+    // the note on `className` at the top of the file.
+    <div className={`mx-auto min-h-screen max-w-2xl px-5 pb-8 sm:px-6 ${className}`}>
       <h2 className="font-display text-3xl font-extrabold text-white">{profile.name}&apos;s Anime List</h2>
       <p className="mb-6 text-sm text-white/40">
         {profile.animeList.length} anime · {profile.animeList.reduce((n, a) => n + a.characters.length, 0)} characters

@@ -5,7 +5,7 @@ import QuestionLog from './QuestionLog';
 import PeekPanel from './PeekPanel';
 import WhoIsWhoPanel from './WhoIsWhoPanel';
 import { normalizeTitle } from '../../../shared/utils/ranking';
-import { rankSuggestions } from '../utils/guessSuggest';
+import { rankSuggestions } from '../../../shared/utils/guessSuggest';
 import { Avatar, Button, GhostButton, Input, Screen } from '../../../shared/ui';
 
 // The active guesser's device. Deliberately never receives the assigned

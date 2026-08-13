@@ -29,14 +29,85 @@ function isSameShowByCast(charsA = [], charsB = []) {
   return shared >= SHARED_CAST_MIN && shared >= smaller * SHARED_CAST_RATIO;
 }
 
-// Adds a character to an anime entry unless a character with the same name is
-// already there. Returns 1 if it was added, 0 otherwise.
-function addCharacterIfNew(entry, char) {
+// Character fields that arrived after the first imports did — the same story as
+// the anime-level STAT_KEYS below, and the reason a profile can be years of
+// curation with none of them. `favourites` is the one that prompted this:
+// AniFake ranks by it and AniRank has an axis for it, and it entered the stored
+// shape long after these profiles were first written.
+//
+// `name` is deliberately absent — it is the identity this merge matches on, so
+// rewriting it would mean silently repointing a record at a different character.
+const CHAR_KEYS = ['favourites', 'imageUrl', 'description', 'gender', 'role'];
+
+/**
+ * A copy of `existing` with fields it is missing filled in from `incoming`, or
+ * null when there was nothing to fill.
+ *
+ * Same rule as backfillStats and for the same reason: fill absent fields, NEVER
+ * overwrite a value already there. A stored value may have come from a source
+ * this import knows nothing about, and a repair that can only add information is
+ * one a user can run without reading the code first.
+ *
+ * `== null` and not falsiness, because `favourites: 0` is a real answer — a MAIN
+ * character short-circuits filterAndMapCharacterEdges' threshold, so AniList
+ * genuinely reporting zero is stored as zero. Treating that as absent would make
+ * every unpopular lead re-fetch forever.
+ *
+ * Returns a NEW object rather than mutating. mergeAnimeIntoProfile copies entries
+ * with `characters: [...a.characters]`, which is shallow — the character objects
+ * are still the ones ProfileProvider is holding in React state, so editing one in
+ * place would change rendered state behind React's back.
+ */
+function backfilledCharacter(existing, incoming) {
+  const patch = {};
+  for (const key of CHAR_KEYS) {
+    if (existing[key] == null && incoming[key] != null) patch[key] = incoming[key];
+  }
+  // Genres separately: an empty array is "nothing on file" rather than a value.
+  // AniFake deals the blind fake one genre off the secret's show and has nothing
+  // to say when the list is empty, so an empty array is worth replacing.
+  if (!existing.genres?.length && incoming.genres?.length) patch.genres = [...incoming.genres];
+  return Object.keys(patch).length ? { ...existing, ...patch } : null;
+}
+
+/**
+ * Files a character into an anime entry, by folded name.
+ *
+ * Returns 'added' | 'updated' | 'unchanged'. The three are counted separately
+ * because they mean different things to someone watching an import: a repair run
+ * on a fully-imported list legitimately adds nothing, and folding its updates
+ * into the "+N characters" figure would make that number describe work the
+ * import did not do.
+ *
+ * The 'updated' case is why a re-import is worth anything at all on a show you
+ * already have. It used to early-return here, which meant every field of a saved
+ * character was frozen at its import vintage forever — the fetch pulled correct
+ * data and this function dropped it on the floor.
+ */
+function addOrBackfillCharacter(entry, char) {
   const key = characterNameKey(char.name);
-  const alreadyHas = entry.characters.some((c) => characterNameKey(c.name) === key);
-  if (alreadyHas) return 0;
-  entry.characters.push(char);
-  return 1;
+  const at = entry.characters.findIndex((c) => characterNameKey(c.name) === key);
+  if (at === -1) {
+    entry.characters.push(char);
+    return 'added';
+  }
+  const merged = backfilledCharacter(entry.characters[at], char);
+  if (!merged) return 'unchanged';
+  entry.characters[at] = merged;
+  return 'updated';
+}
+
+// Whether re-fetching this entry's cast would tell us anything new. True only
+// when the entry HAS characters and NONE of them carry a favourites count, which
+// is what a profile written before the field existed looks like.
+//
+// "None", not "any of them lack it", on purpose: a fetch only returns MAIN plus
+// SUPPORTING above the favourites threshold, so a supporting character below the
+// current threshold can never be filled in. Keyed on "any" this would mark such
+// a show stale forever and re-suggest it after every repair.
+function hasStaleCast(entry) {
+  const chars = entry?.characters ?? [];
+  return chars.length > 0 && chars.every((c) => c.favourites == null);
 }
 
 // Normalizes the two shapes that describe the same thing. A franchise group from
@@ -110,6 +181,9 @@ export function mergeAnimeIntoProfile(profile, importedAnimeList) {
   let animeList = profile.animeList.map((a) => ({ ...a, characters: [...a.characters] }));
   let addedAnime = 0;
   let addedChars = 0;
+  // Counted apart from addedChars: a re-import of a list you already have adds
+  // nothing and repairs plenty, and the import screen has to be able to say so.
+  let updatedChars = 0;
 
   for (const imported of importedAnimeList) {
     const identity = groupIdentity(imported);
@@ -140,17 +214,23 @@ export function mergeAnimeIntoProfile(profile, importedAnimeList) {
     if (isBetterTitle(imported, base)) base.title = imported.title;
     backfillStats(base, imported);
     for (const dupe of rest) {
-      for (const char of dupe.characters) addCharacterIfNew(base, char);
+      // Folding a duplicate entry in can repair as well as add — two saved
+      // copies of one character where only the younger carries the stats.
+      for (const char of dupe.characters) addOrBackfillCharacter(base, char);
     }
     if (rest.length > 0) {
       const dropped = new Set(rest);
       animeList = animeList.filter((a) => !dropped.has(a));
     }
 
-    for (const char of imported.characters) addedChars += addCharacterIfNew(base, char);
+    for (const char of imported.characters) {
+      const outcome = addOrBackfillCharacter(base, char);
+      if (outcome === 'added') addedChars++;
+      else if (outcome === 'updated') updatedChars++;
+    }
   }
 
-  return { profile: { ...profile, animeList }, addedAnime, addedChars };
+  return { profile: { ...profile, animeList }, addedAnime, addedChars, updatedChars };
 }
 
 /**
@@ -160,12 +240,17 @@ export function mergeAnimeIntoProfile(profile, importedAnimeList) {
  * identity. Selecting only these turns a re-import from "re-fetch all 200
  * shows at ~30 req/min" into "fetch the delta".
  *
- * Three states, because "already in my profile" and "nothing left to fetch"
- * stop being the same question once a franchise gains a season:
+ * Four states, because "already in my profile" and "nothing left to fetch"
+ * stop being the same question once a franchise gains a season — or once the
+ * app starts storing a field it did not use to:
  *   'new'     — nothing in the profile looks like this show.
  *   'partial' — some members were fetched before, some weren't: a new season
  *               aired. Worth fetching, so it is suggested.
- *   'known'   — every member already paid for.
+ *   'stale'   — every member was fetched, but before character `favourites`
+ *               existed, so the saved cast carries none. A re-fetch now repairs
+ *               them in place (see addOrBackfillCharacter) rather than adding
+ *               nothing, which is what it used to do.
+ *   'known'   — every member already paid for, with nothing left to learn.
  *
  * That distinction is the whole reason `anilistImportedIds` is recorded on the
  * profile rather than inferred: mergeAnimeIntoProfile collapses a franchise's
@@ -187,14 +272,17 @@ export function classifyImportGroups(profile, groups) {
 
   const byKey = new Map();
   const suggested = new Set();
-  const counts = { new: 0, partial: 0, known: 0 };
+  const counts = { new: 0, partial: 0, stale: 0, known: 0 };
 
   for (const group of groups ?? []) {
     const identity = groupIdentity(group);
-    // `.some`, not a consuming match: one profile entry can legitimately be the
-    // identity match for several groups (two franchises whose canonical titles
-    // key the same), and each is independently known. Nothing is used up.
-    const identityMatch = animeList.some((a) => matchesGroupIdentity(a, identity));
+    // Filtered, not consumed: one profile entry can legitimately be the identity
+    // match for several groups (two franchises whose canonical titles key the
+    // same), and each is independently known. Nothing is used up. The entries
+    // themselves rather than a boolean, because the staleness test below has to
+    // look at the cast they already hold.
+    const matched = animeList.filter((a) => matchesGroupIdentity(a, identity));
+    const identityMatch = matched.length > 0;
     const fetched = hasCoverage
       ? identity.memberIds.filter((id) => covered.has(id)).length
       : 0;
@@ -212,6 +300,10 @@ export function classifyImportGroups(profile, groups) {
       // user hits Select All. One import later the coverage set is exact.
       state = identityMatch ? 'known' : 'new';
     }
+
+    // Only 'known' is ever promoted — 'new' and 'partial' are being fetched
+    // anyway, and their cast will arrive with the field already on it.
+    if (state === 'known' && matched.some(hasStaleCast)) state = 'stale';
 
     byKey.set(group.key, state);
     counts[state]++;
@@ -250,7 +342,7 @@ export function dedupeProfileAnimeList(animeList) {
 
     if (!target) {
       const entry = { ...anime, characters: [] };
-      for (const char of anime.characters ?? []) addCharacterIfNew(entry, char);
+      for (const char of anime.characters ?? []) addOrBackfillCharacter(entry, char);
       shows.push(entry);
       byTitleKey.set(key, entry);
       continue;
@@ -262,7 +354,11 @@ export function dedupeProfileAnimeList(animeList) {
       target.id = anime.id;
       target.title = anime.title;
     }
-    for (const char of anime.characters ?? []) addCharacterIfNew(target, char);
+    // Repairs as well as adds: two saved copies of one show can each hold the
+    // same character at different import vintages, and the merged entry should
+    // end up with whatever either of them knew. Still pure and offline, so this
+    // stays safe to run on every profile read.
+    for (const char of anime.characters ?? []) addOrBackfillCharacter(target, char);
     // Point this title at the merged show too, so a third copy hits the fast path.
     byTitleKey.set(key, target);
   }

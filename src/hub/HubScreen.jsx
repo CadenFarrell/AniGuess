@@ -4,7 +4,7 @@ import ListManager from '../shared/components/ListManager';
 import ProfileButton from '../shared/components/ProfileButton';
 import ProfilePicker from '../shared/components/ProfilePicker';
 import { useProfileStore } from '../shared/context/profileContext';
-import { Backdrop, Badge, GhostButton, Screen, Wordmark } from '../shared/ui';
+import { Backdrop, Badge, GhostButton, HubButton, Screen, Wordmark } from '../shared/ui';
 
 // Tile fill plus the border the card adopts on hover, so each game "lights up"
 // in its own colour rather than every card sharing one highlight.
@@ -97,16 +97,25 @@ export default function HubScreen() {
     return (
       <>
         <Backdrop />
-        {/* mt-16 clears nothing here (the hub has no fixed HubButton), but the
-            same in-flow back row as AniGuess's list view keeps the two screens
-            reading identically. */}
-        <div className="mx-5 mb-0 pt-6 sm:mx-6">
-          <GhostButton onClick={() => setEditingListId(null)}>← Back to hub</GhostButton>
+        {/* The same fixed control every in-game screen uses. "Hub" is literal
+            here — this view IS inside the hub, so leaving it lands on the menu. */}
+        <HubButton onClick={() => setEditingListId(null)} />
+        {/* The stepping half beside it: 🏠 Hub leaves the flow, this goes back one
+            step to the picker the ✏️ was pressed in. No `origin` state like
+            AniGuess's — the hub has exactly one route in, so back is always the
+            picker. Own column (matching ListManager's) so it lines up with the
+            heading below, and it carries the pt-16 that clears the fixed button. */}
+        <div className="mx-auto max-w-2xl px-5 pt-16 sm:px-6">
+          <GhostButton onClick={() => { setEditingListId(null); setShowPicker(true); }}>
+            ← Profiles
+          </GhostButton>
         </div>
         <ListManager
           key={editingListId}
           profile={profiles[editingListId] ?? null}
           onProfileUpdated={saveProfile}
+          // The row above clears the fixed button, so this only needs the gap.
+          className="pt-4"
         />
       </>
     );

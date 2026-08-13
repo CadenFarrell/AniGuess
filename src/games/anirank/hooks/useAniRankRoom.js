@@ -8,6 +8,15 @@ import * as rules from '../rules';
 
 const ROOM_KEY = 'anirank_online_room';
 
+// The round's axis, out of the settings the host wrote.
+//
+// `settings.axis` is a spec: a built-in's id, or — for a prompt the host wrote
+// themselves — its whole definition. It has to be the definition, because a
+// guest's device has never seen that prompt and no id would resolve to anything
+// but the default on it. `axisId` is the field's older name, still read so a
+// room created by the previous build finishes its game.
+const settingsAxis = (settings) => getAxis(settings?.axis ?? settings?.axisId);
+
 const initialState = (localProfile) => ({
   view: 'lobby',
   hostId: localProfile.id,
@@ -53,6 +62,10 @@ const normalizeState = (val) => {
     settings: val.settings ?? null,
     presence: val.presence ?? {},
     totalScores: val.totalScores ?? {},
+    // What the last banked round was worth, so the reveal can show `+N` beside a
+    // total that has been accumulating since the room opened. Absent on an
+    // unscored round — RTDB does not store `{}`.
+    roundScores: val.roundScores ?? {},
     roundIndex: val.roundIndex ?? 0,
     players,
     game: normalizeGame(val.game, players.map((p) => p.id)),
@@ -109,7 +122,7 @@ export function useAniRankRoom() {
     // shape the deck, least of all under "shared cards only".
     const dealtIn = rosterRef.current.active;
     const db = getFirebaseDb();
-    const axis = getAxis(settings.axisId);
+    const axis = settingsAxis(settings);
     const { deck, candidates, enough } = buildDeck(dealtIn, {
       axis,
       sharedOnly: settings.sharedOnly,
@@ -177,7 +190,7 @@ export function useAniRankRoom() {
     const db = getFirebaseDb();
     const snapshot = state?.game;
     if (!snapshot) return false;
-    const axis = getAxis(state?.settings?.axisId);
+    const axis = settingsAxis(state?.settings);
     // Returns {} when the round has no answer key — an unscored round, or an
     // opinion round whose subject left before finishing their board. Banking an
     // empty object is a no-op, so the reveal still happens, just without points.
@@ -191,7 +204,15 @@ export function useAniRankRoom() {
     ).catch(() => null);
     if (!claim) return false; // transient — retry on a later render
     if (claim.committed) {
-      await patchState({ totalScores: rules.applyRoundScores(state.totalScores ?? {}, scores) });
+      await patchState({
+        totalScores: rules.applyRoundScores(state.totalScores ?? {}, scores),
+        // Banked in the same write as the totals, by the one device that won the
+        // claim, so the `+N` on the reveal can never disagree with the points it
+        // sits beside. Explicitly null rather than `{}` when the round scored
+        // nothing: RTDB drops an empty object, which would leave the PREVIOUS
+        // round's deltas on screen instead of none.
+        roundScores: Object.keys(scores).length ? scores : null,
+      });
     }
     await runTransaction(ref(db, `rooms/${roomCode}/state/view`), (cur) =>
       (cur === 'results' ? undefined : 'results')
@@ -269,12 +290,12 @@ export function useAniRankRoom() {
     players,
     settings: state?.settings ?? null,
     totalScores: state?.totalScores ?? {},
+    roundScores: state?.roundScores ?? {},
     game,
     // The round's axis and subject, resolved once here so no screen has to
     // re-derive them from settings — and getAxis never returns undefined, so a
     // room written by an older build still renders.
-    axis: getAxis(state?.settings?.axisId),
-    axisId: state?.settings?.axisId ?? null,
+    axis: settingsAxis(state?.settings),
     scoring: state?.settings?.scoring !== false,
     subjectId: game?.subjectId ?? null,
     subject: players.find((p) => p.id === game?.subjectId) ?? null,
