@@ -210,6 +210,20 @@ export function useAniFakeRoom() {
 
   // Every mutation of the round funnels through one transaction on state/game
   // so two devices acting at the same instant can't lose each other's write.
+  //
+  // RETURNS FALSE ON A FAILED WRITE, and that is load-bearing rather than
+  // tidiness: half the calls below run inside useRoomCore's `once`, which
+  // re-arms only on a thrown error or an explicit false. Swallowing the failure
+  // into setSyncError and returning undefined left the one-shot latched, so a
+  // single dropped packet meant the write never happened and nothing would ever
+  // retry it. The reveal was the worst case — `publish` is per-device, and
+  // `reconciledRef` clears on a view CHANGE, so a device that failed to publish
+  // its card sat on "Turning the cards over…" for the rest of the round with no
+  // other player able to rescue it.
+  //
+  // A transaction that ABORTS still resolves (committed: false), which is
+  // correct to latch: the rule was a no-op, or another device got there first.
+  // Only a genuine write failure re-arms.
   const applyGame = useCallback((fn) => {
     const db = getFirebaseDb();
     return runTransaction(ref(db, `rooms/${roomCode}/state/game`), (raw) => {
@@ -220,6 +234,7 @@ export function useAniFakeRoom() {
       return { ...current, ...patch };
     }).catch((e) => {
       setSyncError(e?.message || 'Could not sync with the room — check your connection.');
+      return false;
     });
   }, [roomCode, setSyncError]);
 
@@ -279,7 +294,17 @@ export function useAniFakeRoom() {
     for (const [id, entry] of Object.entries(secrets)) {
       updates[`rooms/${roomCode}/secrets/${id}`] = entry;
     }
-    await guard(update(ref(db), updates));
+    // Not guard(), which reports a failure and swallows it. A swallowed failure
+    // here would move the room to `check` with no cards stored, leaving every
+    // device on "Waiting for the deal…" with no write left that could fix it —
+    // the same wedge applyGame's `false` exists to prevent, one node over.
+    // useRoomCore exposes setSyncError for exactly this: report AND return.
+    // Bailing leaves the room in the lobby, where Start is still pressable.
+    const stored = await update(ref(db), updates).then(() => true).catch((e) => {
+      setSyncError(e?.message || 'Could not deal the round — check your connection.');
+      return false;
+    });
+    if (!stored) return;
 
     await bestEffort(set(ref(db, `rooms/${roomCode}/open`), false));
     await patchState({
@@ -294,7 +319,7 @@ export function useAniFakeRoom() {
       }),
       view: settings.allowRedeal ? 'check' : 'clues',
     });
-  }, [isHost, roomCode, roundNumber, patchState, guard, bestEffort, rosterRef, setSyncError]);
+  }, [isHost, roomCode, roundNumber, patchState, bestEffort, rosterRef, setSyncError]);
 
   // My answer to the card check. `asked` never becomes a per-player value —
   // rules.respondToCheck folds it into one shared latch. See the note there.
@@ -354,7 +379,20 @@ export function useAniFakeRoom() {
     // waiting state; if two hosts somehow race, both write complete consistent
     // batches and exactly one wins applyRedeal's re-check, leaving the loser's
     // cards stamped with a deal number that never becomes current.
-    await guard(update(ref(db), updates));
+    // Not guard(), for the reason startGame gives — and here it matters twice
+    // over, because this function's return value IS the one-shot's re-arm
+    // signal. Reporting the failure and then returning true would tell the
+    // caller the re-deal landed.
+    const stored = await update(ref(db), updates).then(() => true).catch((e) => {
+      setSyncError(e?.message || 'Could not deal the round — check your connection.');
+      return false;
+    });
+    // The three refs advance only once the cards are actually stored. Advancing
+    // them on a failed write would exclude characters nobody was dealt, pin the
+    // fake to a deal that never happened, and publish a `discarded` name the
+    // table never saw — which is the one thing that would hand the blind fake a
+    // discard list the crew cannot corroborate.
+    if (!stored) return false;
     dealtRef.current = [...dealtRef.current, ...dealt];
     // Assigned rather than left alone, for the host-migration case: an incoming
     // host's ref is null, so THIS deal re-rolled the fake (the degradation
@@ -362,9 +400,10 @@ export function useAniFakeRoom() {
     // it, instead of re-rolling the role on each one for the rest of the phase.
     fakeRef.current = fakeId;
     if (secretName) secretNamesRef.current = [...secretNamesRef.current, secretName];
-    await applyGame((g) => rules.applyRedeal(g, nextDeal));
-    return true;
-  }, [isHost, roomCode, players, state, roundNumber, guard, applyGame]);
+    // applyGame reports its own failure as false, so this is the claim write's
+    // verdict rather than an assumption that it landed.
+    return (await applyGame((g) => rules.applyRedeal(g, nextDeal))) !== false;
+  }, [isHost, roomCode, players, state, roundNumber, applyGame, setSyncError]);
 
   const submitClue = useCallback((text) => (
     applyGame((g) => rules.submitClue(g, myPlayerId, text))
