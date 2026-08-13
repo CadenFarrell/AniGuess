@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import AniRankSetup from './components/AniRankSetup';
 import AniRankRound from './components/AniRankRound';
 import AniRankResults from './components/AniRankResults';
 import TierMode from './TierMode';
 import { buildDeck } from './utils/deck';
 import { getAxis, isOpinion } from './axes';
-import { subjectFor } from './rules';
+import { applyRoundScores, subjectFor } from './rules';
 import { HubButton } from '../../shared/ui';
 
 // Single-device pass-and-play. A thin view-router, the same shape as
@@ -19,11 +19,23 @@ export default function LocalGame({ onExit, onBack }) {
   // Counts rounds rather than tracking a subject directly, so "play again" walks
   // the roster instead of asking the same person to be the subject every time.
   const [roundIndex, setRoundIndex] = useState(0);
+  // The running total across every round of this sitting, exactly as the online
+  // hook keeps it. Local play used to hand the results screen ONE round's
+  // scores as `totalScores` and then throw them away on "New ten", so
+  // rules.applyRoundScores was dead code in this path and a local session had no
+  // memory — the same game scored differently depending on how you were playing
+  // it. AniFake's LocalGame is the shape being matched here.
+  const [totalScores, setTotalScores] = useState({});
 
   // `axis` is a spec — a built-in's id, or the whole definition of a prompt the
   // player wrote, which no lookup could recover. getAxis resolves either.
   function start({ players, sharedOnly, axis, scoring, blind, format = 'round' }, nextRound = 0) {
     setError(null);
+    // Round zero is the only way into a fresh sitting — the setup screen calls
+    // start() with the default, "New ten" always passes roundIndex + 1 — so
+    // clearing here covers every path back to setup without a second reset to
+    // keep in step with this one.
+    if (nextRound === 0) setTotalScores({});
     const resolved = getAxis(axis);
 
     // The tier-list formats have no deck, no subject and no score — they take
@@ -55,6 +67,14 @@ export default function LocalGame({ onExit, onBack }) {
     setView('round');
   }
 
+  // Stable, so AniRankRound's finish effect isn't re-armed every render — and
+  // the functional update is what makes a double-fire harmless if it ever is.
+  const handleFinish = useCallback((result) => {
+    setFinished(result);
+    setTotalScores((totals) => applyRoundScores(totals, result.scores));
+    setView('results');
+  }, []);
+
   // Every local screen sits under one fixed "🏠 Hub" button rather than carrying
   // its own way out, so the exit never moves between views. This is also what
   // separates the two exits the round has: the Hub button leaves the game, while
@@ -82,7 +102,7 @@ export default function LocalGame({ onExit, onBack }) {
           subjectId={game.subjectId}
           scoring={game.scoring}
           blind={game.blind}
-          onFinish={(result) => { setFinished(result); setView('results'); }}
+          onFinish={handleFinish}
           onQuit={() => { setGame(null); setView('setup'); }}
         />
       );
@@ -97,7 +117,11 @@ export default function LocalGame({ onExit, onBack }) {
           axis={game.axis}
           subjectId={game.subjectId}
           scoring={game.scoring}
-          totalScores={finished.scores}
+          totalScores={totalScores}
+          // What the round just played was worth, against the running total
+          // above it. Online has always shown this; without it a second round
+          // just changes every number with no way to see what earned it.
+          roundScores={finished.scores}
           // Re-draw from the same lists rather than reusing the deck — a second
           // round of the same ten cards is no longer blind — and pass the turn to
           // the next subject.
