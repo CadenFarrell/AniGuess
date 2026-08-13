@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   RACE, SIMULTANEOUS, LIVES, startRound, buzz, resolveBuzz, everyoneLockedOut, releaseBuzz,
   submitAnswer, beginEntry, startGuessing, submitOnlineAnswer, revealNow, giveUp, nextQuestion,
-  openWindow, scoreAnswer, expireQuestion, livePlayerIds, answerElapsedMs,
+  openWindow, scoreAnswer, expireQuestion, livePlayerIds, answerElapsedMs, resumeRound,
 } from './rules';
 
 const player = (id) => ({ id, name: id });
@@ -491,5 +491,93 @@ describe('lives mode', () => {
   it('charges nobody when revealNow is used to unwedge a departure', () => {
     const state = { ...livesRound(), answers: { ana: { text: RIGHT, correct: true, at: T0 } } };
     expect(revealNow(state).patch.lives).toEqual({ ana: 2, ben: 2, cleo: 2 });
+  });
+});
+
+describe('resumeRound', () => {
+  // The whole reason this exists: a deadline is an absolute instant, so one
+  // written to storage last night has already passed. Resuming into it would
+  // expire the question the moment it rendered.
+  it('clears the expired clock and re-asks the question', () => {
+    const saved = {
+      ...startRound(ALL, SIMULTANEOUS, TIMED),
+      index: 3,
+      phase: 'entry',
+      windowStartAt: T0,
+      deadlineAt: T0 + 20_000,
+      answers: { ana: { text: RIGHT, correct: true, ms: 900 } },
+    };
+    const back = resumeRound(saved, ALL, 10);
+    expect(back.index).toBe(3);
+    expect(back.phase).toBe('listening');
+    expect(back.deadlineAt).toBeNull();
+    expect(back.windowStartAt).toBeNull();
+    expect(back.answers).toEqual({});
+  });
+
+  it('carries scores, lives and the elimination order across untouched', () => {
+    const saved = {
+      ...startRound(ALL, LIVES, { ...TIMED, startingLives: 3 }),
+      index: 4,
+      scores: { ana: 7, ben: 2, cleo: 0 },
+      lives: { ana: 2, ben: 1, cleo: 0 },
+      eliminated: ['cleo'],
+    };
+    const back = resumeRound(saved, ALL, 10);
+    expect(back.scores).toEqual({ ana: 7, ben: 2, cleo: 0 });
+    expect(back.lives).toEqual({ ana: 2, ben: 1, cleo: 0 });
+    expect(back.eliminated).toEqual(['cleo']);
+  });
+
+  // Same rule nextQuestion applies: submitAnswer would charge an eliminated
+  // player a life for a question they were never in.
+  it('rebuilds the pass order from survivors only', () => {
+    const saved = {
+      ...startRound(ALL, LIVES, { startingLives: 3 }),
+      index: 2,
+      lives: { ana: 1, ben: 2, cleo: 0 },
+      eliminated: ['cleo'],
+    };
+    expect(resumeRound(saved, ALL, 10).entryOrder).not.toContain('cleo');
+  });
+
+  it('keeps everyone in the order when the mode has no lives', () => {
+    const saved = { ...startRound(ALL, SIMULTANEOUS), index: 1, eliminated: ['cleo'] };
+    expect([...resumeRound(saved, ALL, 10).entryOrder].sort()).toEqual(ALL_IDS);
+  });
+
+  it('resumes the last question, and refuses one past the end', () => {
+    const saved = { ...startRound(ALL, RACE), index: 9 };
+    // Index 9 of ten IS the last question, so there is still a clip to play.
+    expect(resumeRound(saved, ALL, 10)?.index).toBe(9);
+    expect(resumeRound({ ...saved, index: 10 }, ALL, 10)).toBeNull();
+    expect(resumeRound({ ...saved, index: -1 }, ALL, 10)).toBeNull();
+  });
+
+  it('refuses a Lives round with no contest left', () => {
+    const saved = {
+      ...startRound(ALL, LIVES, { startingLives: 1 }),
+      index: 2,
+      lives: { ana: 1, ben: 0, cleo: 0 },
+      eliminated: ['ben', 'cleo'],
+    };
+    expect(resumeRound(saved, ALL, 10)).toBeNull();
+  });
+
+  // It reads a blob out of localStorage that an older build may have written,
+  // so junk has to mean "offer a fresh game" rather than throw.
+  it('refuses junk rather than throwing', () => {
+    expect(resumeRound(null, ALL, 10)).toBeNull();
+    expect(resumeRound(undefined, ALL, 10)).toBeNull();
+    expect(resumeRound('nope', ALL, 10)).toBeNull();
+    expect(resumeRound({}, ALL, 10)).toBeNull();
+    expect(resumeRound({ index: 'two' }, ALL, 10)).toBeNull();
+    expect(resumeRound({ ...startRound(ALL, RACE), index: 1 }, [], 10)).toBeNull();
+  });
+
+  it('resumes a solo Lives round while the player still has a life', () => {
+    const solo = [ANA];
+    const saved = { ...startRound(solo, LIVES, { startingLives: 3 }), index: 2, lives: { ana: 1 } };
+    expect(resumeRound(saved, solo, 10)?.index).toBe(2);
   });
 });

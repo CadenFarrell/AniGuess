@@ -551,6 +551,45 @@ export function nextQuestion(state, players, roundLength) {
   return { finished: false, patch: { index, ...questionReset(survivors, index) } };
 }
 
+/**
+ * A saved round, rewound to the START of the question it was on → state or null.
+ *
+ * RESUMING MID-QUESTION IS NOT AN OPTION, and that is a property of the clock
+ * rather than a simplification. Every window here is stored as an absolute
+ * instant (see the convention at the top of this file), so a deadline written
+ * to storage last night is not "20 seconds of guessing time" — it is a moment
+ * that has already passed. Restoring one would hand the table a question that
+ * expires the instant it is rendered, grading everybody as out of time, and
+ * `answers` half-collected from a window nobody can still be inside is not a
+ * state any rule below knows how to finish. So the question is re-asked: the
+ * clip replays, the clock starts fresh, and nothing cumulative is lost —
+ * scores, lives and the elimination order all carry over untouched.
+ *
+ * Returns null for a round there is nothing to resume into — a finished or
+ * out-of-range index, a shape that isn't a round, or a Lives round with no
+ * contest left. Null means "offer a fresh game", never a thrown error: this
+ * runs against a blob from localStorage that an older build may have written.
+ *
+ * The pass order is rebuilt from the SURVIVORS, the same rule nextQuestion
+ * applies and for the same reason — resuming must not hand the device to
+ * someone who is out, where submitAnswer would charge them a life for a
+ * question they were never in.
+ */
+export function resumeRound(saved, players, roundLength) {
+  if (!saved || typeof saved !== 'object' || !Array.isArray(players) || !players.length) return null;
+  const index = Number.isInteger(saved.index) ? saved.index : -1;
+  if (index < 0 || index >= roundLength) return null;
+
+  if (!hasLives(saved.mode)) {
+    return { ...saved, ...questionReset(players, index) };
+  }
+
+  const survivors = players.filter((p) => !isEliminated(saved, p.id));
+  const over = players.length > 1 ? survivors.length <= 1 : survivors.length === 0;
+  if (over) return null;
+  return { ...saved, ...questionReset(survivors, index) };
+}
+
 // Whoever the UI should be highlighting right now, if anyone.
 export function activePlayerId(state) {
   if (state.phase === 'buzzed') return state.buzzedBy;

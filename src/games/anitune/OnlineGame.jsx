@@ -31,6 +31,29 @@ export default function OnlineGame({ onBack, onExit }) {
     setClipDone(false);
   }, [room.game?.index, room.view]);
 
+  // Warm the next clip — metadata alone took ~2s in testing, which would
+  // otherwise be dead air between questions. Delayed rather than immediate: the
+  // CDN 503s under concurrent requests, and the clip playing right now must win
+  // that race. AniTuneRound does the same locally; online it matters MORE, not
+  // less, because every device pays the cold fetch and the room's ready gate
+  // waits on the slowest one.
+  const preloadRef = useRef(null);
+  useEffect(() => {
+    if (room.view !== 'round') return undefined;
+    const next = room.round?.[(room.game?.index ?? -1) + 1];
+    if (!next?.audioUrl) return undefined;
+    const timer = setTimeout(() => {
+      const audio = new Audio();
+      audio.preload = 'auto';
+      audio.src = next.audioUrl;
+      preloadRef.current = audio;
+    }, 4000);
+    return () => {
+      clearTimeout(timer);
+      if (preloadRef.current) { preloadRef.current.src = ''; preloadRef.current = null; }
+    };
+  }, [room.view, room.game?.index, room.round]);
+
   // Once every device has tapped "ready", one of them stamps the shared start
   // time (a transaction, so only the first stamp sticks). Ref-guarded to one
   // write per question per device.

@@ -17,12 +17,17 @@ import { Backdrop, Badge, GhostButton, Screen, TimerBar } from '../../../shared/
 // over every local view, so the exit stays in the same corner on all of them.
 export default function AniTuneRound({
   round, players, questions, clipSeconds, playbackRate = 1, mode, settings = {},
-  onFinish, onBackToSetup,
+  initialState = null, onProgress, onFinish, onBackToSetup,
 }) {
   const {
     state, activeId, isLastQuestion, clock, setQuestion, openWindow,
     buzz, resolveBuzz, giveUp, startGuessing, beginEntry, submitAnswer, advance,
-  } = useAniTuneRound(players, mode, round.length, settings);
+  } = useAniTuneRound(players, mode, round.length, settings, initialState);
+
+  // Hand every state change up so LocalGame can save it. Here rather than in the
+  // hook because the hook is the online twin's shape too, and only local play
+  // has somewhere to put it.
+  useEffect(() => { onProgress?.(state); }, [state, onProgress]);
 
   // Which question's clip has nothing left to give — either its window ran out
   // or it never loaded at all. Stored as an index rather than a flag so it

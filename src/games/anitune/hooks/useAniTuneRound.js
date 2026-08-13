@@ -11,8 +11,12 @@ import * as rules from '../rules';
 // The clock is the one place local and online genuinely differ, and only in
 // where "now" comes from: there is a single device here, so Date.now() is the
 // shared clock by definition and no server offset is involved.
-export function useAniTuneRound(players, mode, roundLength, settings = {}) {
-  const [state, setState] = useState(() => rules.startRound(players, mode, settings));
+// `initialState` resumes a saved round instead of dealing a fresh one. It has
+// already been through rules.resumeRound, which is what guarantees it is sitting
+// at a question boundary with no expired clock in it — this hook takes it as
+// given rather than re-checking, the same way it takes startRound's output.
+export function useAniTuneRound(players, mode, roundLength, settings = {}, initialState = null) {
+  const [state, setState] = useState(() => initialState ?? rules.startRound(players, mode, settings));
 
   // Rules run inside the updater so handlers always see current state — several
   // of them (buzzing, locking in) can fire in quick succession.
