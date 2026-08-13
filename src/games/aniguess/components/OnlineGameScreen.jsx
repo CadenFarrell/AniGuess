@@ -6,7 +6,7 @@ import PeekPanel from './PeekPanel';
 import WhoIsWhoPanel from './WhoIsWhoPanel';
 import { normalizeTitle } from '../../../shared/utils/ranking';
 import { rankSuggestions } from '../../../shared/utils/guessSuggest';
-import { Avatar, Button, GhostButton, Input, Screen } from '../../../shared/ui';
+import { Avatar, Button, Combobox, GhostButton, Input, Screen } from '../../../shared/ui';
 
 // The active guesser's device. Deliberately never receives the assigned
 // character — only raw question/guess text ever leaves this device, sent via
@@ -129,36 +129,27 @@ export default function OnlineGameScreen({
 
       {mode === 'guess' && !waiting && (
         <div className="mb-5">
-          <Input
-            type="text"
+          <Combobox
             value={guess}
-            onChange={(e) => updateGuess(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Escape') setSuggestions([]); else if (e.key === 'Enter') submitGuess(); }}
-            placeholder="Type your guess..."
-            aria-label="Your guess"
-            autoFocus
-            className="mb-3 text-lg"
-          />
-          {/* In-flow (not absolute) so the list never overlaps the Back/Guess
-              buttons below — otherwise a click meant for Guess lands on a
-              suggestion and only the second click submits. */}
-          {suggestions.length > 0 && (
-            <div className="mb-3 max-h-72 w-full overflow-y-auto rounded-pop border-2 border-white/15 bg-surface">
-              {suggestions.map((s) => (
-                <div
-                  key={`${s.series}-${s.name}`}
-                  onMouseDown={() => { setGuess(s.name); setSuggestions([]); }}
-                  className="flex cursor-pointer items-center gap-3 px-4 py-2 hover:bg-white/10"
-                >
-                  <Avatar src={s.imageUrl} size="sm" />
-                  <div>
-                    <p className="text-sm font-semibold text-white">{s.name}</p>
-                    <p className="text-xs text-white/40">{s.series}</p>
-                  </div>
+            onChange={updateGuess}
+            suggestions={suggestions}
+            onSelect={(s) => { setGuess(s.name); setSuggestions([]); }}
+            onSubmit={submitGuess}
+            optionKey={(s) => `${s.series}-${s.name}`}
+            renderOption={(s) => (
+              <>
+                <Avatar src={s.imageUrl} size="sm" />
+                <div>
+                  <p className="text-sm font-semibold text-white">{s.name}</p>
+                  <p className="text-xs text-white/40">{s.series}</p>
                 </div>
-              ))}
-            </div>
-          )}
+              </>
+            )}
+            placeholder="Type your guess..."
+            ariaLabel="Your guess"
+            autoFocus
+            className="mb-3"
+          />
           <div className="flex gap-3">
             <GhostButton onClick={() => { setMode('choose'); setGuess(''); setSuggestions([]); }}>
               ← Back

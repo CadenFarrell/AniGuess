@@ -9,7 +9,7 @@ import { isCorrectGuess as matchGuess } from '../utils/guessMatch';
 import { rankSuggestions } from '../../../shared/utils/guessSuggest';
 import { buildWhoIsWho } from '../utils/whoIsWho';
 import { answerTrail } from '../utils/answerTrail';
-import { Avatar, Button, GhostButton, Input, Modal, Screen } from '../../../shared/ui';
+import { Avatar, Button, Combobox, GhostButton, Input, Modal, Screen } from '../../../shared/ui';
 
 export default function GameScreen({
   guesser,
@@ -34,7 +34,6 @@ export default function GameScreen({
   const [question, setQuestion] = useState('');
   const [guess, setGuess] = useState('');
   const [suggestions, setSuggestions] = useState([]);
-  const [activeIdx, setActiveIdx] = useState(-1);
   // Flattening every show's cast on each turn is wasted work in talk mode,
   // which never renders the suggestion list this feeds.
   const allChars = useMemo(
@@ -90,8 +89,9 @@ export default function GameScreen({
   const resetTurn = () => {
     setQuestion('');
     setGuess('');
+    // Clearing the suggestions is the whole reset now: Combobox owns the
+    // highlight and re-seeds it on the next keystroke.
     setSuggestions([]);
-    setActiveIdx(-1);
     setMode('choose');
     setWaitingForAnswer(false);
     setPendingQuestion('');
@@ -151,16 +151,16 @@ export default function GameScreen({
 
   const isCorrectGuess = (raw) => matchGuess(character, raw);
 
+  // Ranking stays here rather than inside Combobox, deliberately: AniGuess ranks
+  // characters and AniTune ranks titles, and the two want different match tiers.
   const updateGuess = (val) => {
     setGuess(val);
-    setActiveIdx(-1);
     setSuggestions(rankSuggestions(allChars, val));
   };
 
   const pickSuggestion = (name) => {
     setGuess(name);
     setSuggestions([]);
-    setActiveIdx(-1);
   };
 
   const submitGuess = () => {
@@ -297,40 +297,27 @@ export default function GameScreen({
 
           {mode === 'guess' && (
             <div className="mb-5">
-              <Input
-                type="text"
+              <Combobox
                 value={guess}
-                onChange={(e) => updateGuess(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'ArrowDown') { e.preventDefault(); setActiveIdx(i => Math.min(i + 1, suggestions.length - 1)); }
-                  else if (e.key === 'ArrowUp') { e.preventDefault(); setActiveIdx(i => Math.max(i - 1, -1)); }
-                  else if (e.key === 'Enter') { if (activeIdx >= 0) pickSuggestion(suggestions[activeIdx].name); else if (guess.trim()) submitGuess(); }
-                  else if (e.key === 'Escape') setSuggestions([]);
-                }}
-                placeholder="Type your guess..."
-                aria-label="Your guess"
-                autoFocus
-                className="mb-3 text-lg"
-              />
-              {/* In-flow (not absolute) so the list never overlaps the Back/Guess buttons below. */}
-              {suggestions.length > 0 && (
-                <div className="mb-3 max-h-72 w-full overflow-y-auto overflow-x-hidden rounded-pop border-2 border-white/15 bg-surface">
-                  {suggestions.map((s, i) => (
-                    <div
-                      key={`${s.series}-${s.name}`}
-                      onMouseDown={() => pickSuggestion(s.name)}
-                      className={`flex cursor-pointer items-center gap-3 px-4 py-2
-                        ${i === activeIdx ? 'bg-pop-pink/30' : 'hover:bg-white/10'}`}
-                    >
-                      <Avatar src={s.imageUrl} size="sm" />
-                      <div>
-                        <p className="text-sm font-semibold text-white">{s.name}</p>
-                        <p className="text-xs text-white/40">{s.series}</p>
-                      </div>
+                onChange={updateGuess}
+                suggestions={suggestions}
+                onSelect={(s) => pickSuggestion(s.name)}
+                onSubmit={submitGuess}
+                optionKey={(s) => `${s.series}-${s.name}`}
+                renderOption={(s) => (
+                  <>
+                    <Avatar src={s.imageUrl} size="sm" />
+                    <div>
+                      <p className="text-sm font-semibold text-white">{s.name}</p>
+                      <p className="text-xs text-white/40">{s.series}</p>
                     </div>
-                  ))}
-                </div>
-              )}
+                  </>
+                )}
+                placeholder="Type your guess..."
+                ariaLabel="Your guess"
+                autoFocus
+                className="mb-3"
+              />
               <div className="flex gap-3">
                 <GhostButton onClick={() => { setMode('choose'); setGuess(''); setSuggestions([]); }}>
                   ← Back

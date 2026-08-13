@@ -8,8 +8,8 @@ import { Button, Combobox } from '../../../shared/ui';
 // The typeahead shell is shared/ui/Combobox — keyboard handling, the highlight,
 // and the ARIA combobox roles this file used to be missing. Combobox's own
 // header named this component as one of the three hand-rolled copies it was
-// extracted to replace; AniGuess's two were converted at the time and this one
-// was not, so until now the same arcade answered to two different keyboards
+// extracted to replace; this was the first converted and AniGuess's two followed
+// later, so for a release the arcade did answer to two different keyboards
 // depending on which game you were in. Ranking stays here, as it does for
 // AniGuess: this one ranks titles.
 //

@@ -3,11 +3,19 @@ import { Input } from './Field';
 
 // The typeahead shell: a text box with a ranked suggestion list under it.
 //
-// Extracted because this pattern had already been written three times by hand
+// Extracted because this pattern had been written three times by hand
 // (aniguess's GameScreen and OnlineGameScreen, anitune's GuessInput) and the
 // copies drifted — the online AniGuess one lost arrow-key navigation somewhere
-// along the way, so the same game answers to two different keyboards depending
-// on how you're playing it. Same reasoning as shared/hooks/useRoomCore.js.
+// along the way, so the same game answered to two different keyboards depending
+// on how you were playing it. Same reasoning as shared/hooks/useRoomCore.js.
+//
+// All three call sites are on this component now. That is worth stating because
+// it was not true for a release: this header claimed the extraction was done
+// while both AniGuess screens were still hand-rolled, so the drift it describes
+// in the past tense was live the whole time — and a comment asserting a
+// migration that never happened is worse than the missing migration, because it
+// stops anyone looking. If a fourth typeahead appears, convert it here rather
+// than adding a fourth copy.
 //
 // Ranking stays with the caller, deliberately: AniGuess ranks characters,
 // AniTune ranks titles, and the two want different match tiers. What is
