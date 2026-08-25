@@ -11,11 +11,16 @@ query ($userName: String, $type: MediaType, $statusIn: [MediaListStatus]) {
           id
           format
           episodes
+          duration
           averageScore
           popularity
+          source
+          season
+          seasonYear
           startDate { year month day }
           title { romaji english }
           coverImage { large }
+          studios(isMain: true) { nodes { name } }
           relations {
             edges {
               relationType(version: 2)
@@ -153,6 +158,19 @@ export async function fetchUserAnimeList(username, { statusIn = ['COMPLETED'] } 
         episodes: media.episodes ?? null,
         averageScore: media.averageScore ?? null,
         popularity: media.popularity ?? null,
+        // Facts about the show rather than numbers to rank it by. No game reads
+        // these yet: they are stored so a future quiz finds its answer key
+        // already on the device instead of fetching one mid-round. Same nullable
+        // contract as the axes above — a consumer must read a missing value as
+        // "this show cannot be asked about", never as a default.
+        duration: media.duration ?? null,
+        source: media.source ?? null,
+        season: media.season ?? null,
+        seasonYear: media.seasonYear ?? null,
+        // isMain filters the connection down to the animation studio, so
+        // nodes[0] is what "who made this" means. The unfiltered connection also
+        // carries producers and licensors, which no clue is ever asking for.
+        studio: media.studios?.nodes?.[0]?.name ?? null,
         relatedIds: seasonRelatedIds(media),
       });
     }

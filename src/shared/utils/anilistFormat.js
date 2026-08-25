@@ -107,9 +107,15 @@ const airDateKey = (d) => (d?.year ?? 9999) * 10000 + (d?.month ?? 99) * 100 + (
  *
  *   startDate  earliest member — a franchise debuted when its first season did,
  *              which is also what blind ranking by year is asking about.
+ *   season     earliest member too, for a reason stronger than symmetry: these
+ *   seasonYear name the same debut startDate does, so folding them from the
+ *              canonical member instead lets one card answer "2013" and
+ *              "SPRING 2019" at once — two facts that contradict each other.
  *   episodes   summed — the card stands for every season, so its length is all
  *              of them. Null only when no member reports a count at all, since
  *              a partial sum still beats dropping the show from the axis.
+ *   duration   canonical — it is per-episode, so summing it the way episodes is
+ *              summed would invent a number that describes nothing.
  *   the rest   the canonical member (group.key), the flagship entry that already
  *              gives the group its title and cover.
  *
@@ -137,6 +143,12 @@ export function summarizeGroupStats(group) {
     episodes,
     averageScore: canonical.averageScore ?? null,
     popularity: canonical.popularity ?? null,
+    format: canonical.format ?? null,
+    studio: canonical.studio ?? null,
+    source: canonical.source ?? null,
+    duration: canonical.duration ?? null,
+    season: earliest.season ?? null,
+    seasonYear: earliest.seasonYear ?? null,
   };
 
   return Object.fromEntries(Object.entries(stats).filter(([, v]) => v != null && v !== ''));

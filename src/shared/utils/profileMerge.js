@@ -144,7 +144,15 @@ function matchesGroupIdentity(entry, identity) {
 // They exist because a ranking game needs a number per show and the alternative
 // is a network call per round, which would break the "local play touches no
 // network" property CLAUDE.md asks callers to preserve.
-const STAT_KEYS = ['coverImageUrl', 'startDate', 'episodes', 'averageScore', 'popularity'];
+const STAT_KEYS = [
+  'coverImageUrl', 'startDate', 'episodes', 'averageScore', 'popularity',
+  // Facts about the show rather than numbers to rank it by. Nothing reads these
+  // yet — they are stored now so a future quiz-style game finds its answer key
+  // already on the device. They are absent, not null, on every profile imported
+  // before this line existed, exactly as the five above are on profiles older
+  // than them, and a re-import is the repair path for both.
+  'format', 'studio', 'source', 'season', 'seasonYear', 'duration',
+];
 
 function pickStats(imported) {
   const out = {};

@@ -9,7 +9,7 @@
 //   franchiseTitleKey   — the title alone. A heuristic, but it works offline on
 //     a profile that was saved before any of this existed.
 
-import { normalizeTitle } from './ranking';
+import { normalizeTitle } from './ranking.js';
 
 // The relations that mean "same show, later/earlier/attached part": season
 // chains (PREQUEL/SEQUEL) and the OVAs and specials hanging off a season

@@ -114,9 +114,14 @@ describe('summarizeGroupStats', () => {
     coverImageUrl: `cover-${id}`,
     format: 'TV',
     startDate: { year: 2020, month: 1, day: 1 },
+    season: 'WINTER',
+    seasonYear: 2020,
     episodes: 12,
+    duration: 24,
     averageScore: 80,
     popularity: 1000,
+    studio: `Studio ${id}`,
+    source: 'MANGA',
     ...over,
   });
   const group = (members, key = members[0].id) => ({
@@ -162,6 +167,32 @@ describe('summarizeGroupStats', () => {
 
     expect(stats.averageScore).toBe(90);
     expect(stats.popularity).toBe(999);
+  });
+
+  it('takes studio, source and duration from the canonical member', () => {
+    const stats = summarizeGroupStats(group([
+      member(1, { studio: 'Wit', source: 'MANGA', duration: 24 }),
+      member(2, { studio: 'MAPPA', source: 'ORIGINAL', duration: 48 }),
+    ], 2));
+
+    expect(stats.studio).toBe('MAPPA');
+    expect(stats.source).toBe('ORIGINAL');
+    // Per-episode, so a sum would be 72 — a length no episode of either season
+    // actually has.
+    expect(stats.duration).toBe(48);
+  });
+
+  // The regression guard: season/seasonYear name the same debut startDate does,
+  // so folding them from a different member than startDate lets one card answer
+  // 2013 and SPRING 2019 at the same time.
+  it('takes season and seasonYear from the earliest member, agreeing with startDate', () => {
+    const stats = summarizeGroupStats(group([
+      member(1, { startDate: { year: 2019, month: 4, day: 1 }, season: 'SPRING', seasonYear: 2019 }),
+      member(2, { startDate: { year: 2013, month: 4, day: 1 }, season: 'SPRING', seasonYear: 2013 }),
+    ], 1));
+
+    expect(stats.seasonYear).toBe(2013);
+    expect(stats.seasonYear).toBe(stats.startDate.year);
   });
 
   // Spread over an existing entry, so a null would blank a value an earlier

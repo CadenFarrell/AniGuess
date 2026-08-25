@@ -2,6 +2,13 @@
 // on the X-RateLimit-* headers AniList actually returns (the commonly-cited
 // ~90/min figure is stale — as of writing the API reports a 30 req/min limit)
 // and backs off on 429 using Retry-After / X-RateLimit-Reset.
+//
+// Despite "for the browser" above, this module is plain fetch plus timers and is
+// Node-safe — generateFacts.js imports it directly. Do that rather than copying
+// the throttle: generateProfiles.js has its own 600ms version only because it
+// predates this file, and a third copy is how a rate-limit fix ends up applied
+// to two callers out of three. (The Node caveat that DOES bite is
+// animethemesClient.js's User-Agent bot filter, which is a different API.)
 const ENDPOINT = 'https://graphql.anilist.co';
 const FALLBACK_MIN_INTERVAL_MS = 2500; // ~24 req/min, safe even if headers are ever absent
 
