@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { filterAndMapCharacterEdges } from './src/shared/utils/anilistFormat.js';
+import { ANIME_CATALOG } from './animeCatalog.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CACHE_DIR = path.join(__dirname, '.anilist-cache');
@@ -88,67 +89,6 @@ async function anilist(id) {
   return { genres, characters: { edges: allEdges } };
 }
 
-// ── Anime catalog (AniList IDs) ───────────────────────────────────────────────
-const ANIME_CATALOG = {
-  moreThanMarried:    { title: 'More Than a Married Couple, But Not Lovers',                               anilistId: 141949 },
-  quintuplets:        { title: 'The Quintessential Quintuplets',                                            anilistId: 103572 },
-  jjk:                { title: 'Jujutsu Kaisen',                                                            anilistId: 113415 },
-  alya:               { title: 'Alya Sometimes Hides Her Feelings In Russian',                             anilistId: 162804 },
-  chainsawMan:        { title: 'Chainsaw Man',                                                              anilistId: 127230 },
-  bunnyGirl:          { title: 'Rascal Does Not Dream of Bunny Girl Senpai',                               anilistId: 101291 },
-  akameGaKill:        { title: 'Akame Ga Kill!',                                                            anilistId: 20613  },
-  mushokuTensei:      { title: 'Mushoku Tensei',                                                            anilistId: 108465 },
-  angelBeats:         { title: 'Angel Beats!',                                                              anilistId: 6547   },
-  shiunji:            { title: 'The Children of Shiunji Family',                                           anilistId: 174802 },
-  fragrantFlower:     { title: 'The Fragrant Flower Blooms With Dignity',                                   anilistId: 181444 },
-  oshinoko:           { title: 'Oshi No Ko',                                                                anilistId: 150672 },
-  chivalry:           { title: 'Chivalry of a Failed Knight',                                              anilistId: 21092  },
-  blueLock:           { title: 'Blue Lock',                                                                 anilistId: 137822 },
-  charlotte:          { title: 'Charlotte',                                                                 anilistId: 20997  },
-  dxd:                { title: 'High School DxD',                                                          anilistId: 11617  },
-  hsotd:              { title: 'High School of the Dead',                                                   anilistId: 8074   },
-  sao:                { title: 'Sword Art Online',                                                          anilistId: 11757  },
-  hundredGirlfriends: { title: 'The 100 Girlfriends Who Really, Really, Really, Really, Really Love You',  anilistId: 162694 },
-  demonSlayer:        { title: 'Demon Slayer',                                                              anilistId: 101922 },
-  blueBox:            { title: 'Blue Box',                                                                  anilistId: 170942 },
-  dressingDarling:    { title: 'My Dress-Up Darling',                                                       anilistId: 132405 },
-  rezero:             { title: 'Re:Zero',                                                                   anilistId: 21355  },
-  ditf:               { title: 'Darling in the Franxx',                                                    anilistId: 99423  },
-  callOfNight:        { title: 'Call of the Night',                                                         anilistId: 141391 },
-  aot:                { title: 'Attack on Titan',                                                           anilistId: 16498  },
-  soloLeveling:       { title: 'Solo Leveling',                                                             anilistId: 151807 },
-  angelNextDoor:      { title: 'The Angel Next Door Spoils Me Rotten',                                     anilistId: 143338 },
-  deathNote:          { title: 'Death Note',                                                                anilistId: 1535   },
-  codeGeass:          { title: 'Code Geass',                                                                anilistId: 1575   },
-  seraphEnd:          { title: 'Seraph of the End',                                                         anilistId: 20829  },
-  fireForce:          { title: 'Fire Force',                                                                anilistId: 105310 },
-  konosuba:           { title: 'KonoSuba',                                                                  anilistId: 21202  },
-  tensura:            { title: 'That Time I Got Reincarnated as a Slime',                                   anilistId: 101280 },
-  tokyoGhoul:         { title: 'Tokyo Ghoul',                                                               anilistId: 20605  },
-  vinlandSaga:        { title: 'Vinland Saga',                                                              anilistId: 101348 },
-  trinitySeven:       { title: 'Trinity Seven',                                                             anilistId: 20631  },
-  fate:               { title: 'Fate/Stay Night (2006)',                                                   anilistId: 356    },
-  edgerunners:        { title: 'Cyberpunk: Edgerunners',                                                   anilistId: 120377 },
-  dateALive:          { title: 'Date A Live',                                                               anilistId: 15583  },
-  prisonSchool:       { title: 'Prison School',                                                             anilistId: 20807  },
-  testament:          { title: 'The Testament of Sister New Devil',                                         anilistId: 20678  },
-  narutoFull:         { title: 'Naruto',                                                                    anilistId: 20     },
-  erased:             { title: 'Erased',                                                                    anilistId: 21234  },
-  shikimori:          { title: "Shikimori's Not Just a Cutie",                                             anilistId: 127911 },
-  midnightHeart:      { title: 'Tune In To The Midnight Heart',                                            anilistId: 187942 },
-  danDaDan:           { title: 'Dan Da Dan',                                                                anilistId: 171018 },
-  snafuSNAFU:         { title: 'My Teen Romantic Comedy SNAFU',                                            anilistId: 14813  },
-  classroomElite:     { title: 'Classroom of the Elite',                                                   anilistId: 98659  },
-  vermeil:            { title: 'Vermeil in Gold',                                                           anilistId: 146210 },
-  cafeTerrace:        { title: 'The Café Terrace and Its Goddesses',                                       anilistId: 154412 },
-  hokkaido:           { title: 'Hokkaido Gals Are Super Adorable!',                                        anilistId: 155963 },
-  takamineSan:        { title: 'Please Put Them On, Takamine-san',                                         anilistId: 179965 },
-  komi:               { title: "Komi Can't Communicate",                                                   anilistId: 133965 },
-  eigtyySix:          { title: '86 Eighty-Six',                                                             anilistId: 116589 },
-  horimiya:           { title: 'Horimiya',                                                                  anilistId: 124080 },
-  yourLieApril:       { title: 'Your Lie in April',                                                         anilistId: 20665  },
-  coupleCuckoos:      { title: 'Couple of Cuckoos',                                                         anilistId: 132052 },
-};
 
 // ── Player definitions ────────────────────────────────────────────────────────
 const PLAYER_NAMES = { caden: 'Caden', gavin: 'Gavin', gabe: 'Gabe', liam: 'Liam' };

@@ -7,7 +7,7 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 export default defineConfig([
   globalIgnores(['dist', 'seedProfiles.js']),
   {
-    files: ['generateProfiles.js'],
+    files: ['generateProfiles.js', 'generateFacts.js', 'animeCatalog.js', 'factSources/*.js'],
     languageOptions: { globals: globals.node },
   },
   {

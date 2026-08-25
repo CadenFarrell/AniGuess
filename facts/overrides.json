@@ -1,0 +1,5 @@
+{
+  "_readme": "Hand-maintained corrections, applied AFTER generation so a regeneration can never clobber one. Shape: { shows|characters: { <subjectKey>: { <field>: value } } }. A null value SUPPRESSES a fact the source is wrong about. Subject keys are the folded form - franchiseTitleKey for shows, characterNameKey for characters.",
+  "shows": {},
+  "characters": {}
+}
