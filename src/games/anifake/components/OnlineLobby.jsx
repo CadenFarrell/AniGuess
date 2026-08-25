@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useProfileStore } from '../../../shared/context/profileContext';
 import AniListImport from '../../../shared/components/AniListImport';
 import SettingsFooter from '../../../shared/components/SettingsFooter';
+import SettingHelp, { DetailToggle } from '../../../shared/components/SettingHelp';
 import { useGamePrefs } from '../../../shared/hooks/useGamePrefs';
 import { profileFingerprint } from '../../../shared/utils/profileStats';
 import ModePicker from './ModePicker';
@@ -9,8 +10,9 @@ import {
   eligibleCharacters, famousCount, hasAnyFameData, hasFameSignal, MIN_FAME_POOL,
 } from '../utils/pool';
 import { FAME_LEVELS, getFame } from '../fame';
+import { SETTING_HELP } from '../help';
 import { DEFAULT_PREFS } from '../prefs';
-import { MAX_CLUE_ROUNDS, MAX_DEALS, minPool, MIN_PLAYERS } from '../rules';
+import { MAX_CLUE_ROUNDS, minPool, MIN_PLAYERS } from '../rules';
 import {
   Backdrop, Badge, Banner, Button, Card, CardRow, Checkbox, Field, NumberInput, Screen,
   Select, Wordmark,
@@ -165,7 +167,7 @@ export default function OnlineLobby({ room }) {
           <>
             <ModePicker value={mode} onChange={setMode} />
 
-            <Card title="⚙️ Settings" padding="lg" className="mb-6">
+            <Card title="⚙️ Settings" action={<DetailToggle />} padding="lg" className="mb-6">
               <Field label="Clue rounds" htmlFor="anifake-laps" className="mb-2">
                 <NumberInput
                   id="anifake-laps"
@@ -176,10 +178,9 @@ export default function OnlineLobby({ room }) {
                   onChange={setLaps}
                 />
               </Field>
-              <p className="mb-5 text-base text-white/50">
-                How many times round the table before the vote opens. More clues means more
-                to go on — and more chances for the fake to trip over their own story.
-              </p>
+              <SettingHelp className="mb-5" more={SETTING_HELP.laps.more}>
+                {SETTING_HELP.laps.short}
+              </SettingHelp>
 
               <Checkbox
                 label="Shared characters only"
@@ -187,11 +188,9 @@ export default function OnlineLobby({ room }) {
                 onChange={(e) => setSharedOnly(e.target.checked)}
                 className="mb-2"
               />
-              <p className="mb-5 ml-10 text-base text-white/50">
-                Only use characters <em>everyone</em> has on their list. The whole table
-                gives clues about one of them, so a character only one player has seen
-                makes the round unplayable for the rest.
-              </p>
+              <SettingHelp indent className="mb-5" more={SETTING_HELP.sharedOnly.more}>
+                {SETTING_HELP.sharedOnly.short}
+              </SettingHelp>
 
               <Field label="How well known">
                 <Select value={fame} onChange={(e) => setFame(e.target.value)} className="text-lg">
@@ -200,11 +199,9 @@ export default function OnlineLobby({ room }) {
                   ))}
                 </Select>
               </Field>
-              <p className="mb-2 text-base text-white/50">
-                {getFame(fame).blurb} Sharing a show is not the same as remembering everyone
-                in it — a background character nobody can describe makes every clue
-                meaningless and the fake impossible to catch.
-              </p>
+              <SettingHelp className="mb-2" more={SETTING_HELP.fame.more}>
+                {getFame(fame).blurb}
+              </SettingHelp>
               {fameBlind && (
                 <Banner tone="warning" className="mb-5">
                   {/* Naming which dead end it is, because only one of them is
@@ -235,15 +232,12 @@ export default function OnlineLobby({ room }) {
                 onChange={(e) => setAllowRedeal(e.target.checked)}
                 className="mb-2"
               />
-              {/* Word for word AniFakeSetup's — see the note there for why the
-                  last sentence is stated publicly. */}
-              <p className="ml-10 text-base text-white/50">
-                Everyone looks at their card first, and anyone who draws a blank can ask for
-                a new character. Nobody is told who asked, and a round can be re-dealt at
-                most {MAX_DEALS - 1} times. A re-deal changes everyone&apos;s character, but
-                not who the fake is — and in Blind the fake can&apos;t ask, since they hold
-                no character to not-know.
-              </p>
+              {/* Shares AniFakeSetup's strings rather than restating them — the
+                  two used to be "word for word identical" by convention and had
+                  already drifted apart. See help.js. */}
+              <SettingHelp indent more={SETTING_HELP.allowRedeal.more}>
+                {SETTING_HELP.allowRedeal.short}
+              </SettingHelp>
 
               <p className="mt-4 text-sm text-white/30">
                 You&apos;re the host — your settings apply to everyone.

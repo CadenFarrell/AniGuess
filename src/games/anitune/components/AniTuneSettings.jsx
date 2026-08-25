@@ -8,6 +8,7 @@ import {
   POPULARITY_LEVELS, getPopularityLevel, hasPopularitySignal, hasAnyPopularityData,
   MIN_POPULARITY_POOL,
 } from '../utils/popularity';
+import SettingHelp, { DetailToggle } from '../../../shared/components/SettingHelp';
 import {
   Banner, Card, Checkbox, Field, NumberInput, Select,
 } from '../../../shared/ui';
@@ -83,7 +84,7 @@ export default function AniTuneSettings({ players, values, onChange, disabled = 
         })}
       </div>
 
-      <Card title="⚙️ The round" padding="lg" className="mb-6">
+      <Card title="⚙️ The round" action={<DetailToggle />} padding="lg" className="mb-6">
         <div className="mb-5 flex flex-col gap-4 sm:flex-row">
           <Field label="Questions" htmlFor="anitune-round-size" className="flex-1">
             <NumberInput
@@ -116,13 +117,16 @@ export default function AniTuneSettings({ players, values, onChange, disabled = 
           onChange={(e) => set({ timed: e.target.checked })}
           className="mb-2"
         />
-        {/* ml-10 lines the note up with the label, clearing the 7-unit box plus
-            its 3-unit gap. */}
-        <p className="mb-4 ml-10 text-base text-white/50">
-          A countdown per song, and the faster you answer the more the point is worth
-          (up to double). Turn it off and every correct answer is worth exactly one,
-          with no clock at all.
-        </p>
+        {/* `indent` lines the note up with the label, clearing the 7-unit box
+            plus its 3-unit gap — see SettingHelp. */}
+        <SettingHelp
+          indent
+          className="mb-4"
+          more="Turn it off and every correct answer is worth exactly one, with no clock at all."
+        >
+          A countdown per song, and the faster you answer the more the point is worth —
+          up to double.
+        </SettingHelp>
 
         {values.timed && (
           <div className="mb-5 ml-10 flex flex-col gap-4 sm:flex-row">
@@ -195,11 +199,17 @@ export default function AniTuneSettings({ players, values, onChange, disabled = 
             </Select>
           </Field>
         </div>
-        <p className="mt-2 text-sm text-white/30">
+        {/* Already a single line, but routed through SettingHelp so every note on
+            the card carries one weight — the drift between three of them is half
+            of what made these cards read as a wall. */}
+        <SettingHelp className="mt-2">
           {SAMPLE_POINTS.find((s) => s.id === values.samplePoint)?.blurb}
-        </p>
+        </SettingHelp>
       </Card>
 
+      {/* No switch on this card: every note in it is already one line and has no
+          second tier to reveal, so the control would be inert. The rule is that a
+          card carries the switch when it has something to show. */}
       <Card title="🎵 The song pool" padding="lg" className="mb-6">
         <Checkbox
           label="Shared songs only"
@@ -208,9 +218,9 @@ export default function AniTuneSettings({ players, values, onChange, disabled = 
           onChange={(e) => set({ sharedSongsOnly: e.target.checked })}
           className="mb-2"
         />
-        <p className="mb-5 ml-10 text-base text-white/50">
-          Only use shows <em>everyone</em> has on their list, so nobody is guessing blind.
-        </p>
+        <SettingHelp indent className="mb-5">
+          Only use shows every player has on their list, so nobody is guessing blind.
+        </SettingHelp>
 
         <div className="mb-5 flex flex-wrap gap-x-8 gap-y-3">
           <Checkbox
@@ -239,7 +249,7 @@ export default function AniTuneSettings({ players, values, onChange, disabled = 
             ))}
           </Select>
         </Field>
-        <p className="mb-3 text-sm text-white/30">{level.blurb}</p>
+        <SettingHelp className="mb-3">{level.blurb}</SettingHelp>
 
         {/* Warn, never gate. A small pool is a valid answer to what was asked,
             and silently overriding a setting someone just picked is what makes
@@ -283,12 +293,12 @@ export default function AniTuneSettings({ players, values, onChange, disabled = 
             />
           </Field>
         </div>
-        <p className="mb-5 text-sm text-white/30">
+        <SettingHelp className="mb-5">
           {yearNarrowed
             ? `Shows with no release date on file are left out while this is narrowed${
               afterYear.length < base.length ? ` — ${base.length - afterYear.length} dropped.` : '.'}`
             : 'Leave at the full range to include everything, dated or not.'}
-        </p>
+        </SettingHelp>
 
         <Field label="Max songs per show" htmlFor="anitune-max-per-anime">
           <NumberInput

@@ -2,11 +2,13 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useProfileStore } from '../../../shared/context/profileContext';
 import AniListImport from '../../../shared/components/AniListImport';
 import SettingsFooter from '../../../shared/components/SettingsFooter';
+import SettingHelp, { DetailToggle } from '../../../shared/components/SettingHelp';
 import { useGamePrefs } from '../../../shared/hooks/useGamePrefs';
 import { profileFingerprint } from '../../../shared/utils/profileStats';
 import AxisPicker from './AxisPicker';
 import FormatOption from './FormatOption';
 import { useCustomPrompts } from '../hooks/useCustomPrompts';
+import { SETTING_HELP, sharedOnlyHelp } from '../help';
 import { eligibleItems, opinionPoolCounts } from '../utils/deck';
 import { DEFAULT_PREFS, axisIdOf, resolveSavedAxis } from '../prefs';
 import { AXES, getAxis } from '../axes';
@@ -89,6 +91,10 @@ export default function OnlineLobby({ room }) {
 
   const resolved = getAxis(axis);
   const noun = resolved.items === 'characters' ? 'characters' : 'shows';
+  // Always the round wording — the settings card below only renders when the
+  // room is not comparing tier lists, and a comparison has no board to share a
+  // pool for. See help.js.
+  const sharedHelp = sharedOnlyHelp({ noun, tiering: false });
   // Counted for every axis so the picker can show which modes this room can
   // actually play — a fact axis reads 0 until someone re-imports their list.
   // Custom prompts share two pool counts; see the same memo in AniRankSetup.
@@ -241,17 +247,16 @@ export default function OnlineLobby({ room }) {
               onDeletePrompt={deletePrompt}
             />
 
-            <Card title="⚙️ Settings" padding="lg" className="mb-6">
+            <Card title="⚙️ Settings" action={<DetailToggle />} padding="lg" className="mb-6">
               <Checkbox
                 label={`Shared ${noun} only`}
                 checked={sharedOnly}
                 onChange={(e) => setSharedOnly(e.target.checked)}
                 className="mb-2"
               />
-              <p className="ml-10 mb-4 text-base text-white/50">
-                Only use {noun} <em>everyone</em> has on their list. Everyone ranks the same ten,
-                so a card only one player knows is a free guess for the rest.
-              </p>
+              <SettingHelp indent className="mb-4" more={sharedHelp.more}>
+                {sharedHelp.short}
+              </SettingHelp>
 
               <Checkbox
                 label="Blind ranking"
@@ -259,10 +264,9 @@ export default function OnlineLobby({ room }) {
                 onChange={(e) => setBlind(e.target.checked)}
                 className="mb-2"
               />
-              <p className="ml-10 mb-4 text-base text-white/50">
-                Cards arrive one at a time and can&rsquo;t be moved once placed. Turn it off to
-                see all ten at once and arrange them freely before locking in.
-              </p>
+              <SettingHelp indent className="mb-4" more={SETTING_HELP.blind.more}>
+                {SETTING_HELP.blind.short}
+              </SettingHelp>
 
               <Checkbox
                 label="Keep score"
@@ -270,10 +274,9 @@ export default function OnlineLobby({ room }) {
                 onChange={(e) => setScoring(e.target.checked)}
                 className="mb-2"
               />
-              <p className="ml-10 text-base text-white/50">
-                Turn this off to just build boards and compare them at the end — no answer
-                key, no points, nothing to win.
-              </p>
+              <SettingHelp indent more={SETTING_HELP.scoring.more}>
+                {SETTING_HELP.scoring.short}
+              </SettingHelp>
 
               <p className="mt-4 text-sm text-white/30">
                 You&apos;re the host — your settings apply to everyone.

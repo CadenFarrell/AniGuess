@@ -5,6 +5,7 @@ import { useGamePrefs } from '../../../shared/hooks/useGamePrefs';
 import { normalizeTitle } from '../../../shared/utils/ranking';
 import ProfilePicker from '../../../shared/components/ProfilePicker';
 import SettingsFooter from '../../../shared/components/SettingsFooter';
+import SettingHelp, { DetailToggle } from '../../../shared/components/SettingHelp';
 import { DEFAULT_PREFS, POSITIONS } from '../prefs';
 import {
   Backdrop, Badge, Banner, Button, Card, CardRow, Checkbox, Modal, NumberInput, Screen,
@@ -234,7 +235,7 @@ export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayer
           </Banner>
         )}
 
-        <Card title="⚙️ Settings" padding="lg" className="mb-8 mt-4">
+        <Card title="⚙️ Settings" action={<DetailToggle />} padding="lg" className="mb-8 mt-4">
           <Checkbox
             label="Anime-first randomizer"
             checked={twoStepRandom}
@@ -259,11 +260,15 @@ export default function PlayerSetup({ onStartGame, onGoToList, players, onPlayer
             onChange={(e) => setTalkMode(e.target.checked)}
             className="mb-2"
           />
-          <p className="mb-5 ml-10 text-base text-white/50">
+          <SettingHelp
+            indent
+            className="mb-5"
+            more="Nothing is typed, so instead of a question history you get a running ✅/❌
+                  trail of each player's answers."
+          >
             Ask your questions and say your guess out loud — the table taps what happened
-            and the turn passes on that one tap. Nothing is typed, so instead of a question
-            history you get a running ✅/❌ trail of each player&apos;s answers.
-          </p>
+            and the turn passes on that one tap.
+          </SettingHelp>
 
           {timerEnabled && (
             <div className="mb-5 flex items-center gap-3 text-lg text-white/70">

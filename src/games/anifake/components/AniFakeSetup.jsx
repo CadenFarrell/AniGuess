@@ -3,14 +3,16 @@ import { useProfileStore } from '../../../shared/context/profileContext';
 import AniListImport from '../../../shared/components/AniListImport';
 import ProfilePicker from '../../../shared/components/ProfilePicker';
 import SettingsFooter from '../../../shared/components/SettingsFooter';
+import SettingHelp, { DetailToggle } from '../../../shared/components/SettingHelp';
 import { useGamePrefs } from '../../../shared/hooks/useGamePrefs';
 import ModePicker from './ModePicker';
 import {
   eligibleCharacters, famousCount, hasAnyFameData, hasFameSignal, MIN_FAME_POOL,
 } from '../utils/pool';
 import { FAME_LEVELS, getFame } from '../fame';
+import { SETTING_HELP } from '../help';
 import { DEFAULT_PREFS } from '../prefs';
-import { MAX_CLUE_ROUNDS, MAX_DEALS, minPool, MIN_PLAYERS } from '../rules';
+import { MAX_CLUE_ROUNDS, minPool, MIN_PLAYERS } from '../rules';
 import {
   Backdrop, Badge, Banner, Button, Card, CardRow, Checkbox, Field, NumberInput, Screen,
   Select, Wordmark,
@@ -153,7 +155,7 @@ export default function AniFakeSetup({ onStart, error, onBack }) {
 
         <ModePicker value={mode} onChange={setMode} />
 
-        <Card title="⚙️ Settings" padding="lg" className="mb-6">
+        <Card title="⚙️ Settings" action={<DetailToggle />} padding="lg" className="mb-6">
           <Field label="Clue rounds" htmlFor="anifake-laps" className="mb-2">
             <NumberInput
               id="anifake-laps"
@@ -164,10 +166,9 @@ export default function AniFakeSetup({ onStart, error, onBack }) {
               onChange={setLaps}
             />
           </Field>
-          <p className="mb-5 text-base text-white/50">
-            How many times round the table before the vote opens. More clues means more to
-            go on — and more chances for the fake to trip over their own story.
-          </p>
+          <SettingHelp className="mb-5" more={SETTING_HELP.laps.more}>
+            {SETTING_HELP.laps.short}
+          </SettingHelp>
 
           <Checkbox
             label="Shared characters only"
@@ -175,11 +176,9 @@ export default function AniFakeSetup({ onStart, error, onBack }) {
             onChange={(e) => setSharedOnly(e.target.checked)}
             className="mb-2"
           />
-          <p className="mb-5 ml-10 text-base text-white/50">
-            Only use characters <em>everyone</em> has on their list. The whole table gives
-            clues about one of them, so a character only one player has seen makes the
-            round unplayable for the rest — and unfalsifiable for the fake.
-          </p>
+          <SettingHelp indent className="mb-5" more={SETTING_HELP.sharedOnly.more}>
+            {SETTING_HELP.sharedOnly.short}
+          </SettingHelp>
 
           <Field label="How well known">
             <Select value={fame} onChange={(e) => setFame(e.target.value)} className="text-lg">
@@ -188,11 +187,12 @@ export default function AniFakeSetup({ onStart, error, onBack }) {
               ))}
             </Select>
           </Field>
-          <p className="mb-2 text-base text-white/50">
-            {getFame(fame).blurb} Sharing a show is not the same as remembering everyone in
-            it — a background character nobody can describe makes every clue meaningless
-            and the fake impossible to catch.
-          </p>
+          {/* The short line is the level's own blurb rather than a fixed
+              sentence — it is the only place the difference between the levels is
+              stated, so it has to change with the Select above it. */}
+          <SettingHelp className="mb-2" more={SETTING_HELP.fame.more}>
+            {getFame(fame).blurb}
+          </SettingHelp>
           {fameBlind && (
             <Banner tone="warning" className="mb-5">
               {/* Which of the two causes it is decides whether a re-import helps
@@ -222,18 +222,14 @@ export default function AniFakeSetup({ onStart, error, onBack }) {
             onChange={(e) => setAllowRedeal(e.target.checked)}
             className="mb-2"
           />
-          {/* Kept word for word identical to OnlineLobby's. The last sentence is
-              deliberately public: saying out loud that a re-deal changes the
-              character and not the role is what stops anyone trying to veto their
-              way out of being the fake. It is a fact about the rule, not about any
-              player, so it gives nothing away. */}
-          <p className="mb-5 ml-10 text-base text-white/50">
-            Everyone looks at their card first, and anyone who draws a blank can ask for a
-            new character. Nobody is told who asked, and a round can be re-dealt at most{' '}
-            {MAX_DEALS - 1} times. A re-deal changes everyone&apos;s character, but not who
-            the fake is — and in Blind the fake can&apos;t ask, since they hold no character
-            to not-know.
-          </p>
+          {/* "A re-deal changes the character and not the role" is deliberately
+              public — it is what stops anyone trying to veto their way out of being
+              the fake — but the host choosing whether to offer the phase is not
+              when the table needs to hear it. It is said in full where a player is
+              actually looking at a card: CardCheck.jsx and SecretReveal.jsx. */}
+          <SettingHelp indent className="mb-5" more={SETTING_HELP.allowRedeal.more}>
+            {SETTING_HELP.allowRedeal.short}
+          </SettingHelp>
 
           <Checkbox
             label="🗣️ Talk it out"
@@ -241,11 +237,9 @@ export default function AniFakeSetup({ onStart, error, onBack }) {
             onChange={(e) => setTalkMode(e.target.checked)}
             className="mb-2"
           />
-          <p className="ml-10 text-base text-white/50">
-            Say your clue out loud instead of typing it, and just tap to pass the turn on.
-            Faster round the table — but nothing is written down, so there is no clue list
-            to read back when it is time to vote.
-          </p>
+          <SettingHelp indent more={SETTING_HELP.talkMode.more}>
+            {SETTING_HELP.talkMode.short}
+          </SettingHelp>
 
           <SettingsFooter values={settings} defaults={DEFAULT_PREFS} onReset={applyDefaults} />
         </Card>

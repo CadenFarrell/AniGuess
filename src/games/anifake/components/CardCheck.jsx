@@ -83,10 +83,19 @@ export default function CardCheck({
                 {/* "Nobody is told" is true; "nobody can tell" would not be. At
                     three players a confirmer who sees a re-deal happen knows one
                     of the other two asked, and no amount of code changes that —
-                    so the copy claims only what the room actually guarantees. */}
+                    so the copy claims only what the room actually guarantees.
+
+                    The second sentence is the one that used to live on the setup
+                    screen, and it is deliberately public: saying out loud that a
+                    re-deal changes the character and not the role is what stops
+                    anyone trying to veto their way out of being the fake. It says
+                    more here than it ever did in setup — the host read it once
+                    while configuring, whereas this is on screen for everyone at
+                    the moment the button is theirs to press. */}
                 <p className="mt-3 text-center text-sm text-white/40">
                   Nobody is told who asked. If anyone does, everyone gets a new character —
                   {dealsLeft === 1 ? ' one more time.' : ` up to ${dealsLeft} more times.`}
+                  {' '}It never changes who the fake is.
                 </p>
               </>
             ))}

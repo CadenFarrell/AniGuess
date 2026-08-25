@@ -142,10 +142,14 @@ export default function SecretReveal({
                 >
                   🔁 Deal again — I can&apos;t work with this
                 </Button>
+                {/* The last sentence matches CardCheck's word for word — see the
+                    note there for why the pinned role is stated publicly, and why
+                    this screen rather than the setup card is where it belongs. */}
                 <p className="mt-3 text-center text-sm text-white/40">
                   Nobody is told who asked. Nothing happens until everyone has looked —
                   then everyone gets a new character
                   {dealsLeft === 1 ? ', one more time.' : `, up to ${dealsLeft} more times.`}
+                  {' '}It never changes who the fake is.
                 </p>
               </>
             ))}
