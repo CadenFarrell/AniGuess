@@ -198,6 +198,34 @@
   animation: blob-drift 24s ease-in-out infinite;
 }
 
+/* AniWave's reveal, landing one piece at a time: the target bands settle, then
+   each player's dial drops onto the arc.
+
+   Both animate FROM a start state with no `to`, so the end state is whatever
+   the element already computes. That is what makes the reduced-motion rule
+   below safe — removing the animation leaves the finished picture rather than a
+   blank one, which is the trap with the more obvious `opacity-0` + transition
+   approach. `backwards` makes the delay hold the start state instead of
+   flashing the element before its turn. */
+@keyframes dial-band-in {
+  from { opacity: 0; }
+}
+
+/* Only `transform`, never `translate`: the badge is centred on its point with
+   Tailwind's -translate-x-1/2, which in v4 compiles to the separate `translate`
+   property — so a scale here composes with the centring instead of erasing it. */
+@keyframes dial-marker-in {
+  from { opacity: 0; transform: scale(0.4); }
+}
+
+@utility dial-band-in {
+  animation: dial-band-in 400ms ease-out backwards;
+}
+
+@utility dial-marker-in {
+  animation: dial-marker-in 380ms cubic-bezier(0.2, 0.9, 0.3, 1.5) backwards;
+}
+
 /* Nothing above should move for anyone who has asked the OS to stop it. */
 @media (prefers-reduced-motion: reduce) {
   .btn-pop {
@@ -208,6 +236,10 @@
     transform: none;
   }
   .blob {
+    animation: none;
+  }
+  .dial-band-in,
+  .dial-marker-in {
     animation: none;
   }
   .blurb-overlay {
