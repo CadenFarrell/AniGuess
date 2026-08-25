@@ -13,12 +13,18 @@ import {
 // props rather than two near-identical files.
 //
 //   tone  the game's accent, for the wordmark and the identity card
-//   stat  (profile) => string, the one-line summary under the player's name
+//   stat  (profile) => string, the one-line summary under the player's name.
+//         OPTIONAL, and AniWave is why: it is the one game whose default mode
+//         draws no cards, so no number about your list says anything about
+//         whether you can play. Omitting it used to crash this screen on
+//         `stat(profile)` before a single pixel of the online path rendered —
+//         so the default is a function, not a bare guard at the call site,
+//         because a required-by-accident prop is exactly what happened here.
 //
 // No name box: the hub already asked. This screen only ever wanted to know
 // "who am I", and typing that answer fresh each time is what quietly created
 // empty duplicate profiles. The profile itself is shared by every game.
-export default function RoomSetup({ room, onBack, tone = 'purple', stat }) {
+export default function RoomSetup({ room, onBack, tone = 'purple', stat = () => null }) {
   const { activeProfile: profile, saveProfile, selectProfile } = useProfileStore();
   const [codeInput, setCodeInput] = useState('');
   const [showImport, setShowImport] = useState(false);

@@ -11,6 +11,7 @@ const PADDING = {
 
 export default function Card({
   title,
+  action,
   padding = 'md',
   className = '',
   children,
@@ -19,9 +20,20 @@ export default function Card({
   return (
     <div className={`card-pop ${PADDING[padding]} ${className}`} {...rest}>
       {title && (
-        <h3 className="font-display text-sm font-extrabold uppercase tracking-widest text-white/50 mb-3">
-          {title}
-        </h3>
+        // `action` is a control that belongs to the whole card rather than to any
+        // one row in it — today, SettingHelp's ⓘ Detail switch. It rides in the
+        // heading so a card does not have to rebuild the h3 to get one control
+        // beside its title; without it, every settings card would hand-roll this
+        // row and they would drift.
+        //
+        // The margin moves onto the wrapper so the h3 keeps its own spacing when
+        // there is no action, leaving the title-only path byte-identical.
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h3 className="font-display text-sm font-extrabold uppercase tracking-widest text-white/50">
+            {title}
+          </h3>
+          {action}
+        </div>
       )}
       {children}
     </div>
