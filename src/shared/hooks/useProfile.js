@@ -59,10 +59,13 @@ export function useProfile() {
     return { profile: newProfile, isNew: true };
   }, []);
 
+  // Returns whether the write actually persisted. ProfileProvider surfaces a
+  // false: a profile that silently failed to save is an AniList import the
+  // player loses on reload while the screen still says it worked.
   const saveProfile = useCallback((profile) => {
     const profiles = storage.getItem(PROFILES_KEY) || {};
     profiles[profile.id] = profile;
-    storage.setItem(PROFILES_KEY, profiles);
+    return storage.setItem(PROFILES_KEY, profiles);
   }, []);
 
   const deleteProfile = useCallback((id) => {

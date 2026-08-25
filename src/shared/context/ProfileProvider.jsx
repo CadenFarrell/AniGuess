@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { Banner } from '../ui';
 import { useProfile } from '../hooks/useProfile';
 import { resolveActiveProfileId } from '../utils/profileStats';
 import { ProfileContext } from './profileContext';
@@ -28,6 +29,12 @@ export default function ProfileProvider({ children }) {
     resolveActiveProfileId(getAllProfiles(), getActiveProfileId())
   );
 
+  // Set when a write to localStorage did not stick. Held here rather than in
+  // whichever screen triggered the save, because the write that matters most —
+  // an AniList import — is worth hours, and the player may well have navigated
+  // away from the import screen before the failure would otherwise show.
+  const [storageError, setStorageError] = useState(false);
+
   // The map as of the last write, not as of the last render.
   //
   // This ref is load-bearing, not an optimisation. Two writes in one event
@@ -43,8 +50,13 @@ export default function ProfileProvider({ children }) {
   }, []);
 
   const saveProfile = useCallback((profile) => {
-    persistProfile(profile);
+    const persisted = persistProfile(profile);
+    setStorageError(!persisted);
+    // Committed either way, deliberately: a profile that failed to persist is
+    // still the right thing to show for the rest of this session, and dropping
+    // it here would lose the data twice over.
     commitProfiles({ ...profilesRef.current, [profile.id]: profile });
+    return persisted;
   }, [persistProfile, commitProfiles]);
 
   // Stamping lastUsedAt here (rather than at game start) is what orders the
@@ -105,5 +117,19 @@ export default function ProfileProvider({ children }) {
     removeProfile,
   }), [profiles, activeId, selectProfile, createProfile, ensureProfile, saveProfile, removeProfile]);
 
-  return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;
+  return (
+    <ProfileContext.Provider value={value}>
+      {storageError && (
+        <div className="fixed inset-x-0 top-0 z-50 mx-auto max-w-2xl p-3">
+          <Banner tone="danger" onDismiss={() => setStorageError(false)}>
+            <strong className="font-black">Your profile did not save.</strong>{' '}
+            Browser storage is full or blocked, so anything you just imported
+            will be gone when you reload. Deleting a profile you no longer use
+            frees space.
+          </Banner>
+        </div>
+      )}
+      {children}
+    </ProfileContext.Provider>
+  );
 }
