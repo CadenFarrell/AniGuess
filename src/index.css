@@ -156,6 +156,36 @@
          focus-visible:ring-offset-2 focus-visible:ring-offset-canvas;
 }
 
+/* The hub tile's blurb has two homes, and exactly one of them is ever mounted:
+   a pointer and a finger want opposite things here.
+
+   On a pointer it overlays the icon on hover. That costs the tile no height at
+   all and gives the text the panel's whole depth — six lines instead of two —
+   which is what stops the blurbs truncating on a narrow tile.
+
+   On a touch screen there is no hover to reveal it with, and an overlay left
+   showing at rest would bury the artwork on every phone, permanently. So there
+   it sits under the title instead and the tile is simply taller. Two nodes
+   rather than one because the two positions are not the same box; the media
+   queries guarantee only one is ever displayed, so nothing is duplicated on
+   screen.
+
+   The .group:hover reveal lives at the call site and wins on specificity
+   (0,2,0 against this rule's 0,1,0) whichever order they compile in. */
+@utility blurb-overlay {
+  @apply opacity-0 transition-opacity duration-150;
+
+  @media (hover: none) {
+    display: none;
+  }
+}
+
+@utility blurb-inline {
+  @media (hover: hover) {
+    display: none;
+  }
+}
+
 /* Slow drifting colour blobs behind the hub. Purely decorative. */
 @keyframes blob-drift {
   0%, 100% { transform: translate(0, 0) scale(1); }
@@ -179,5 +209,8 @@
   }
   .blob {
     animation: none;
+  }
+  .blurb-overlay {
+    transition: none;
   }
 }
