@@ -14,6 +14,7 @@ const TONES = {
   blue: 'text-pop-blue',
   amber: 'text-pop-amber',
   teal: 'text-pop-teal',
+  lime: 'text-pop-lime',
 };
 
 export default function OnlineIdentityCard({ profile, stat, tone = 'purple', onSwitch, onImport }) {
@@ -22,7 +23,10 @@ export default function OnlineIdentityCard({ profile, stat, tone = 'purple', onS
       <div className="min-w-0">
         <p className="text-sm text-white/40">Playing online as</p>
         <p className="truncate font-display text-lg font-extrabold text-white">{profile.name}</p>
-        <p className="text-sm text-white/40">{stat}</p>
+        {/* A game whose default mode draws no cards passes none — an empty line
+            of the right height is worse than no line, since it reads as a stat
+            that failed to load. */}
+        {stat && <p className="text-sm text-white/40">{stat}</p>}
         {/* Player ids come from the profile name, so a room rejects a second
             person using the same one — make switching easy. */}
         <button
