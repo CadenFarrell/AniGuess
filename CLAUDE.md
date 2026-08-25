@@ -26,6 +26,7 @@ npm run preview       # serve the built dist/
 npm run lint          # ESLint over the project
 npm test              # vitest run (one pass, no watch)
 npm run generate      # regenerate seedProfiles.js from AniList (Node script)
+npm run generate:facts # regenerate the fact pack in public/facts/ (Node script)
 ```
 
 Tests:
@@ -68,6 +69,60 @@ Each game's top component (`<Game>Game.jsx`) is just a local/online mode picker;
 online button is disabled unless `firebaseEnabled`. It delegates to
 `LocalGame.jsx` or `OnlineGame.jsx`, each of which is a thin view-router holding a `view`
 string and rendering dumb screens from `components/`.
+
+**The menu is a board rather than a list, and the tile sizing is the whole of it.**
+`HubScreen.jsx` lays the roster out `grid-cols-2 sm:grid-cols-4 lg:grid-cols-6` inside a
+`max-w-4xl` shell. A stacked column was already running off a laptop at six games and the
+registry only grows. The ladder is picked so a tile stays roughly 136–155px at *every*
+breakpoint rather than ballooning on desktop — which is why the icon inside it needs no
+responsive size at all. `lg:` is the app's only one; everything else here is `sm:`-only.
+
+Six across rather than four is also what stops the accent panel being mostly paint. The
+icons are square and the marquee is `aspect-[4/3]`, so **growing the icon can never fill
+the sides — the panel has to come IN to meet it.**
+
+**The icon is sized with a definite height and never a percentage.** A percentage resolves
+against a height the marquee's own `aspect-ratio` has not computed yet, so the box falls
+back to sizing itself from the icon: the marquee comes out square instead of 4:3 and the
+board grows straight past the fold. Same reason the emoji fallback is sized in `text-*`.
+
+**`hub/gameIcons.js` is icon geometry as DATA, keyed by game id rather than carried on the
+descriptor.** `icon` is still the emoji string and nothing about that shape changed —
+`GameIcon` returns `null` when it finds no entry and the tile falls back to the emoji, so a
+game added tomorrow has a working tile the day it lands and drawing it one later is a
+single entry. The shapes live in a `.js` rather than in JSX for `wavelength/utils/arc.js`'s
+reason: vitest only runs `src/**/*.test.js` under `environment: 'node'`, so anything
+defined in a `.jsx` is untestable by construction.
+
+`gameIcons.test.js` earns its place because **every failure here is silent.** A mistyped
+key is indistinguishable from a game nobody has drawn yet, and "the icon never appeared" is
+not something the hub can report. It pins the key set against the registry in *both*
+directions — a game with no icon, and an orphan key naming no game — and that every shape
+carries a `fill-`/`stroke-` class, because an unpainted shape is not a blank icon but a
+BLACK one: SVG's default fill is black, which on this palette looks almost right.
+
+Paint goes in `className` so the icons use the `@theme` tokens; geometry and stroke shape go
+in attributes. That split is `Dial.jsx`'s. **No hex literals and no `currentColor`** —
+`public/favicon.svg` is the one place hex appears in this repo, because a file in `public/`
+cannot see the theme. Ink-on-accent is also what makes the unavailable card's `grayscale
+opacity-50` work: a silhouette greys out cleanly where an emoji's own palette half-fades.
+
+**A tile's blurb has two homes and exactly one is ever mounted** — `blurb-overlay` and
+`blurb-inline` in `index.css`, guarded by `@media (hover: hover)` and `(hover: none)`. On a
+pointer it overlays the panel on hover, which costs the tile no height and gives the text
+the panel's whole depth: six lines instead of two, so a 97-character blurb stops truncating
+on a 136px tile. On a touch screen there is no hover to reveal it with, and an overlay left
+showing at rest would bury the artwork on every phone permanently, so there it sits under
+the title and the tile is simply taller. The overlay is a **sibling** of the marquee rather
+than a child, because the marquee is `aria-hidden` and nesting the text inside would drop
+the blurb out of the button's accessible name.
+
+`ArcadeMark` is `public/favicon.svg` brought into the app — the logo had lived only in the
+tab. It is a **wide** plaque and that is not a styling whim: a ball on a stem over a base is
+a person, the exact glyph the profile pill in the opposite corner wears, so it needs the
+buttons beside it to read as a control panel — and squeezed into a 64px square a white ball
+plus two white dots collapse into a face instead. Width is free on this screen; height is
+not.
 
 ### rules.js — the central invariant
 
@@ -801,6 +856,42 @@ Anything derived from a pref that is worth testing has to live in a `.js` module
 config only runs `src/**/*.test.js` — which is why `prefs.js` and `fame.js` are separate files
 from the screens that read them.
 
+**A setting's note comes in two tiers, and `shared/components/SettingHelp.jsx` is the only
+place either one is styled.** Every setup screen and lobby used to hand-place a `<p
+className="ml-10 text-base text-white/50">` holding both halves at once; four games' worth
+of that put a two-to-four line paragraph under every single-line control, so a settings card
+ran roughly three times taller in prose than in controls and read as a wall rather than as
+help. None of the copy was deleted — several paragraphs carry rules the table actually needs
+— the *why* simply stops being the first thing on screen. The split is nearly always where
+the existing paragraph already broke: its opening sentence names the behaviour and the rest
+argues for it. Pass the first as `children`, the second as `more`.
+
+The weight was the other half of the problem. Helper copy had drifted to three treatments
+across the games (`text-base text-white/50`, `text-sm text-white/50`, `text-sm
+text-white/30`), and with no consistent signal for "this is the secondary line" the volume
+read as noise instead of hierarchy. Everything routes through here now, at two weights only.
+
+**`DetailToggle` goes on a card only when that card has something to reveal**, and on every
+such card rather than once per screen — two of them a few hundred pixels apart is mild
+redundancy, while a card full of quietly-truncated notes whose control is somewhere above
+the fold is a feature nobody finds. AniTune's second card is every-note-one-line and so
+carries no toggle rather than an inert one.
+
+**Both halves fail soft, deliberately.** `useHelpDetail` returns `{ detail: false, setDetail:
+null }` outside a provider instead of throwing, and `DetailToggle` renders nothing at all
+there rather than a control that does nothing. This is presentation only, and its consumers
+are leaf components scattered across every game's setup screen — exactly the population most
+likely to end up in a future screen nobody remembered to wrap.
+
+AniFake and AniRank keep their copy in a `help.js` beside `prefs.js`, being long enough that
+inlining buried the controls in JSX; AniTune and AniGuess inline theirs. **The preference is
+arcade-wide and gets its own localStorage key** (`aniarcade_setting_detail`), not a slot in
+`aniarcade_game_prefs`: that map is `{ [gameId]: {...} }` and each game's `DEFAULT_PREFS`
+*is* its schema, so there is nowhere in it for a value belonging to no game. Off by default,
+which is the point of the split — the short line is what a returning player should meet. It
+is deliberately absent from `resetKeys.js`'s `PRESERVED_KEYS`: a crash reset clearing a
+cosmetic preference is the right outcome, and the default it falls back to is the quiet one.
+
 ### Profiles and identity
 
 Player profiles (name + anime list + characters) live in localStorage under
@@ -926,6 +1017,55 @@ Identity is deliberately not id-based, and the reasons are non-obvious:
 - Characters come in two shapes (`genres` array from AniList, singular `genre` string from
   ListManager); `normalizeCharacter` collapses them so consumers never branch.
 
+### Fact packs: the answers a profile cannot derive
+
+Every game above computes its own answer key on the device — `valueFor` reads a stored
+field, `trueOrder` sorts it, `scoreBoard` grades against it. "Who directed this" is not a
+function of anything a profile holds (see the table above for how narrow a profile actually
+is), so a quiz-style game cannot work that way: **the answer has to ship with the
+question.** `generateFacts.js` (Node, `npm run generate:facts`) writes a pack, `public/facts/`
+serves it as a static file, `shared/services/factPack.js` loads it, and
+`shared/utils/facts.js` holds every pure part of it.
+
+**The pack that ships today is EMPTY, and visibly so on purpose** — `index.json` says
+PLACEHOLDER and names zero shows, zero characters, zero facts, because AniList's API was
+down while the pipeline was built. **Nothing in `src/` reads it yet.** A consumer must treat
+an empty pack as normal rather than as a failed load, and must not be written assuming a
+populated one has ever existed.
+
+**A pack key is the SAME fold a saved profile keys on** — `franchiseTitleKey` for shows and
+`characterNameKey` for characters, exactly what `anirank/utils/deck.js` computes when it
+collapses a profile into cards. That identity is the whole targeting design: "only shows
+this room imported" becomes a Set lookup at draw time and "any show at all" is skipping it,
+so which game asks what is not decided in the data and nothing has to be regenerated to
+change the answer. The keys are re-exported through `facts.js` rather than imported
+directly by the generator, so the two sides cannot drift on what a key is. `anilistId` is
+carried as **provenance only** — identity in this repo is deliberately not id-based, since
+the ids ListManager mints and AniList's own share no id space, so a lookup routed through
+it would miss every hand-entered entry.
+
+**The loader takes two fetches and the indirection is the point.** The manifest is small and
+always revalidated; the pack file it names is immutable and can be cached hard. A data fix
+is then "write `pack-v2.json`, change one line of `index.json`" — no app code change, no
+rebuild, no redeploy of anything but those two files. A bundled `import()` of the JSON was
+rejected for that reason plus one more: it is parsed as JavaScript on every load by every
+player, including everyone who never opens the game.
+
+Everything testable lives in `shared/utils/facts.js` rather than in the generator, for the
+reason `prefs.js` and `fame.js` are separate from the screens that read them — logic in a
+root-level script is logic with no test. **It carries explicit `.js` extensions**, unlike the
+rest of the app, because `generateFacts.js` imports it under plain Node, which does not do
+Vite's extensionless resolution; `franchise.js`'s import of `./ranking.js` carries one for
+the same reason. That is the price of the generator and the app sharing one definition of a
+key, and sharing it is exactly the point.
+
+`facts/overrides.json` is applied **after** generation, so a regeneration can never clobber a
+hand-made correction, and a `null` value there *suppresses* a fact the source got wrong.
+`generateFacts.js` imports `anilistClient.js` directly rather than hand-rolling a throttle —
+that module is plain fetch and timers and is Node-safe despite its "for the browser" header.
+`generateProfiles.js` keeps its own 600ms copy only because it predates it, and a third copy
+is how a rate-limit fix ends up applied to two callers out of three.
+
 ### External APIs
 
 - `shared/services/anilistClient.js` — GraphQL. Throttles from the `X-RateLimit-*` headers
@@ -965,11 +1105,17 @@ lockfile:
 | --- | --- | --- |
 | `seedProfiles.js` | ~22K lines / ~950 KB | generated console seed script |
 | `.anilist-cache/` | ~130 files / ~1.7 MB | raw AniList API responses (gitignored) |
+| `.facts-cache/` | grows with the catalog | same, for `generateFacts.js` (gitignored) |
 | `package-lock.json` | ~13K lines / ~460 KB | npm lockfile |
 
-None of the three carries architectural information. `Grep` them for a specific key when
-you genuinely need one, exclude them from repo-wide searches, and never `Read` them
-wholesale.
+None of them carries architectural information. `Grep` them for a specific key when you
+genuinely need one, exclude them from repo-wide searches, and never `Read` them wholesale.
+
+Two root-level files near these are **not** generated and are meant to be edited by hand:
+`animeCatalog.js`, the show list both generators read (it was lifted out of
+`generateProfiles.js` so there would be one copy), and `facts/overrides.json`. Neither is
+large. `public/facts/pack-v1.json` *is* generated output, but it is currently an empty
+placeholder — see the fact pack section rather than reading it for content.
 
 ## Conventions
 
