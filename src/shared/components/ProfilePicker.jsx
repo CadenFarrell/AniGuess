@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useProfileStore } from '../context/profileContext';
 import { summarizeProfiles } from '../utils/profileStats';
+import AniListImport from './AniListImport';
 import { Badge, Button, Input, Label, Modal } from '../ui';
 
 // Pick who you are, once, for the whole arcade.
@@ -12,6 +13,14 @@ import { Badge, Button, Input, Label, Modal } from '../ui';
 //
 // Editing an anime list is not in here: ListManager renders a full-height page,
 // not a dialog, so the hub routes to it instead and this just asks for it.
+//
+// *Importing* one is, and the distinction is the shape rather than the topic:
+// AniListImport is already a dialog, so it can replace this one in place. A
+// brand-new profile is handed straight to it, because creating a profile used to
+// dead-end on the menu with an empty list and a warning pill — the import was
+// three navigations away (reopen the picker, ✏️, ListManager) and nothing on
+// screen said so. An empty profile is the one state where the import is the only
+// useful next action, so it is offered rather than merely reachable.
 //
 // Two modes over one list, because the underlying question differs:
 //
@@ -32,10 +41,12 @@ export default function ProfilePicker({
   onEditList,
 }) {
   const {
-    profiles, activeId, selectProfile, createProfile, ensureProfile, removeProfile,
+    profiles, activeId, selectProfile, createProfile, ensureProfile, saveProfile, removeProfile,
   } = useProfileStore();
   const [nameInput, setNameInput] = useState('');
   const [creating, setCreating] = useState(false);
+  // The profile just created, waiting on its import. Null the rest of the time.
+  const [importFor, setImportFor] = useState(null);
 
   const adding = mode === 'add';
   const rows = summarizeProfiles(profiles, activeId);
@@ -44,15 +55,26 @@ export default function ProfilePicker({
   const mainRow = adding ? null : rows.find((r) => r.isActive) ?? null;
   const otherRows = adding ? rows : rows.filter((r) => !r.isActive);
 
+  // The one way out, whichever path got here. 'add' mode owes its caller a
+  // profile, and it owes it *after* the import rather than before, so the roster
+  // is seated with the merged list instead of the empty one it was created with.
+  const finishWith = (profile) => {
+    if (adding) onPick(profile);
+    onClose();
+  };
+
   const handleCreate = () => {
     const trimmed = nameInput.trim();
     if (!trimmed) return;
     // ensureProfile in 'add' mode: creating a guest must not make them you.
-    const { profile } = adding ? ensureProfile(trimmed) : createProfile(trimmed);
+    const { profile, isNew } = adding ? ensureProfile(trimmed) : createProfile(trimmed);
     setNameInput('');
     setCreating(false);
-    if (adding) onPick(profile);
-    onClose();
+    // A name that folds onto a profile you already have is not a new profile — it
+    // is the near-miss this picker exists to catch, and it already has a list.
+    // Only a genuinely new one is worth interrupting for.
+    if (isNew) setImportFor(profile);
+    else finishWith(profile);
   };
 
   const handleDelete = (row) => {
@@ -127,6 +149,22 @@ export default function ProfilePicker({
       </div>
     );
   };
+
+  // Replaces this dialog rather than stacking on top of it: two <Modal>s means
+  // two fixed backdrops and two Escape handlers over what reads as one panel.
+  if (importFor) {
+    return (
+      <AniListImport
+        profile={importFor}
+        // Skipping IS closing — the picker's job is done either way. Saved
+        // through the store, not useProfile: AniListImport only hands the merged
+        // profile back, and a bare write would leave the hub's profile pill stale
+        // and swallow the quota banner ProfileProvider raises.
+        onClose={() => finishWith(importFor)}
+        onImported={(merged) => { saveProfile(merged); finishWith(merged); }}
+      />
+    );
+  }
 
   return (
     <Modal onClose={onClose} width="sm">
