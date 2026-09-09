@@ -153,12 +153,27 @@ async function main() {
     for (const [key, identity] of Object.entries(source)) pack[section][key] = { ...identity };
   }
 
+  // FIRST write wins, per field. A franchise folds to one key, so every sequel
+  // emits rows against the season already collected — and popularity order puts
+  // the best-known season first, which is the one the identity block (anilistId,
+  // title) keeps. Last-wins paired that identity with the LAST season fetched:
+  // `attack on titan` called itself the 2013 WIT season while reporting MAPPA,
+  // 2022 and 12 episodes. 42 of 441 keys are built from more than one media, and
+  // they are the largest franchises in the pack, so this is the common case for
+  // exactly the shows a clue is most likely to be about.
+  //
+  // Per FIELD rather than per subject, so a later season still backfills what an
+  // earlier one had no value for — which is what "merges into the season already
+  // collected" was always meant to say.
   const rejected = [];
   let accepted = 0;
+  let shadowed = 0;
   for (const row of rows) {
     const verdict = validateFact(row);
     if (!verdict.ok) { rejected.push({ ...row, reason: verdict.reason }); continue; }
-    pack[SECTION_FOR[row.kind]][row.key][row.field] = row.value;
+    const entry = pack[SECTION_FOR[row.kind]][row.key];
+    if (Object.hasOwn(entry, row.field)) { shadowed++; continue; }
+    entry[row.field] = row.value;
     accepted++;
   }
 
@@ -194,6 +209,10 @@ async function main() {
 
   console.log(`\n✅  ${showCount} shows · ${charCount} characters · ${manifest.facts} facts`);
   if (applied || suppressed) console.log(`   overrides: ${applied} set, ${suppressed} suppressed`);
+  // Reported rather than merely dropped: a sequel's rows losing to the season
+  // already collected is the intended outcome, but a number that suddenly
+  // doubles means the fold started collapsing shows it should not.
+  if (shadowed) console.log(`   ${shadowed} later-season rows shadowed by the canonical entry`);
   if (rejected.length) {
     console.log(`   ⚠️  ${rejected.length} rows rejected — see facts/rejected.json`);
     const byReason = {};

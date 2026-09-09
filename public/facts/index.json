@@ -1,8 +1,7 @@
 {
   "current": "pack-v1.json",
-  "note": "PLACEHOLDER - no facts have been generated yet. Run `npm run generate:facts` to populate; AniList's API was down when the pipeline was built.",
-  "generatedAt": null,
-  "shows": 0,
-  "characters": 0,
-  "facts": 0
+  "generatedAt": "2026-09-09",
+  "shows": 441,
+  "characters": 1412,
+  "facts": 11457
 }
