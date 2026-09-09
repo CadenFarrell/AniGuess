@@ -53,7 +53,15 @@ async function anilistPage(id, page) {
     try {
       res = await fetch('https://graphql.anilist.co', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        // Referer is required or AniList 403s with a message that reads like an
+        // outage — see the REFERER note in src/shared/services/anilistClient.js.
+        // Applied here as well as there deliberately: this file's fetch is the
+        // "two callers out of three" that client warns about, and a fix that
+        // reached only one of them is exactly the failure it predicts.
+        headers: {
+          'Content-Type': 'application/json',
+          Referer: 'https://aniguess-a08f7.web.app/',
+        },
         body: JSON.stringify({ query: QUERY, variables: { id, page } }),
       });
     } catch (err) {

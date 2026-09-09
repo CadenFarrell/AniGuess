@@ -7,9 +7,24 @@
 // Node-safe — generateFacts.js imports it directly. Do that rather than copying
 // the throttle: generateProfiles.js has its own 600ms version only because it
 // predates this file, and a third copy is how a rate-limit fix ends up applied
-// to two callers out of three. (The Node caveat that DOES bite is
-// animethemesClient.js's User-Agent bot filter, which is a different API.)
+// to two callers out of three.
+//
+// Two Node caveats bite, not one. animethemesClient.js's User-Agent bot filter
+// is a different API; AniList has its own, on Referer — see REFERER below.
 const ENDPOINT = 'https://graphql.anilist.co';
+
+// AniList bot-filters requests that carry no Referer, answering them with a 403
+// whose body reads "The AniList API has been temporarily disabled due to severe
+// stability issues." That looks exactly like an outage and was mistaken for one:
+// the fact pack shipped empty because generateFacts.js could not get a single
+// response. Only the header's PRESENCE is checked — any non-empty value passes,
+// and an empty one does not — so this is honest about who is calling rather
+// than impersonating anilist.co.
+//
+// It is a no-op in the browser: Referer is a forbidden header name, so fetch()
+// silently drops this and sends the page's own referrer, which is why the app's
+// import kept working throughout and only Node was ever blocked.
+const REFERER = 'https://aniguess-a08f7.web.app/';
 const FALLBACK_MIN_INTERVAL_MS = 2500; // ~24 req/min, safe even if headers are ever absent
 
 let lastRequestAt = 0;
@@ -37,7 +52,11 @@ export async function anilistRequest(query, variables, { signal } = {}) {
     try {
       res = await fetch(ENDPOINT, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Referer: REFERER,
+        },
         body: JSON.stringify({ query, variables }),
         signal,
       });
